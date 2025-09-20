@@ -6,7 +6,7 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 export interface ExpenseCategoryData {
   id: string;
   name: string;
-  amount: string;
+  amount: number;
   icon: {
     library: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5';
     name: string;
@@ -19,9 +19,14 @@ export interface ExpenseCategoryData {
 interface ExpenseCategoryProps {
   category: ExpenseCategoryData;
   onPress?: () => void;
+  isEditMode?: boolean;
 }
 
-const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({ category, onPress }) => {
+const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({ 
+  category, 
+  onPress,
+  isEditMode = false
+}) => {
   const renderIcon = () => {
     const iconProps = {
       size: 24,
@@ -42,7 +47,9 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({ category, onPress }) 
 
   const containerStyle = category.isAddButton
     ? "bg-gray-100 rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center justify-center border-2 border-dashed border-gray-300"
-    : "bg-white rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center";
+    : isEditMode 
+      ? "bg-blue-50 rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center border-2 border-blue-200"
+      : "bg-white rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center";
 
   const iconContainerStyle = category.isAddButton
     ? "bg-gray-200 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3"
@@ -63,7 +70,7 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({ category, onPress }) 
       </View>
       <Text className={titleStyle}>{category.name}</Text>
       {!category.isAddButton && (
-        <Text className={amountStyle}>{category.amount}</Text>
+        <Text className={amountStyle}>${category.amount.toFixed(2)}</Text>
       )}
       {category.isAddButton && (
         <Text className={amountStyle}>New Category</Text>

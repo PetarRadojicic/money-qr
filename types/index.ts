@@ -3,14 +3,17 @@ export type { ExpenseCategoryData } from '../components/ExpenseCategory';
 
 // Additional types for the app
 export interface BalanceData {
-  total: string;
-  change: string;
+  total: number;
+  change: number;
   changeType: 'positive' | 'negative';
 }
 
 export interface MonthlyData {
-  income: string;
-  expenses: string;
+  income: number;
+  expenses: number;
+  categories: {
+    [categoryId: string]: number;
+  };
 }
 
 export interface NavigationTab {
@@ -18,4 +21,32 @@ export interface NavigationTab {
   name: string;
   icon: string;
   isActive: boolean;
+}
+
+export interface AppData {
+  [monthKey: string]: MonthlyData;
+}
+
+export interface ModalState {
+  isVisible: boolean;
+  type: 'expense' | 'balance' | 'addCategory' | 'editCategory' | 'deleteCategory' | null;
+  categoryId?: string;
+}
+
+export interface CustomCategory {
+  id: string;
+  name: string;
+  icon: {
+    library: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5';
+    name: string;
+    color: string;
+  };
+  backgroundColor: string;
+  isCustom: boolean;
+}
+
+export interface CategoryIcon {
+  name: string;
+  library: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5';
+  category: string;
 }
