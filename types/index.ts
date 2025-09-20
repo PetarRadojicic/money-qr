@@ -50,3 +50,19 @@ export interface CategoryIcon {
   library: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5';
   category: string;
 }
+
+export interface Transaction {
+  id: string;
+  type: 'expense' | 'income';
+  amount: number;
+  categoryId: string;
+  categoryName: string;
+  monthKey: string;
+  date: string; // ISO date string
+  description?: string;
+  isReverted?: boolean;
+}
+
+export interface HistoryData {
+  transactions: Transaction[];
+}

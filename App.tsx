@@ -26,8 +26,10 @@ import {
   getHiddenCategories,
   saveHiddenCategories,
   recalculateMonthlyExpenses,
+  addTransaction,
 } from './utils/dataManager';
-import { MonthlyData, ModalState, CustomCategory } from './types';
+import { MonthlyData, ModalState, CustomCategory, Transaction } from './types';
+import HistoryScreen from './components/HistoryScreen';
 import './global.css';
 
 export default function App() {
@@ -42,6 +44,7 @@ export default function App() {
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [editingCategory, setEditingCategory] = useState<CustomCategory | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'history'>('home');
 
   // Load data on component mount and when month changes
   useEffect(() => {
@@ -159,12 +162,29 @@ export default function App() {
   const handleExpenseConfirm = async (amount: number) => {
     if (!modalState.categoryId || !monthlyData) return;
 
+    const category = expenseCategories.find(cat => cat.id === modalState.categoryId);
+    const categoryName = category?.name || 'Unknown';
+
     const updatedCategories = {
       ...monthlyData.categories,
       [modalState.categoryId]: (monthlyData.categories[modalState.categoryId] || 0) + amount,
     };
 
     await updateMonthlyData(currentMonthKey, { categories: updatedCategories });
+    
+    // Add transaction to history
+    const transaction: Transaction = {
+      id: `expense_${Date.now()}_${Math.random()}`,
+      type: 'expense',
+      amount,
+      categoryId: modalState.categoryId,
+      categoryName,
+      monthKey: currentMonthKey,
+      date: new Date().toISOString(),
+      description: `Expense added to ${categoryName}`,
+    };
+    await addTransaction(transaction);
+    
     await loadMonthData();
     await loadTotalBalance();
   };
@@ -182,6 +202,20 @@ export default function App() {
     await updateMonthlyData(currentMonthKey, {
       income: monthlyData.income + amount,
     });
+    
+    // Add transaction to history
+    const transaction: Transaction = {
+      id: `income_${Date.now()}_${Math.random()}`,
+      type: 'income',
+      amount,
+      categoryId: 'income',
+      categoryName: 'Add to Balance',
+      monthKey: currentMonthKey,
+      date: new Date().toISOString(),
+      description: 'Money added to balance',
+    };
+    await addTransaction(transaction);
+    
     await loadMonthData();
     await loadTotalBalance();
   };
@@ -228,10 +262,36 @@ export default function App() {
 
 
   const handleNavigationPress = (tabName: string) => {
-    console.log(`${tabName} tab pressed!`);
-    // TODO: Implement navigation functionality
+    if (tabName === 'History') {
+      setCurrentScreen('history');
+    } else if (tabName === 'Home') {
+      setCurrentScreen('home');
+    }
   };
 
+  const handleNavigateHome = () => {
+    setCurrentScreen('home');
+  };
+
+  const handleDataChange = () => {
+    // Refresh home screen data when history changes
+    loadMonthData();
+    loadTotalBalance();
+  };
+
+  const isHistoryScreen = currentScreen === 'history';
+  const isHomeScreen = currentScreen === 'home';
+
+
+  // Render different screens
+  if (currentScreen === 'history') {
+    return (
+      <HistoryScreen 
+        onNavigateHome={handleNavigateHome}
+        onDataChange={handleDataChange}
+      />
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -341,14 +401,14 @@ export default function App() {
         <View className="flex-row justify-around items-center">
           {/* Home Tab */}
           <TouchableOpacity className="items-center py-2" onPress={() => handleNavigationPress('Home')}>
-            <Ionicons name="home" size={24} color="#2563eb" />
-            <Text className="text-blue-600 text-xs mt-1 font-medium">Home</Text>
+            <Ionicons name="home" size={24} color={isHomeScreen ? "#2563eb" : "#6b7280"} />
+            <Text className={`text-xs mt-1 ${isHomeScreen ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>Home</Text>
           </TouchableOpacity>
           
-          {/* Analytics Tab */}
-          <TouchableOpacity className="items-center py-2" onPress={() => handleNavigationPress('Analytics')}>
-            <Ionicons name="analytics" size={24} color="#6b7280" />
-            <Text className="text-gray-500 text-xs mt-1">Analytics</Text>
+          {/* History Tab */}
+          <TouchableOpacity className="items-center py-2" onPress={() => handleNavigationPress('History')}>
+            <Ionicons name="time" size={24} color={isHistoryScreen ? "#2563eb" : "#6b7280"} />
+            <Text className={`text-xs mt-1 ${isHistoryScreen ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>History</Text>
           </TouchableOpacity>
           
           {/* Settings Tab */}

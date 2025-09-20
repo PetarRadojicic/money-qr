@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppData, MonthlyData } from '../types';
+import { AppData, MonthlyData, Transaction, HistoryData } from '../types';
 
 const STORAGE_KEY = 'money_tracker_data';
+const HISTORY_STORAGE_KEY = 'transaction_history';
 
 // Helper function to get current month key (YYYY-MM format)
 export const getCurrentMonthKey = (): string => {
@@ -190,4 +191,74 @@ export const calculateTotalBalance = async (): Promise<number> => {
   });
   
   return total;
+};
+
+// Transaction History Functions
+export const loadTransactionHistory = async (): Promise<HistoryData> => {
+  try {
+    const data = await AsyncStorage.getItem(HISTORY_STORAGE_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+    return { transactions: [] };
+  } catch (error) {
+    console.error('Error loading transaction history:', error);
+    return { transactions: [] };
+  }
+};
+
+export const saveTransactionHistory = async (history: HistoryData): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.error('Error saving transaction history:', error);
+  }
+};
+
+export const addTransaction = async (transaction: Transaction): Promise<void> => {
+  const history = await loadTransactionHistory();
+  history.transactions.unshift(transaction); // Add to beginning (most recent first)
+  await saveTransactionHistory(history);
+};
+
+export const revertTransaction = async (transactionId: string): Promise<boolean> => {
+  const history = await loadTransactionHistory();
+  const transactionIndex = history.transactions.findIndex(t => t.id === transactionId);
+  
+  if (transactionIndex === -1) {
+    return false;
+  }
+  
+  const transaction = history.transactions[transactionIndex];
+  
+  if (transaction.isReverted) {
+    return false; // Already reverted
+  }
+  
+  // Mark as reverted
+  history.transactions[transactionIndex].isReverted = true;
+  await saveTransactionHistory(history);
+  
+  // Update the actual data
+  const data = await loadData();
+  const monthlyData = data[transaction.monthKey];
+  
+  if (monthlyData) {
+    if (transaction.type === 'income') {
+      monthlyData.income = Math.max(0, monthlyData.income - transaction.amount);
+    } else {
+      if (monthlyData.categories[transaction.categoryId]) {
+        monthlyData.categories[transaction.categoryId] = Math.max(0, 
+          monthlyData.categories[transaction.categoryId] - transaction.amount
+        );
+      }
+    }
+    
+    // Recalculate expenses
+    monthlyData.expenses = Object.values(monthlyData.categories).reduce((sum, amount) => sum + amount, 0);
+    
+    await saveData(data);
+  }
+  
+  return true;
 };
