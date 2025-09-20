@@ -30,6 +30,7 @@ import {
 } from './utils/dataManager';
 import { MonthlyData, ModalState, CustomCategory, Transaction } from './types';
 import HistoryScreen from './components/HistoryScreen';
+import SettingsScreen from './components/SettingsScreen';
 import './global.css';
 
 export default function App() {
@@ -44,7 +45,7 @@ export default function App() {
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [editingCategory, setEditingCategory] = useState<CustomCategory | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'history'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'history' | 'settings'>('home');
 
   // Load data on component mount and when month changes
   useEffect(() => {
@@ -266,6 +267,8 @@ export default function App() {
       setCurrentScreen('history');
     } else if (tabName === 'Home') {
       setCurrentScreen('home');
+    } else if (tabName === 'Settings') {
+      setCurrentScreen('settings');
     }
   };
 
@@ -279,8 +282,16 @@ export default function App() {
     loadTotalBalance();
   };
 
+  const handleDataReset = () => {
+    // Reset all app data and reload
+    loadMonthData();
+    loadTotalBalance();
+    // Categories will be reloaded via loadMonthData
+  };
+
   const isHistoryScreen = currentScreen === 'history';
   const isHomeScreen = currentScreen === 'home';
+  const isSettingsScreen = currentScreen === 'settings';
 
 
   // Render different screens
@@ -289,6 +300,15 @@ export default function App() {
       <HistoryScreen 
         onNavigateHome={handleNavigateHome}
         onDataChange={handleDataChange}
+      />
+    );
+  }
+
+  if (currentScreen === 'settings') {
+    return (
+      <SettingsScreen 
+        onNavigateHome={handleNavigateHome}
+        onDataReset={handleDataReset}
       />
     );
   }
@@ -413,8 +433,8 @@ export default function App() {
           
           {/* Settings Tab */}
           <TouchableOpacity className="items-center py-2" onPress={() => handleNavigationPress('Settings')}>
-            <Ionicons name="settings" size={24} color="#6b7280" />
-            <Text className="text-gray-500 text-xs mt-1">Settings</Text>
+            <Ionicons name="settings" size={24} color={isSettingsScreen ? "#2563eb" : "#6b7280"} />
+            <Text className={`text-xs mt-1 ${isSettingsScreen ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>Settings</Text>
           </TouchableOpacity>
         </View>
       </View>

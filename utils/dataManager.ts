@@ -262,3 +262,20 @@ export const revertTransaction = async (transactionId: string): Promise<boolean>
   
   return true;
 };
+
+// Reset all app data
+export const resetAppData = async (): Promise<void> => {
+  try {
+    // Clear all AsyncStorage keys
+    await AsyncStorage.multiRemove([
+      STORAGE_KEY,
+      HISTORY_STORAGE_KEY,
+      CUSTOM_CATEGORIES_KEY,
+      'modified_categories',
+      'hidden_categories'
+    ]);
+  } catch (error) {
+    console.error('Error resetting app data:', error);
+    throw error;
+  }
+};
