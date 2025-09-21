@@ -33,52 +33,30 @@ import { updateCurrencyRates } from '../utils/currencyService';
 interface HomeScreenProps {
   onNavigateHistory: () => void;
   onNavigateSettings: () => void;
-  cachedData?: {
-    monthlyData: any;
-    totalBalance: number;
-    selectedCurrency: string;
-    expenseCategories: any[];
-    isLoaded: boolean;
-  };
-  onDataRefresh?: () => void;
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ 
   onNavigateHistory, 
-  onNavigateSettings,
-  cachedData,
-  onDataRefresh
+  onNavigateSettings 
 }) => {
   // State management
   const [currentMonthKey, setCurrentMonthKey] = useState(getCurrentMonthKey());
-  const [monthlyData, setMonthlyData] = useState<MonthlyData | null>(
-    cachedData?.monthlyData || null
-  );
-  const [totalBalance, setTotalBalance] = useState(
-    cachedData?.totalBalance || 0
-  );
+  const [monthlyData, setMonthlyData] = useState<MonthlyData | null>(null);
+  const [totalBalance, setTotalBalance] = useState(0);
   const [modalState, setModalState] = useState<ModalState>({
     isVisible: false,
     type: null,
   });
-  const [expenseCategories, setExpenseCategories] = useState<any[]>(
-    cachedData?.expenseCategories || []
-  );
+  const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [editingCategory, setEditingCategory] = useState<CustomCategory | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    cachedData?.selectedCurrency || 'USD'
-  );
-  const [isLoading, setIsLoading] = useState(!cachedData?.isLoaded);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load data only if not cached or month changed
+  // Load all data in coordinated manner
   useEffect(() => {
-    if (!cachedData?.isLoaded || currentMonthKey !== getCurrentMonthKey()) {
-      loadAllData();
-    }
-    // If cached data is available, use it instantly - no loading needed
-  }, [currentMonthKey, cachedData]);
-
+    loadAllData();
+  }, [currentMonthKey]);
 
   // Coordinated loading function - loads everything at once
   const loadAllData = async () => {
@@ -211,8 +189,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             });
             await saveData(data);
             
-            // Refresh data through navigation manager
-            onDataRefresh?.();
+            await loadAllData();
           },
         },
       ]
@@ -245,9 +222,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     };
     await addTransaction(transaction);
     
-    // Refresh data through navigation manager
-    onDataRefresh?.();
-  }, [modalState.categoryId, monthlyData, expenseCategories, currentMonthKey, onDataRefresh]);
+    await loadAllData();
+  }, [modalState.categoryId, monthlyData, expenseCategories, currentMonthKey]);
 
   const handleAddToBalance = useCallback(() => {
     setModalState({
@@ -276,9 +252,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     };
     await addTransaction(transaction);
     
-    // Refresh data through navigation manager
-    onDataRefresh?.();
-  }, [monthlyData, currentMonthKey, onDataRefresh]);
+    await loadAllData();
+  }, [monthlyData, currentMonthKey]);
 
   const handleModalClose = useCallback(() => {
     setModalState({ isVisible: false, type: null });
@@ -293,8 +268,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const customCategories = await loadCustomCategories();
     customCategories[newCategory.id] = newCategory;
     await saveCustomCategories(customCategories);
-    // Refresh data through navigation manager
-    onDataRefresh?.();
+    await loadAllData();
   }, []);
 
   const handleEditCategoryConfirm = useCallback(async (categoryId: string, updates: Partial<CustomCategory>) => {
@@ -318,8 +292,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       await saveModifiedCategories(modifiedCategories);
     }
     
-    // Refresh data through navigation manager
-    onDataRefresh?.();
+    await loadAllData();
   }, [editingCategory]);
 
   // Loading skeleton component
@@ -368,8 +341,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     </ScrollView>
   );
 
-  // Show loading skeleton only if no cached data and still loading
-  if (isLoading && !cachedData?.isLoaded) {
+  // Show loading skeleton while data is loading
+  if (isLoading) {
     return <LoadingSkeleton />;
   }
 

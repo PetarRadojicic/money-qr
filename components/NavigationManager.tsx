@@ -1,12 +1,9 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TouchableOpacity } from 'react-native';
-import { getCurrentMonthKey, getMonthlyData, calculateTotalBalance, getSelectedCurrency } from '../utils/dataManager';
-import { createExpenseCategories } from '../constants/expenseCategories';
-import { updateCurrencyRates } from '../utils/currencyService';
 
 // Import all screen components
 import HomeScreen from './HomeScreen';
@@ -28,90 +25,30 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   onDataReset,
 }) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
-  
-  // Cache data for instant loading
-  const [cachedData, setCachedData] = useState({
-    monthlyData: null as any,
-    totalBalance: 0,
-    selectedCurrency: 'USD',
-    expenseCategories: [] as any[],
-    isLoaded: false,
-  });
-
-  // Pre-load data on app start
-  useEffect(() => {
-    preloadData();
-  }, []);
-
-  const preloadData = async () => {
-    try {
-      const [currency, monthlyData, totalBalance] = await Promise.all([
-        getSelectedCurrency(),
-        getMonthlyData(getCurrentMonthKey()),
-        calculateTotalBalance(),
-      ]);
-
-      // Load categories immediately with the data
-      const expenseCategories = await createExpenseCategories(monthlyData.categories);
-
-      setCachedData({
-        monthlyData,
-        totalBalance,
-        selectedCurrency: currency,
-        expenseCategories,
-        isLoaded: true,
-      });
-
-      // Fetch exchange rates in background
-      updateCurrencyRates();
-    } catch (error) {
-      console.error('Error preloading data:', error);
-    }
-  };
 
   // Memoize navigation handler to prevent unnecessary re-renders
   const handleNavigation = useCallback((screen: ScreenType) => {
     setCurrentScreen(screen);
   }, []);
 
-  // Data refresh handlers
-  const handleDataRefresh = useCallback(async () => {
-    await preloadData();
-    onDataChange?.();
-  }, [onDataChange]);
-
-  const handleCurrencyRefresh = useCallback(async () => {
-    await preloadData();
-    onCurrencyChange?.();
-  }, [onCurrencyChange]);
-
-  const handleDataReset = useCallback(async () => {
-    await preloadData();
-    onDataReset?.();
-  }, [onDataReset]);
-
   // Memoize navigation callbacks to prevent re-renders
   const navigationCallbacks = useMemo(() => ({
     home: {
       onNavigateHistory: () => handleNavigation('history'),
       onNavigateSettings: () => handleNavigation('settings'),
-      cachedData,
-      onDataRefresh: handleDataRefresh,
     },
     history: {
       onNavigateHome: () => handleNavigation('home'),
       onNavigateSettings: () => handleNavigation('settings'),
-      onDataChange: handleDataRefresh,
-      cachedData,
+      onDataChange: onDataChange || (() => {}),
     },
     settings: {
       onNavigateHome: () => handleNavigation('home'),
       onNavigateHistory: () => handleNavigation('history'),
-      onDataReset: handleDataReset,
-      onCurrencyChange: handleCurrencyRefresh,
-      cachedData,
+      onDataReset: onDataReset || (() => {}),
+      onCurrencyChange: onCurrencyChange || (() => {}),
     },
-  }), [handleNavigation, handleDataRefresh, handleCurrencyRefresh, handleDataReset, cachedData]);
+  }), [handleNavigation, onDataChange, onDataReset, onCurrencyChange]);
 
   // Memoize screen components to prevent re-mounting
   const renderCurrentScreen = useMemo(() => {
