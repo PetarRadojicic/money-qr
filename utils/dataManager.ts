@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppData, MonthlyData, Transaction, HistoryData } from '../types';
+import { convertAmount } from './currencyService';
 
 const STORAGE_KEY = 'money_tracker_data';
 const HISTORY_STORAGE_KEY = 'transaction_history';
+const CURRENCY_STORAGE_KEY = 'selected_currency';
 
 // Helper function to get current month key (YYYY-MM format)
 export const getCurrentMonthKey = (): string => {
@@ -272,10 +274,86 @@ export const resetAppData = async (): Promise<void> => {
       HISTORY_STORAGE_KEY,
       CUSTOM_CATEGORIES_KEY,
       'modified_categories',
-      'hidden_categories'
+      'hidden_categories',
+      CURRENCY_STORAGE_KEY
     ]);
   } catch (error) {
     console.error('Error resetting app data:', error);
+    throw error;
+  }
+};
+
+// Currency Management Functions
+export const getSelectedCurrency = async (): Promise<string> => {
+  try {
+    const currency = await AsyncStorage.getItem(CURRENCY_STORAGE_KEY);
+    return currency || 'USD';
+  } catch (error) {
+    console.error('Error loading selected currency:', error);
+    return 'USD';
+  }
+};
+
+export const saveSelectedCurrency = async (currencyCode: string): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(CURRENCY_STORAGE_KEY, currencyCode);
+  } catch (error) {
+    console.error('Error saving selected currency:', error);
+  }
+};
+
+export const convertAllDataToCurrency = async (newCurrencyCode: string): Promise<void> => {
+  try {
+    const currentCurrency = await getSelectedCurrency();
+    
+    if (currentCurrency === newCurrencyCode) {
+      return; // No conversion needed
+    }
+    
+    // Convert all monthly data
+    const data = await loadData();
+    const convertedData: AppData = {};
+    
+    // Convert each month's data
+    for (const monthKey of Object.keys(data)) {
+      const monthData = data[monthKey];
+      const convertedCategories: Record<string, number> = {};
+      
+      // Convert categories
+      for (const categoryId of Object.keys(monthData.categories)) {
+        convertedCategories[categoryId] = await convertAmount(
+          monthData.categories[categoryId], 
+          currentCurrency, 
+          newCurrencyCode
+        );
+      }
+      
+      convertedData[monthKey] = {
+        ...monthData,
+        income: await convertAmount(monthData.income, currentCurrency, newCurrencyCode),
+        expenses: await convertAmount(monthData.expenses, currentCurrency, newCurrencyCode),
+        categories: convertedCategories
+      };
+    }
+    
+    await saveData(convertedData);
+    
+    // Convert all transaction history
+    const history = await loadTransactionHistory();
+    const convertedHistory: HistoryData = {
+      transactions: await Promise.all(history.transactions.map(async transaction => ({
+        ...transaction,
+        amount: await convertAmount(transaction.amount, currentCurrency, newCurrencyCode)
+      })))
+    };
+    
+    await saveTransactionHistory(convertedHistory);
+    
+    // Save new currency
+    await saveSelectedCurrency(newCurrencyCode);
+    
+  } catch (error) {
+    console.error('Error converting data to new currency:', error);
     throw error;
   }
 };

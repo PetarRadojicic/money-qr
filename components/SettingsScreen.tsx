@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,45 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { resetAppData } from '../utils/dataManager';
+import { resetAppData, getSelectedCurrency } from '../utils/dataManager';
+import { getCurrencyByCode, formatCurrency } from '../constants/currencies';
+import CurrencyModal from './CurrencyModal';
+import ExchangeRateStatus from './ExchangeRateStatus';
 
 interface SettingsScreenProps {
   onNavigateHome: () => void;
+  onNavigateHistory: () => void;
   onDataReset: () => void;
+  onCurrencyChange: () => void;
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigateHome, onDataReset }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ 
+  onNavigateHome, 
+  onNavigateHistory,
+  onDataReset, 
+  onCurrencyChange
+}) => {
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+
+  useEffect(() => {
+    loadCurrentCurrency();
+  }, []);
+
+  const loadCurrentCurrency = async () => {
+    const current = await getSelectedCurrency();
+    setSelectedCurrency(current);
+  };
+
+  const handleCurrencyPress = () => {
+    setShowCurrencyModal(true);
+  };
+
+  const handleCurrencyChange = () => {
+    loadCurrentCurrency();
+    onCurrencyChange();
+  };
+
   const handleResetApp = () => {
     Alert.alert(
       'Reset App',
@@ -103,7 +134,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigateHome, onDataR
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <>
       {/* Header */}
       <View className="bg-white px-6 py-4 shadow-sm">
         <View className="flex-row items-center justify-between">
@@ -131,6 +162,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigateHome, onDataR
               </View>
             </View>
           </View>
+        </View>
+
+        {/* Currency Section */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-gray-900 mb-4">Currency</Text>
+          
+          <ExchangeRateStatus onRatesUpdated={handleCurrencyChange} />
+          
+          <SettingsItem
+            icon="cash"
+            iconLibrary="Ionicons"
+            title="Currency"
+            subtitle={`${getCurrencyByCode(selectedCurrency).name} (${formatCurrency(100, selectedCurrency)})`}
+            onPress={handleCurrencyPress}
+          />
         </View>
 
         {/* Data Management Section */}
@@ -233,7 +279,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigateHome, onDataR
           <Text className="text-gray-400 text-xs mt-1">Built with React Native & NativeWind</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Currency Modal */}
+      <CurrencyModal
+        isVisible={showCurrencyModal}
+        onClose={() => setShowCurrencyModal(false)}
+        onCurrencyChange={handleCurrencyChange}
+      />
+    </>
   );
 };
 

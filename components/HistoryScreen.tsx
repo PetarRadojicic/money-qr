@@ -7,17 +7,24 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Transaction } from '../types';
 import { loadTransactionHistory, revertTransaction } from '../utils/dataManager';
+import { formatCurrency } from '../constants/currencies';
 
 interface HistoryScreenProps {
   onNavigateHome: () => void;
+  onNavigateSettings: () => void;
   onDataChange: () => void;
+  currency?: string;
 }
 
-const HistoryScreen: React.FC<HistoryScreenProps> = ({ onNavigateHome, onDataChange }) => {
+const HistoryScreen: React.FC<HistoryScreenProps> = ({ 
+  onNavigateHome, 
+  onNavigateSettings,
+  onDataChange, 
+  currency = 'USD'
+}) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -51,7 +58,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onNavigateHome, onDataCha
 
     Alert.alert(
       'Revert Transaction',
-      `Are you sure you want to ${actionText}?\n\n${transaction.categoryName}: $${transaction.amount.toFixed(2)}\nDate: ${formatDate(transaction.date)}`,
+      `Are you sure you want to ${actionText}?\n\n${transaction.categoryName}: ${formatCurrency(transaction.amount, currency)}\nDate: ${formatDate(transaction.date)}`,
       [
         {
           text: 'Cancel',
@@ -117,7 +124,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onNavigateHome, onDataCha
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <>
       {/* Header */}
       <View className="bg-white px-6 py-4 shadow-sm">
         <View className="flex-row items-center justify-between">
@@ -172,7 +179,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onNavigateHome, onDataCha
                           {transaction.categoryName}
                         </Text>
                         <Text className={`font-bold text-lg ${getTransactionColor(transaction)}`}>
-                          {getAmountPrefix(transaction)}${transaction.amount.toFixed(2)}
+                          {getAmountPrefix(transaction)}{formatCurrency(transaction.amount, currency)}
                         </Text>
                       </View>
                       
@@ -209,7 +216,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onNavigateHome, onDataCha
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 };
 
