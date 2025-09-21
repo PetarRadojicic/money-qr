@@ -9,8 +9,9 @@ import { Text, TouchableOpacity } from 'react-native';
 import HomeScreen from './HomeScreen';
 import HistoryScreen from './HistoryScreen';
 import SettingsScreen from './SettingsScreen';
+import AnalyticsScreen from './AnalyticsScreen';
 
-export type ScreenType = 'home' | 'history' | 'settings';
+export type ScreenType = 'home' | 'analytics' | 'history' | 'settings';
 
 interface NavigationManagerProps {
   // Add any global props that all screens might need
@@ -37,6 +38,11 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
       onNavigateHistory: () => handleNavigation('history'),
       onNavigateSettings: () => handleNavigation('settings'),
     },
+    analytics: {
+      onNavigateHome: () => handleNavigation('home'),
+      onNavigateHistory: () => handleNavigation('history'),
+      onNavigateSettings: () => handleNavigation('settings'),
+    },
     history: {
       onNavigateHome: () => handleNavigation('home'),
       onNavigateSettings: () => handleNavigation('settings'),
@@ -55,6 +61,8 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
     switch (currentScreen) {
       case 'home':
         return <HomeScreen {...navigationCallbacks.home} />;
+      case 'analytics':
+        return <AnalyticsScreen {...navigationCallbacks.analytics} />;
       case 'history':
         return <HistoryScreen {...navigationCallbacks.history} />;
       case 'settings':
@@ -93,6 +101,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
   onNavigate 
 }) => {
   const isHomeActive = currentScreen === 'home';
+  const isAnalyticsActive = currentScreen === 'analytics';
   const isHistoryActive = currentScreen === 'history';
   const isSettingsActive = currentScreen === 'settings';
 
@@ -114,6 +123,24 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
             isHomeActive ? 'text-blue-600 font-medium' : 'text-gray-500'
           }`}>
             Home
+          </Text>
+        </TouchableOpacity>
+        
+        {/* Analytics Tab */}
+        <TouchableOpacity 
+          className="items-center py-2 flex-1" 
+          onPress={() => onNavigate('analytics')}
+          activeOpacity={0.7}
+        >
+          <Ionicons 
+            name="analytics" 
+            size={24} 
+            color={isAnalyticsActive ? "#2563eb" : "#6b7280"} 
+          />
+          <Text className={`text-xs mt-1 ${
+            isAnalyticsActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+          }`}>
+            Analytics
           </Text>
         </TouchableOpacity>
         
