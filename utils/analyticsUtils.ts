@@ -409,3 +409,4 @@ export const calculateYearOverYearComparison = (appData: AppData) => {
     expenseChange
   };
 };
+
