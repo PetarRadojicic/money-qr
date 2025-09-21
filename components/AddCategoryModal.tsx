@@ -168,11 +168,11 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
           <View className="mb-6">
             <Text className="text-gray-700 font-medium mb-2">Choose Icon</Text>
             <ScrollView className="max-h-48" showsVerticalScrollIndicator={false}>
-              <View className="flex-row flex-wrap justify-between">
+              <View className="flex-row flex-wrap justify-center">
                 {filteredIcons.map((icon, index) => (
                   <TouchableOpacity
                     key={index}
-                    className={`w-16 h-16 items-center justify-center rounded-xl mb-2 border-2 ${
+                    className={`w-16 h-16 items-center justify-center rounded-xl mb-2 mx-1 border-2 ${
                       selectedIcon.name === icon.name 
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 bg-gray-50'
