@@ -18,10 +18,19 @@ import {
   calculateYearOverYearComparison 
 } from '../utils/analyticsUtils';
 
+interface GlobalData {
+  appData: any;
+  transactionHistory: any;
+  selectedCurrency: string;
+  isDataReady: boolean;
+}
+
 interface AnalyticsScreenProps {
   onNavigateHome: () => void;
   onNavigateHistory: () => void;
   onNavigateSettings: () => void;
+  globalData?: GlobalData;
+  skipInitialLoading?: boolean;
 }
 
 interface MonthlyAnalytics {
@@ -61,10 +70,14 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   onNavigateHome,
   onNavigateHistory,
   onNavigateSettings,
+  globalData,
+  skipInitialLoading = false,
 }) => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(
+    globalData?.selectedCurrency || 'USD'
+  );
+  const [isLoading, setIsLoading] = useState(!skipInitialLoading);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<'specific' | 'all'>('all');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
@@ -72,6 +85,34 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const screenWidth = Dimensions.get('window').width;
+
+  // Fast loading from preloaded cache
+  const loadAnalyticsDataFromCache = useCallback(async () => {
+    try {
+      if (globalData?.isDataReady && globalData.appData && globalData.transactionHistory) {
+        // Use preloaded data directly
+        setSelectedCurrency(globalData.selectedCurrency);
+        
+        // Get available months from preloaded data
+        const months = Object.keys(globalData.appData).sort();
+        setAvailableMonths(months);
+
+        // If no months selected and we have data, select all months
+        if (selectedMonths.length === 0 && months.length > 0) {
+          setSelectedMonths(months);
+        }
+
+        const analytics = calculateAnalytics(globalData.appData, globalData.transactionHistory, timeRange, selectedMonths);
+        setAnalyticsData(analytics);
+        return; // Exit early - we're done!
+      }
+      
+      // Fallback: Load data normally
+      await loadAnalyticsData(false);
+    } catch (error) {
+      console.error('Error loading analytics data from cache:', error);
+    }
+  }, [globalData, timeRange, selectedMonths]);
 
   // Load analytics data
   const loadAnalyticsData = useCallback(async (isRefresh = false) => {
@@ -114,9 +155,15 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     loadAnalyticsData(true);
   }, [loadAnalyticsData]);
 
+  // Load all data in coordinated manner
   useEffect(() => {
-    loadAnalyticsData();
-  }, [loadAnalyticsData]);
+    if (skipInitialLoading && globalData?.isDataReady) {
+      // Use preloaded data
+      loadAnalyticsDataFromCache();
+    } else {
+      loadAnalyticsData();
+    }
+  }, [timeRange, selectedMonths, skipInitialLoading, globalData?.isDataReady]);
 
   // Calculate analytics from data
   const calculateAnalytics = (

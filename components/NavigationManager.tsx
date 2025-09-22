@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { View } from 'react-native';
+import React, { useState, useCallback, useMemo, memo, useEffect, useRef } from 'react';
+import { View, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,17 @@ import HistoryScreen from './HistoryScreen';
 import SettingsScreen from './SettingsScreen';
 import AnalyticsScreen from './AnalyticsScreen';
 
+// Import data loading functions
+import { loadData, loadTransactionHistory, getSelectedCurrency } from '../utils/dataManager';
+
 export type ScreenType = 'home' | 'analytics' | 'history' | 'settings';
+
+interface GlobalData {
+  appData: any;
+  transactionHistory: any;
+  selectedCurrency: string;
+  isDataReady: boolean;
+}
 
 interface NavigationManagerProps {
   // Add any global props that all screens might need
@@ -26,65 +36,284 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   onDataReset,
 }) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
+  const [globalData, setGlobalData] = useState<GlobalData>({
+    appData: {},
+    transactionHistory: { transactions: [] },
+    selectedCurrency: 'USD',
+    isDataReady: false,
+  });
+  
+  // Track which screens have been preloaded
+  const preloadedScreens = useRef<Set<ScreenType>>(new Set(['home']));
+  
+  // Track preloading state
+  const [preloadingScreen, setPreloadingScreen] = useState<ScreenType | null>(null);
+  const preloadTimeout = useRef<NodeJS.Timeout | null>(null);
+  
+  // Overlay fade animation to avoid shadow/border artifacts
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // Memoize navigation handler to prevent unnecessary re-renders
-  const handleNavigation = useCallback((screen: ScreenType) => {
-    setCurrentScreen(screen);
+  // Preload global data on app start
+  useEffect(() => {
+    const preloadGlobalData = async () => {
+      try {
+        const [appData, transactionHistory, selectedCurrency] = await Promise.all([
+          loadData(),
+          loadTransactionHistory(),
+          getSelectedCurrency(),
+        ]);
+        
+        setGlobalData({
+          appData,
+          transactionHistory,
+          selectedCurrency,
+          isDataReady: true,
+        });
+      } catch (error) {
+        console.error('Error preloading global data:', error);
+        // Set data ready to true even on error to prevent infinite loading
+        setGlobalData(prev => ({ ...prev, isDataReady: true }));
+      }
+    };
+    
+    preloadGlobalData();
   }, []);
 
-  // Memoize navigation callbacks to prevent re-renders
-  const navigationCallbacks = useMemo(() => ({
-    home: {
-      onNavigateHistory: () => handleNavigation('history'),
-      onNavigateSettings: () => handleNavigation('settings'),
-    },
-    analytics: {
-      onNavigateHome: () => handleNavigation('home'),
-      onNavigateHistory: () => handleNavigation('history'),
-      onNavigateSettings: () => handleNavigation('settings'),
-    },
-    history: {
-      onNavigateHome: () => handleNavigation('home'),
-      onNavigateSettings: () => handleNavigation('settings'),
-      onDataChange: onDataChange || (() => {}),
-    },
-    settings: {
-      onNavigateHome: () => handleNavigation('home'),
-      onNavigateHistory: () => handleNavigation('history'),
-      onDataReset: onDataReset || (() => {}),
-      onCurrencyChange: onCurrencyChange || (() => {}),
-    },
-  }), [handleNavigation, onDataChange, onDataReset, onCurrencyChange]);
+  // Update global data when currency changes
+  useEffect(() => {
+    if (globalData.isDataReady && onCurrencyChange) {
+      const updateCurrency = async () => {
+        const currency = await getSelectedCurrency();
+        setGlobalData(prev => ({ ...prev, selectedCurrency: currency }));
+      };
+      updateCurrency();
+    }
+  }, [onCurrencyChange, globalData.isDataReady]);
+
+  // Refresh global data when data changes
+  useEffect(() => {
+    if (globalData.isDataReady && onDataChange) {
+      const refreshData = async () => {
+        try {
+          const [appData, transactionHistory] = await Promise.all([
+            loadData(),
+            loadTransactionHistory(),
+          ]);
+          setGlobalData(prev => ({ 
+            ...prev, 
+            appData, 
+            transactionHistory 
+          }));
+        } catch (error) {
+          console.error('Error refreshing global data:', error);
+        }
+      };
+      refreshData();
+    }
+  }, [onDataChange, globalData.isDataReady]);
+
+  // Fade overlay out on initial data ready
+  useEffect(() => {
+    if (globalData.isDataReady) {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 450,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [globalData.isDataReady, fadeAnim]);
+
+  // Cleanup preload timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (preloadTimeout.current) {
+        clearTimeout(preloadTimeout.current);
+      }
+    };
+  }, []);
+
+  // Preload screen function - starts loading the screen without switching to it
+  const preloadScreen = useCallback((screen: ScreenType) => {
+    if (screen === currentScreen || preloadingScreen === screen) return;
+    
+    setPreloadingScreen(screen);
+    // Mark screen as being preloaded
+    preloadedScreens.current.add(screen);
+  }, [currentScreen, preloadingScreen]);
+
+  // Navigation handler with preloading mechanism
+  const handleNavigationWithPreload = useCallback((screen: ScreenType) => {
+    if (screen === currentScreen) return;
+    
+    // Clear any existing preload timeout
+    if (preloadTimeout.current) {
+      clearTimeout(preloadTimeout.current);
+    }
+    
+    // Start preloading the screen immediately
+    preloadScreen(screen);
+    
+    // Wait 100ms before actually switching screens
+    preloadTimeout.current = setTimeout(() => {
+      // Only animate if data is ready to prevent showing loading states
+      if (globalData.isDataReady) {
+        // Show overlay before switching screens
+        fadeAnim.setValue(1);
+      }
+
+      // Switch to the preloaded screen
+      setCurrentScreen(screen);
+      setPreloadingScreen(null);
+      
+      if (globalData.isDataReady) {
+        // Fade overlay out after content is ready
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 350, // Slightly faster since screen is preloaded
+          useNativeDriver: true,
+        }).start();
+      }
+    }, 100);
+  }, [currentScreen, globalData.isDataReady, fadeAnim, preloadScreen]);
+
+  // Keep the old immediate navigation for backwards compatibility
+  const handleNavigation = useCallback((screen: ScreenType) => {
+    if (screen === currentScreen) return;
+    
+    // Only animate if data is ready to prevent showing loading states
+    if (globalData.isDataReady) {
+      // Show overlay before switching screens
+      fadeAnim.setValue(1);
+    }
+
+    // Mark screen as preloaded when navigating to it
+    preloadedScreens.current.add(screen);
+    setCurrentScreen(screen);
+    
+    if (globalData.isDataReady) {
+      // Fade overlay out after content is ready
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 450,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [currentScreen, globalData.isDataReady, fadeAnim]);
+
+  // Memoize individual navigation callbacks with preloading
+  const navigateToHome = useCallback(() => handleNavigationWithPreload('home'), [handleNavigationWithPreload]);
+  const navigateToAnalytics = useCallback(() => handleNavigationWithPreload('analytics'), [handleNavigationWithPreload]);
+  const navigateToHistory = useCallback(() => handleNavigationWithPreload('history'), [handleNavigationWithPreload]);
+  const navigateToSettings = useCallback(() => handleNavigationWithPreload('settings'), [handleNavigationWithPreload]);
+  
+  // Memoize screen-specific callbacks
+  const homeCallbacks = useMemo(() => ({
+    onNavigateHistory: navigateToHistory,
+    onNavigateSettings: navigateToSettings,
+    globalData,
+    skipInitialLoading: preloadedScreens.current.has('home') && globalData.isDataReady,
+  }), [navigateToHistory, navigateToSettings, globalData]);
+  
+  const analyticsCallbacks = useMemo(() => ({
+    onNavigateHome: navigateToHome,
+    onNavigateHistory: navigateToHistory,
+    onNavigateSettings: navigateToSettings,
+    globalData,
+    skipInitialLoading: preloadedScreens.current.has('analytics') && globalData.isDataReady,
+  }), [navigateToHome, navigateToHistory, navigateToSettings, globalData]);
+  
+  const historyCallbacks = useMemo(() => ({
+    onNavigateHome: navigateToHome,
+    onNavigateSettings: navigateToSettings,
+    onDataChange: onDataChange || (() => {}),
+    globalData,
+    skipInitialLoading: preloadedScreens.current.has('history') && globalData.isDataReady,
+  }), [navigateToHome, navigateToSettings, onDataChange, globalData]);
+  
+  const settingsCallbacks = useMemo(() => ({
+    onNavigateHome: navigateToHome,
+    onNavigateHistory: navigateToHistory,
+    onDataReset: onDataReset || (() => {}),
+    onCurrencyChange: onCurrencyChange || (() => {}),
+    globalData,
+    skipInitialLoading: preloadedScreens.current.has('settings') && globalData.isDataReady,
+  }), [navigateToHome, navigateToHistory, onDataReset, onCurrencyChange, globalData]);
 
   // Memoize screen components to prevent re-mounting
   const renderCurrentScreen = useMemo(() => {
     switch (currentScreen) {
       case 'home':
-        return <HomeScreen {...navigationCallbacks.home} />;
+        return <HomeScreen {...homeCallbacks} />;
       case 'analytics':
-        return <AnalyticsScreen {...navigationCallbacks.analytics} />;
+        return <AnalyticsScreen {...analyticsCallbacks} />;
       case 'history':
-        return <HistoryScreen {...navigationCallbacks.history} />;
+        return <HistoryScreen {...historyCallbacks} />;
       case 'settings':
-        return <SettingsScreen {...navigationCallbacks.settings} />;
+        return <SettingsScreen {...settingsCallbacks} />;
       default:
         return null;
     }
-  }, [currentScreen, navigationCallbacks]);
+  }, [currentScreen, homeCallbacks, analyticsCallbacks, historyCallbacks, settingsCallbacks]);
+
+  // Render preloading screen in background (hidden)
+  const renderPreloadingScreen = useMemo(() => {
+    if (!preloadingScreen || preloadingScreen === currentScreen) return null;
+    
+    const PreloadComponent = () => {
+      switch (preloadingScreen) {
+        case 'home':
+          return <HomeScreen {...homeCallbacks} />;
+        case 'analytics':
+          return <AnalyticsScreen {...analyticsCallbacks} />;
+        case 'history':
+          return <HistoryScreen {...historyCallbacks} />;
+        case 'settings':
+          return <SettingsScreen {...settingsCallbacks} />;
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <View style={{ position: 'absolute', left: -9999, top: -9999, opacity: 0 }}>
+        <PreloadComponent />
+      </View>
+    );
+  }, [preloadingScreen, currentScreen, homeCallbacks, analyticsCallbacks, historyCallbacks, settingsCallbacks]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar style="dark" />
       
       {/* Main Content Area */}
-      <View className="flex-1">
+      <Animated.View 
+        className="flex-1"
+        style={{ backgroundColor: '#ffffff' }}
+      >
         {renderCurrentScreen}
-      </View>
+      </Animated.View>
+      
+      {/* Preloading screen in background (hidden) */}
+      {renderPreloadingScreen}
+      
+      {/* White overlay to avoid gray borders during fades */}
+      <Animated.View 
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#ffffff',
+          opacity: fadeAnim,
+        }}
+      />
       
       {/* Bottom Navigation Bar - Always rendered */}
       <BottomNavigation
         currentScreen={currentScreen}
-        onNavigate={handleNavigation}
+        onNavigate={handleNavigationWithPreload}
       />
     </SafeAreaView>
   );

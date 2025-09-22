@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ExpenseCategory from './ExpenseCategory';
@@ -28,7 +28,7 @@ import {
 } from '../utils/dataManager';
 import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
-import { updateCurrencyRates } from '../utils/currencyService';
+import { updateCurrencyRates, areRatesFresh } from '../utils/currencyService';
 
 interface HomeScreenProps {
   onNavigateHistory: () => void;
@@ -53,10 +53,45 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load all data in coordinated manner
+  // Function to force refresh exchange rates (for manual refresh or currency change)
+  const forceRefreshRates = useCallback(async () => {
+    console.log('🔄 Force refreshing exchange rates...');
+    await updateCurrencyRates();
+  }, []);
+
+  // Track initial load completion to avoid full refresh on month switch
+  const hasInitialLoaded = useRef(false);
+
+  // Initial load only once
   useEffect(() => {
-    loadAllData();
+    const init = async () => {
+      await loadAllData();
+      hasInitialLoaded.current = true;
+    };
+    init();
+  }, []);
+
+  // On month change, load only month-specific data (no global loading state)
+  useEffect(() => {
+    if (hasInitialLoaded.current) {
+      loadMonthData();
+    }
   }, [currentMonthKey]);
+
+  // Watch for currency changes and refresh rates when currency changes
+  useEffect(() => {
+    const checkCurrencyChange = async () => {
+      const currentCurrency = await getSelectedCurrency();
+      if (selectedCurrency && selectedCurrency !== currentCurrency) {
+        console.log(`💱 Currency changed from ${selectedCurrency} to ${currentCurrency}, refreshing rates...`);
+        await forceRefreshRates();
+      }
+    };
+
+    if (selectedCurrency) {
+      checkCurrencyChange();
+    }
+  }, [selectedCurrency, forceRefreshRates]);
 
   // Coordinated loading function - loads everything at once
   const loadAllData = async () => {
@@ -78,8 +113,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const categories = await createExpenseCategories(monthlyData.categories);
       setExpenseCategories(categories);
       
-      // Fetch exchange rates in background (non-blocking)
-      updateCurrencyRates();
+      // Only fetch exchange rates if they're not fresh (non-blocking)
+      if (!areRatesFresh()) {
+        console.log('🔄 Exchange rates are stale, updating...');
+        updateCurrencyRates();
+      } else {
+        console.log('✅ Exchange rates are fresh, skipping update');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
