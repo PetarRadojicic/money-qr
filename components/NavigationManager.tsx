@@ -28,12 +28,14 @@ interface NavigationManagerProps {
   onDataChange?: () => void;
   onCurrencyChange?: () => void;
   onDataReset?: () => void;
+  dataChangeCounter?: number;
 }
 
 const NavigationManager: React.FC<NavigationManagerProps> = ({
   onDataChange,
   onCurrencyChange,
   onDataReset,
+  dataChangeCounter,
 }) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [globalData, setGlobalData] = useState<GlobalData>({
@@ -91,26 +93,30 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   }, [onCurrencyChange, globalData.isDataReady]);
 
   // Refresh global data when data changes
-  useEffect(() => {
-    if (globalData.isDataReady && onDataChange) {
-      const refreshData = async () => {
-        try {
-          const [appData, transactionHistory] = await Promise.all([
-            loadData(),
-            loadTransactionHistory(),
-          ]);
-          setGlobalData(prev => ({ 
-            ...prev, 
-            appData, 
-            transactionHistory 
-          }));
-        } catch (error) {
-          console.error('Error refreshing global data:', error);
-        }
-      };
-      refreshData();
+  const refreshGlobalData = useCallback(async () => {
+    if (globalData.isDataReady) {
+      try {
+        const [appData, transactionHistory] = await Promise.all([
+          loadData(),
+          loadTransactionHistory(),
+        ]);
+        setGlobalData(prev => ({ 
+          ...prev, 
+          appData, 
+          transactionHistory 
+        }));
+      } catch (error) {
+        console.error('Error refreshing global data:', error);
+      }
     }
-  }, [onDataChange, globalData.isDataReady]);
+  }, [globalData.isDataReady]);
+
+  // Watch for data changes and refresh
+  useEffect(() => {
+    if (dataChangeCounter !== undefined && dataChangeCounter > 0) {
+      refreshGlobalData();
+    }
+  }, [dataChangeCounter, refreshGlobalData]);
 
   // Fade overlay out on initial data ready
   useEffect(() => {
@@ -210,9 +216,10 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   const homeCallbacks = useMemo(() => ({
     onNavigateHistory: navigateToHistory,
     onNavigateSettings: navigateToSettings,
+    onDataChange: onDataChange || (() => {}),
     globalData,
     skipInitialLoading: preloadedScreens.current.has('home') && globalData.isDataReady,
-  }), [navigateToHistory, navigateToSettings, globalData]);
+  }), [navigateToHistory, navigateToSettings, onDataChange, globalData]);
   
   const analyticsCallbacks = useMemo(() => ({
     onNavigateHome: navigateToHome,

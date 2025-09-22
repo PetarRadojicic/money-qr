@@ -33,11 +33,13 @@ import { updateCurrencyRates, areRatesFresh } from '../utils/currencyService';
 interface HomeScreenProps {
   onNavigateHistory: () => void;
   onNavigateSettings: () => void;
+  onDataChange?: () => void;
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ 
   onNavigateHistory, 
-  onNavigateSettings 
+  onNavigateSettings,
+  onDataChange
 }) => {
   // State management
   const [currentMonthKey, setCurrentMonthKey] = useState(getCurrentMonthKey());
@@ -112,6 +114,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       // Load categories after other data is set
       const categories = await createExpenseCategories(monthlyData.categories);
       setExpenseCategories(categories);
+      
+      // Notify NavigationManager that data has changed
+      onDataChange?.();
       
       // Only fetch exchange rates if they're not fresh (non-blocking)
       if (!areRatesFresh()) {
