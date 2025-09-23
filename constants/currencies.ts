@@ -7,6 +7,7 @@ export interface Currency {
 
 export const CURRENCIES: Currency[] = [
   { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 },
+  { code: 'RSD', name: 'Serbian Dinar', symbol: 'RSD', rate: 108.0 },
   { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 },
   { code: 'GBP', name: 'British Pound', symbol: '£', rate: 0.73 },
   { code: 'JPY', name: 'Japanese Yen', symbol: '¥', rate: 110.0 },
@@ -65,6 +66,9 @@ export const formatCurrency = (amount: number, currencyCode: string): string => 
   const formattedAmount = amount.toFixed(decimalPlaces);
   
   // Format with proper symbol placement
+  if (currencyCode === 'RSD') {
+    return `${formattedAmount} RSD`;
+  }
   if (currency.symbol === '$' && currencyCode !== 'USD') {
     return `${currency.symbol}${formattedAmount}`;
   } else if (currency.symbol === '¥' && currencyCode === 'JPY') {
