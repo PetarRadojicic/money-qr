@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { categoryIcons, getAllCategories } from '../constants/categoryIcons';
 import { CustomCategory } from '../types';
 
@@ -81,13 +81,13 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
       color: selectedIcon.name === icon.name ? '#2563eb' : '#6b7280',
     };
 
+    const iconName = icon.name as any;
+
     switch (icon.library) {
       case 'Ionicons':
-        return <Ionicons name={icon.name as any} {...iconProps} />;
+        return <Ionicons name={iconName} {...iconProps} />;
       case 'MaterialIcons':
-        return <MaterialIcons name={icon.name as any} {...iconProps} />;
-      case 'FontAwesome5':
-        return <FontAwesome5 name={icon.name as any} {...iconProps} />;
+        return <MaterialIcons name={iconName} {...iconProps} />;
       default:
         return null;
     }

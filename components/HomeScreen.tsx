@@ -30,7 +30,7 @@ import {
 } from '../utils/dataManager';
 import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
-import { updateCurrencyRates, areRatesFresh } from '../utils/currencyService';
+import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/currencyService';
 import { WebView } from 'react-native-webview';
 
 interface HomeScreenProps {
@@ -454,7 +454,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     let amountToSave = scannedReceiptData.amount;
     try {
       if (scannedReceiptData.currency && scannedReceiptData.currency !== selectedCurrency) {
-        const { convertAmount } = await import('../utils/currencyService');
         amountToSave = await convertAmount(scannedReceiptData.amount, scannedReceiptData.currency, selectedCurrency);
       }
     } catch (e) {
