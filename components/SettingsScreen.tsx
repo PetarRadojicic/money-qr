@@ -11,7 +11,9 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { resetAppData, getSelectedCurrency } from '../utils/dataManager';
 import { getCurrencyByCode, formatCurrency } from '../constants/currencies';
 import CurrencyModal from './CurrencyModal';
+import LanguageModal from './LanguageModal';
 import ExchangeRateStatus from './ExchangeRateStatus';
+import { useTranslation, Language } from '../contexts/TranslationContext';
 
 interface SettingsScreenProps {
   onNavigateHome: () => void;
@@ -26,8 +28,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onDataReset, 
   onCurrencyChange
 }) => {
+  const { t, language, setLanguage } = useTranslation();
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   useEffect(() => {
     loadCurrentCurrency();
@@ -42,6 +46,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     setShowCurrencyModal(true);
   };
 
+  const handleLanguagePress = () => {
+    setShowLanguageModal(true);
+  };
+
+  const getLanguageDisplayName = (lang: Language): string => {
+    switch (lang) {
+      case 'en':
+        return 'English';
+      case 'sr':
+        return 'Srpski';
+      default:
+        return 'English';
+    }
+  };
+
   const handleCurrencyChange = () => {
     loadCurrentCurrency();
     onCurrencyChange();
@@ -49,25 +68,25 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const handleResetApp = () => {
     Alert.alert(
-      'Reset App',
-      'Are you sure you want to reset the app?\n\nThis will delete:\n• All expenses and income\n• All transaction history\n• All custom categories\n• All modified categories\n\nThis action cannot be undone!',
+      t('resetApp'),
+      t('resetAppMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: 'Reset',
+          text: t('resetApp'),
           style: 'destructive',
           onPress: async () => {
             try {
               await resetAppData();
               Alert.alert(
                 'App Reset Complete',
-                'All data has been cleared successfully. The app has been restored to its default state.',
+                t('resetAppCompleteMessage'),
                 [
                   {
-                    text: 'OK',
+                    text: t('ok'),
                     onPress: () => {
                       onDataReset();
                       onNavigateHome();
@@ -76,7 +95,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 ]
               );
             } catch (error) {
-              Alert.alert('Error', 'Failed to reset the app. Please try again.');
+              Alert.alert(t('error'), 'Failed to reset the app. Please try again.');
               console.error('Reset error:', error);
             }
           },
@@ -140,7 +159,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <View className="flex-row items-center justify-between">
           <TouchableOpacity onPress={onNavigateHome} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="#374151" />
-            <Text className="text-lg font-semibold text-gray-900 ml-2">Settings</Text>
+            <Text className="text-lg font-semibold text-gray-900 ml-2">{t('settings')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -148,16 +167,29 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Content */}
       <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
 
+        {/* Language Section */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('language')}</Text>
+          
+          <SettingsItem
+            icon="language"
+            iconLibrary="Ionicons"
+            title={t('language')}
+            subtitle={getLanguageDisplayName(language)}
+            onPress={handleLanguagePress}
+          />
+        </View>
+
         {/* Currency Section */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Currency</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('currency')}</Text>
           
           <ExchangeRateStatus onRatesUpdated={handleCurrencyChange} />
           
           <SettingsItem
             icon="cash"
             iconLibrary="Ionicons"
-            title="Currency"
+            title={t('currency')}
             subtitle={`${getCurrencyByCode(selectedCurrency).name} (${formatCurrency(100, selectedCurrency)})`}
             onPress={handleCurrencyPress}
           />
@@ -165,13 +197,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Reset App Section */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Reset App</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('resetApp')}</Text>
           
           <SettingsItem
             icon="refresh"
             iconLibrary="Ionicons"
-            title="Reset App"
-            subtitle="Clear all data and restore default settings"
+            title={t('resetApp')}
+            subtitle={t('clearAllData')}
             onPress={handleResetApp}
             isDestructive={true}
           />
@@ -184,6 +216,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         isVisible={showCurrencyModal}
         onClose={() => setShowCurrencyModal(false)}
         onCurrencyChange={handleCurrencyChange}
+      />
+
+      {/* Language Modal */}
+      <LanguageModal
+        isVisible={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
       />
     </>
   );

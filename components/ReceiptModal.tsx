@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { formatCurrency } from '../constants/currencies';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface ReceiptModalProps {
   isVisible: boolean;
@@ -32,6 +33,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
   categories,
   currency,
 }) => {
+  const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const modalMaxHeight = Math.round(Dimensions.get('window').height * 0.8);
   const headerHeight = 72; // approx header + border
@@ -46,7 +48,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   const handleConfirm = () => {
     if (!selectedCategoryId) {
-      Alert.alert('Select Category', 'Please select a spending category for this receipt.');
+      Alert.alert(t('selectCategory'), t('selectCategoryMessage'));
       return;
     }
 
@@ -88,7 +90,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
         <View className="bg-white rounded-2xl w-full" style={{ maxHeight: modalMaxHeight }}>
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
-            <Text className="text-xl font-bold text-gray-900">Receipt Scanned</Text>
+            <Text className="text-xl font-bold text-gray-900">{t('receiptDetails')}</Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={24} color="#6b7280" />
             </TouchableOpacity>
@@ -98,12 +100,12 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
             {/* Receipt Amount */}
             <View className="p-6 border-b border-gray-200">
               <View className="bg-green-50 rounded-xl p-4 items-center">
-                <Text className="text-gray-600 text-sm">Receipt Amount</Text>
+                <Text className="text-gray-600 text-sm">{t('scannedAmount')}</Text>
                 <Text className="text-green-600 text-3xl font-bold mt-1">
                   {formatCurrency(Number.isFinite(receiptAmount) ? receiptAmount : 0, currency)}
                 </Text>
                 <Text className="text-gray-500 text-xs mt-1">
-                  This amount cannot be changed
+                  {t('amountCannotBeChanged')}
                 </Text>
               </View>
             </View>
@@ -111,7 +113,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
             {/* Category Selection */}
             <View className="p-6">
               <Text className="text-lg font-semibold text-gray-900 mb-4">
-                Select Spending Category
+                {t('selectCategoryForReceipt')}
               </Text>
               
               {/* Categories Grid */}
@@ -154,7 +156,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 onPress={onAddNewCategory}
               >
                 <Ionicons name="add-circle-outline" size={24} color="#6b7280" />
-                <Text className="text-gray-600 font-medium mt-2">Add New Category</Text>
+                <Text className="text-gray-600 font-medium mt-2">{t('addNewCategory')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -166,7 +168,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 className="flex-1 bg-gray-200 rounded-xl py-4"
                 onPress={handleClose}
               >
-                <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
+                <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -179,7 +181,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <Text className={`font-semibold text-center ${
                   selectedCategoryId ? 'text-white' : 'text-gray-500'
                 }`}>
-                  Add Expense
+                  {t('addExpense')}
                 </Text>
               </TouchableOpacity>
             </View>

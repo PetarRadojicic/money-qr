@@ -11,6 +11,7 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Transaction } from '../types';
 import { loadTransactionHistory, revertTransaction } from '../utils/dataManager';
 import { formatCurrency } from '../constants/currencies';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface HistoryScreenProps {
   onNavigateHome: () => void;
@@ -25,6 +26,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
   onDataChange, 
   currency = 'USD'
 }) => {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -49,32 +51,32 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
 
   const handleRevertTransaction = async (transaction: Transaction) => {
     if (transaction.isReverted) {
-      Alert.alert('Already Reverted', 'This transaction has already been reverted.');
+      Alert.alert(t('alreadyReverted'), t('alreadyRevertedMessage'));
       return;
     }
 
     const transactionType = transaction.type === 'income' ? 'income' : 'expense';
-    const actionText = transactionType === 'income' ? 'remove this income' : 'remove this expense';
+    const actionText = transactionType === 'income' ? t('removeThisIncome') : t('removeThisExpense');
 
     Alert.alert(
-      'Revert Transaction',
-      `Are you sure you want to ${actionText}?\n\n${transaction.categoryName}: ${formatCurrency(transaction.amount, currency)}\nDate: ${formatDate(transaction.date)}`,
+      t('revertTransaction'),
+      `${t('areYouSureRevert')} ${actionText}?\n\n${transaction.categoryName}: ${formatCurrency(transaction.amount, currency)}\nDate: ${formatDate(transaction.date)}`,
       [
         {
-          text: 'Cancel',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: 'Revert',
+          text: t('revert'),
           style: 'destructive',
           onPress: async () => {
             const success = await revertTransaction(transaction.id);
             if (success) {
-              Alert.alert('Success', 'Transaction has been reverted.');
+              Alert.alert(t('success'), t('transactionReverted'));
               await loadTransactions();
               onDataChange(); // Refresh home screen data
             } else {
-              Alert.alert('Error', 'Failed to revert transaction.');
+              Alert.alert(t('error'), t('failedToRevert'));
             }
           },
         },
@@ -130,7 +132,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
         <View className="flex-row items-center justify-between">
           <TouchableOpacity onPress={onNavigateHome} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="#374151" />
-            <Text className="text-lg font-semibold text-gray-900 ml-2">Transaction History</Text>
+            <Text className="text-lg font-semibold text-gray-900 ml-2">{t('transactionHistory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleRefresh}>
             <Ionicons name="refresh" size={24} color="#6b7280" />
@@ -149,15 +151,15 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
         {transactions.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
             <Ionicons name="receipt-outline" size={64} color="#d1d5db" />
-            <Text className="text-gray-500 text-lg font-medium mt-4">No Transactions Yet</Text>
+            <Text className="text-gray-500 text-lg font-medium mt-4">{t('noTransactionsYet')}</Text>
             <Text className="text-gray-400 text-center mt-2 px-8">
-              Your transaction history will appear here once you start adding expenses or income.
+              {t('transactionHistoryDescription')}
             </Text>
           </View>
         ) : (
           <View className="px-6 py-4">
             <Text className="text-gray-600 text-sm mb-4">
-              {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} found
+              {transactions.length} {transactions.length !== 1 ? t('transactions') : t('transaction')} {t('transactionsFound')}
             </Text>
             
             {transactions.map((transaction) => (
@@ -195,7 +197,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
                       {transaction.isReverted && (
                         <View className="mt-2">
                           <Text className="text-red-500 text-sm font-medium">
-                            Reverted
+                            {t('reverted')}
                           </Text>
                         </View>
                       )}

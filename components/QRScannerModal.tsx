@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface QRScannerModalProps {
   isVisible: boolean;
@@ -21,6 +22,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
   onClose,
   onQRScanned,
 }) => {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
@@ -57,23 +59,23 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
             <View className="items-center">
               <Ionicons name="camera" size={48} color="#6b7280" />
               <Text className="text-lg font-bold text-gray-900 mt-4 text-center">
-                Camera Permission Required
+                {t('cameraPermissionRequired')}
               </Text>
               <Text className="text-gray-600 mt-2 text-center">
-                We need camera access to scan QR codes on receipts
+                {t('cameraAccessNeeded')}
               </Text>
               <View className="flex-row space-x-3 mt-6 w-full">
                 <TouchableOpacity
                   className="flex-1 bg-gray-200 rounded-xl py-3"
                   onPress={onClose}
                 >
-                  <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
+                  <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="flex-1 bg-blue-600 rounded-xl py-3"
                   onPress={requestPermission}
                 >
-                  <Text className="text-white font-semibold text-center">Allow Camera</Text>
+                  <Text className="text-white font-semibold text-center">{t('allowCamera')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -94,13 +96,13 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
         {/* Header */}
         <View className="absolute top-0 left-0 right-0 z-10 bg-black/50 pt-12 pb-4 px-6">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white text-lg font-semibold">Scan Receipt QR Code</Text>
+            <Text className="text-white text-lg font-semibold">{t('scanReceiptQRCode')}</Text>
             <TouchableOpacity onPress={onClose} className="p-2">
               <Ionicons name="close" size={24} color="white" />
             </TouchableOpacity>
           </View>
           <Text className="text-white/80 text-sm mt-2">
-            Position the QR code within the frame
+            {t('positionQRCode')}
           </Text>
         </View>
 
@@ -127,7 +129,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
         {/* Instructions */}
         <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-6">
           <Text className="text-white text-center text-sm">
-            Point your camera at the QR code on your receipt
+            {t('pointCameraAtQR')}
           </Text>
         </View>
       </View>

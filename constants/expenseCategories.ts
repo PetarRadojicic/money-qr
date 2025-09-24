@@ -4,6 +4,8 @@ import {
   getModifiedCategories, 
   getHiddenCategories 
 } from '../utils/dataManager';
+import { getTranslatedCategoryName } from '../utils/translationUtils';
+import { Translations } from '../contexts/TranslationContext';
 
 // Base category definitions (without amounts)
 export const categoryDefinitions = [
@@ -90,7 +92,7 @@ export const categoryDefinitions = [
 ];
 
 // Helper function to create expense categories with amounts
-export const createExpenseCategories = async (categoryAmounts: { [key: string]: number }): Promise<ExpenseCategoryData[]> => {
+export const createExpenseCategories = async (categoryAmounts: { [key: string]: number }, translations?: Translations): Promise<ExpenseCategoryData[]> => {
   // Load all category modifications
   const [customCategories, modifiedCategories, hiddenCategories] = await Promise.all([
     loadCustomCategories(),
@@ -108,12 +110,14 @@ export const createExpenseCategories = async (categoryAmounts: { [key: string]: 
         return {
           ...category,
           ...modifiedCategory,
+          name: translations ? getTranslatedCategoryName(category.id, modifiedCategory.name || category.name, translations) : (modifiedCategory.name || category.name),
           amount: categoryAmounts[category.id] || 0,
         };
       }
       // Use original default category
       return {
         ...category,
+        name: translations ? getTranslatedCategoryName(category.id, category.name, translations) : category.name,
         amount: categoryAmounts[category.id] || 0,
       };
     });
@@ -134,7 +138,7 @@ export const createExpenseCategories = async (categoryAmounts: { [key: string]: 
   // Add the "Add" button
   categories.push({
     id: 'add',
-    name: 'Add',
+    name: translations ? getTranslatedCategoryName('add', 'Add', translations) : 'Add',
     amount: 0,
     icon: {
       library: 'Ionicons' as const,

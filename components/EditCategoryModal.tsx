@@ -11,6 +11,7 @@ import {
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { categoryIcons, getAllCategories } from '../constants/categoryIcons';
 import { CustomCategory } from '../types';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface EditCategoryModalProps {
   isVisible: boolean;
@@ -27,6 +28,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   onDelete,
   category,
 }) => {
+  const { t } = useTranslation();
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(categoryIcons[0]);
   const [selectedCategory, setSelectedCategory] = useState('Food');
@@ -45,7 +47,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
   const handleConfirm = () => {
     if (!categoryName.trim() || !category) {
-      Alert.alert('Invalid Name', 'Please enter a category name.');
+      Alert.alert(t('invalidName'), t('invalidNameMessage'));
       return;
     }
 
@@ -111,7 +113,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <Text className="text-xl font-bold text-gray-900">
-              Edit Category
+              {t('editCategory')}
             </Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={24} color="#6b7280" />
@@ -120,10 +122,10 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
           {/* Category Name Input */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">Category Name</Text>
+            <Text className="text-gray-700 font-medium mb-2">{t('categoryName')}</Text>
             <TextInput
               className="border border-gray-300 rounded-xl px-4 py-3 text-lg text-gray-900"
-              placeholder="Enter category name"
+              placeholder={t('pleaseEnterCategoryName')}
               value={categoryName}
               onChangeText={setCategoryName}
               autoFocus={true}
@@ -132,7 +134,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
           {/* Category Filter */}
           <View className="mb-4">
-            <Text className="text-gray-700 font-medium mb-2">Icon Category</Text>
+            <Text className="text-gray-700 font-medium mb-2">{t('icons')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row space-x-2">
                 <TouchableOpacity
@@ -144,7 +146,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
                   <Text className={`text-sm font-medium ${
                     selectedCategory === 'All' ? 'text-blue-600' : 'text-gray-600'
                   }`}>
-                    All
+                    {t('all')}
                   </Text>
                 </TouchableOpacity>
                 {getAllCategories().map(category => (
@@ -168,7 +170,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
           {/* Icon Selection */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">Choose Icon</Text>
+            <Text className="text-gray-700 font-medium mb-2">{t('selectIcon')}</Text>
             <ScrollView className="max-h-48" showsVerticalScrollIndicator={false}>
               <View className="flex-row flex-wrap justify-between">
                 {filteredIcons.map((icon, index) => (
@@ -194,21 +196,21 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
               className="flex-1 bg-red-600 rounded-xl py-4"
               onPress={handleDelete}
             >
-              <Text className="text-white font-semibold text-center">Delete</Text>
+              <Text className="text-white font-semibold text-center">{t('delete')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               className="flex-1 bg-gray-200 rounded-xl py-4"
               onPress={handleClose}
             >
-              <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
+              <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               className="flex-1 bg-blue-600 rounded-xl py-4"
               onPress={handleConfirm}
             >
-              <Text className="text-white font-semibold text-center">Save</Text>
+              <Text className="text-white font-semibold text-center">{t('save')}</Text>
             </TouchableOpacity>
           </View>
         </View>

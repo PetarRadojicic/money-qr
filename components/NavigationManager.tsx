@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from '../contexts/TranslationContext';
 
 // Import all screen components
 import HomeScreen from './HomeScreen';
@@ -336,6 +337,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
   currentScreen, 
   onNavigate 
 }) => {
+  const { t } = useTranslation();
   const isHomeActive = currentScreen === 'home';
   const isAnalyticsActive = currentScreen === 'analytics';
   const isHistoryActive = currentScreen === 'history';
@@ -358,7 +360,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           <Text className={`text-xs mt-1 ${
             isHomeActive ? 'text-blue-600 font-medium' : 'text-gray-500'
           }`}>
-            Home
+            {t('home')}
           </Text>
         </TouchableOpacity>
         
@@ -376,7 +378,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           <Text className={`text-xs mt-1 ${
             isAnalyticsActive ? 'text-blue-600 font-medium' : 'text-gray-500'
           }`}>
-            Analytics
+            {t('analytics')}
           </Text>
         </TouchableOpacity>
         
@@ -394,7 +396,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           <Text className={`text-xs mt-1 ${
             isHistoryActive ? 'text-blue-600 font-medium' : 'text-gray-500'
           }`}>
-            History
+            {t('history')}
           </Text>
         </TouchableOpacity>
         
@@ -412,7 +414,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           <Text className={`text-xs mt-1 ${
             isSettingsActive ? 'text-blue-600 font-medium' : 'text-gray-500'
           }`}>
-            Settings
+            {t('settings')}
           </Text>
         </TouchableOpacity>
       </View>

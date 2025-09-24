@@ -7,12 +7,14 @@ import {
   getCachedRates,
   getExchangeRateStatus 
 } from '../utils/currencyService';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface ExchangeRateStatusProps {
   onRatesUpdated?: () => void;
 }
 
 const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated }) => {
+  const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [ratesCount, setRatesCount] = useState(0);
@@ -44,11 +46,11 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
       if (success) {
         const status = getExchangeRateStatus();
         Alert.alert(
-          'Exchange Rates Updated',
+          t('ratesUpdatedSuccessfully'),
           `Currency exchange rates have been updated successfully!\n\n📊 ${status.ratesCount} currencies loaded\n⏰ Fresh for 60 minutes`,
           [
             {
-              text: 'OK',
+              text: t('ok'),
               onPress: () => {
                 checkRatesStatus();
                 onRatesUpdated?.();
@@ -58,11 +60,11 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
         );
       } else {
         Alert.alert(
-          'Update Failed',
+          t('failedToUpdateRates'),
           'Failed to update exchange rates. Using cached or fallback rates.\n\nThis might be due to:\n• Network connectivity issues\n• API rate limits\n• Server maintenance',
           [
             {
-              text: 'OK',
+              text: t('ok'),
               onPress: checkRatesStatus,
             },
           ]
@@ -70,11 +72,11 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
       }
     } catch (error) {
       Alert.alert(
-        'Error',
+        t('error'),
         'An error occurred while updating exchange rates.',
         [
           {
-            text: 'OK',
+            text: t('ok'),
             onPress: checkRatesStatus,
           },
         ]
@@ -104,7 +106,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
           
           <View className="flex-1">
             <Text className="font-semibold text-gray-900 text-base">
-              Exchange Rates
+              {t('exchangeRates')}
             </Text>
             <View className="flex-row items-center mt-1">
               <Ionicons 

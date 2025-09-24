@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface AddBalanceModalProps {
   isVisible: boolean;
@@ -20,13 +21,14 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState('');
 
   const handleConfirm = () => {
     const numericAmount = parseFloat(amount);
     
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid amount greater than 0.');
+      Alert.alert(t('invalidAmount'), t('invalidAmountMessage'));
       return;
     }
 
@@ -52,7 +54,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <Text className="text-xl font-bold text-gray-900">
-              Add to Balance
+              {t('addToBalance')}
             </Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={24} color="#6b7280" />
@@ -61,7 +63,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
 
           {/* Amount Input */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">Amount to Add</Text>
+            <Text className="text-gray-700 font-medium mb-2">{t('amount')}</Text>
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3">
               <Text className="text-gray-600 text-lg mr-2">$</Text>
               <TextInput
@@ -81,14 +83,14 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
               className="flex-1 bg-gray-200 rounded-xl py-4"
               onPress={handleClose}
             >
-              <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
+              <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               className="flex-1 bg-green-600 rounded-xl py-4"
               onPress={handleConfirm}
             >
-              <Text className="text-white font-semibold text-center">Add</Text>
+              <Text className="text-white font-semibold text-center">{t('add')}</Text>
             </TouchableOpacity>
           </View>
         </View>

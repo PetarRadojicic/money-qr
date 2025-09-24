@@ -11,6 +11,7 @@ import {
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { categoryIcons, getAllCategories } from '../constants/categoryIcons';
 import { CustomCategory } from '../types';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface AddCategoryModalProps {
   isVisible: boolean;
@@ -23,13 +24,14 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(categoryIcons[0]);
   const [selectedCategory, setSelectedCategory] = useState('Food');
 
   const handleConfirm = () => {
     if (!categoryName.trim()) {
-      Alert.alert('Invalid Name', 'Please enter a category name.');
+      Alert.alert(t('invalidName'), t('invalidNameMessage'));
       return;
     }
 
@@ -107,7 +109,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <Text className="text-xl font-bold text-gray-900">
-              Add New Category
+              {t('addNewCategory')}
             </Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={24} color="#6b7280" />
@@ -116,10 +118,10 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 
           {/* Category Name Input */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">Category Name</Text>
+            <Text className="text-gray-700 font-medium mb-2">{t('categoryName')}</Text>
             <TextInput
               className="border border-gray-300 rounded-xl px-4 py-3 text-lg text-gray-900"
-              placeholder="Enter category name"
+              placeholder={t('pleaseEnterCategoryName')}
               value={categoryName}
               onChangeText={setCategoryName}
               autoFocus={true}

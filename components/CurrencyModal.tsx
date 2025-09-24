@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { CURRENCIES, Currency, getCurrencyByCode, formatCurrency } from '../constants/currencies';
 import { getSelectedCurrency, convertAllDataToCurrency } from '../utils/dataManager';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface CurrencyModalProps {
   isVisible: boolean;
@@ -18,6 +19,7 @@ interface CurrencyModalProps {
 }
 
 const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCurrencyChange }) => {
+  const { t } = useTranslation();
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isConverting, setIsConverting] = useState(false);
 
@@ -44,11 +46,14 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
       await convertAllDataToCurrency(currency.code);
       
       Alert.alert(
-        'Currency Changed',
-        `All your data has been converted to ${currency.name} (${currency.symbol}).\n\nExample: ${formatCurrency(100, currency.code)}`,
+        t('currencyChanged'),
+        t('currencyConvertedMessage')
+          .replace('{currencyName}', currency.name)
+          .replace('{currencySymbol}', currency.symbol)
+          .replace('{example}', formatCurrency(100, currency.code)),
         [
           {
-            text: 'OK',
+            text: t('ok'),
             onPress: () => {
               onCurrencyChange();
               onClose();
@@ -57,7 +62,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
         ]
       );
     } catch (error) {
-      Alert.alert('Error', 'Failed to convert currency. Please try again.');
+      Alert.alert(t('error'), 'Failed to convert currency. Please try again.');
       console.error('Currency conversion error:', error);
     } finally {
       setIsConverting(false);
@@ -121,7 +126,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#374151" />
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-gray-900">Select Currency</Text>
+            <Text className="text-lg font-semibold text-gray-900">{t('selectCurrency')}</Text>
             <View className="w-6" />
           </View>
         </View>
@@ -133,19 +138,19 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
               <View className="flex-row items-center">
                 <Ionicons name="sync" size={20} color="#2563eb" />
                 <Text className="text-blue-600 font-medium ml-2">
-                  Converting all data to new currency...
+                  {t('convertingCurrency')}
                 </Text>
               </View>
             </View>
           )}
 
           <Text className="text-gray-600 text-sm mb-4">
-            Choose your preferred currency. All existing data will be automatically converted.
+            {t('choosePreferredCurrency')}
           </Text>
 
           {/* Popular Currencies */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">Popular</Text>
+            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('popularCurrencies')}</Text>
             {CURRENCIES.slice(0, 8).map((currency) => (
               <CurrencyItem key={currency.code} currency={currency} />
             ))}
@@ -153,7 +158,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
 
           {/* All Currencies */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">All Currencies</Text>
+            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('allCurrencies')}</Text>
             {CURRENCIES.slice(8).map((currency) => (
               <CurrencyItem key={currency.code} currency={currency} />
             ))}

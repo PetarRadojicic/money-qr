@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   showBackButton = false,
   onBackPress,
 }) => {
+  const { t } = useTranslation();
   const isHomeScreen = currentScreen === 'home';
   const isHistoryScreen = currentScreen === 'history';
   const isSettingsScreen = currentScreen === 'settings';
@@ -67,7 +69,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             <Text className={`text-xs mt-1 ${
               isHomeScreen ? 'text-blue-600 font-medium' : 'text-gray-500'
             }`}>
-              Home
+              {t('home')}
             </Text>
           </TouchableOpacity>
           
@@ -84,7 +86,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             <Text className={`text-xs mt-1 ${
               isHistoryScreen ? 'text-blue-600 font-medium' : 'text-gray-500'
             }`}>
-              History
+              {t('history')}
             </Text>
           </TouchableOpacity>
           
@@ -101,7 +103,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             <Text className={`text-xs mt-1 ${
               isSettingsScreen ? 'text-blue-600 font-medium' : 'text-gray-500'
             }`}>
-              Settings
+              {t('settings')}
             </Text>
           </TouchableOpacity>
         </View>

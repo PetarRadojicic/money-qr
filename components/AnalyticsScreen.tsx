@@ -17,6 +17,8 @@ import {
   analyzeCategoryTrends, 
   calculateYearOverYearComparison 
 } from '../utils/analyticsUtils';
+import { useTranslation } from '../contexts/TranslationContext';
+import { getTranslatedMonthName } from '../utils/translationUtils';
 
 interface GlobalData {
   appData: any;
@@ -73,6 +75,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   globalData,
   skipInitialLoading = false,
 }) => {
+  const { t, translations } = useTranslation();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>(
     globalData?.selectedCurrency || 'USD'
@@ -196,7 +199,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
       return {
         monthKey,
-        monthName: getMonthName(monthKey),
+        monthName: getTranslatedMonthName(monthKey, translations),
         income: monthData.income,
         expenses: monthData.expenses,
         balance,
@@ -294,7 +297,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     return (
       <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          Monthly Income vs Expenses
+          {t('monthlyIncomeVsExpenses')}
         </Text>
         
         <View className="flex-row items-end justify-between h-40 mb-2">
@@ -325,11 +328,11 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         <View className="flex-row justify-center space-x-4">
           <View className="flex-row items-center">
             <View className="w-3 h-3 bg-green-500 rounded mr-1" />
-            <Text className="text-xs text-gray-600">Income</Text>
+            <Text className="text-xs text-gray-600">{t('income')}</Text>
           </View>
           <View className="flex-row items-center">
             <View className="w-3 h-3 bg-red-500 rounded mr-1" />
-            <Text className="text-xs text-gray-600">Expenses</Text>
+            <Text className="text-xs text-gray-600">{t('expenses')}</Text>
           </View>
         </View>
       </View>
@@ -345,7 +348,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     return (
       <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          Top Spending Categories
+          {t('topSpendingCategories')}
         </Text>
         
         {topCategories.map((category, index) => {
@@ -370,10 +373,10 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               
               <View className="flex-row justify-between">
                 <Text className="text-xs text-gray-500">
-                  {category.percentage.toFixed(1)}% of total
+                  {category.percentage.toFixed(1)}% {t('ofTotal')}
                 </Text>
                 <Text className="text-xs text-gray-500">
-                  {category.transactionCount} transactions
+                  {category.transactionCount} {t('transactions')}
                 </Text>
               </View>
             </View>
@@ -401,7 +404,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   if (!analyticsData) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-gray-500 text-lg">No data available for analytics</Text>
+        <Text className="text-gray-500 text-lg">{t('noDataAvailable')}</Text>
       </View>
     );
   }
@@ -417,7 +420,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     >
       {/* Header */}
       <View className="mx-6 mt-8 mb-4">
-        <Text className="text-2xl font-bold text-gray-900 text-center mb-2">Analytics</Text>
+        <Text className="text-2xl font-bold text-gray-900 text-center mb-2">{t('analytics')}</Text>
         
         {/* Time Range Selector */}
         <View className="flex-row justify-center space-x-3">
@@ -433,7 +436,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <Text className={`text-sm ${
               timeRange === 'all' ? 'text-white font-medium' : 'text-gray-600'
             }`}>
-              All Time
+              {t('allTime')}
             </Text>
           </TouchableOpacity>
           
@@ -448,8 +451,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                 timeRange === 'specific' ? 'text-white font-medium' : 'text-gray-600'
               }`}>
                 {timeRange === 'specific' && selectedMonths.length > 0 
-                  ? `${selectedMonths.length} Month${selectedMonths.length !== 1 ? 's' : ''}`
-                  : 'Select Months'
+                  ? `${selectedMonths.length} ${selectedMonths.length !== 1 ? t('selectMonths').toLowerCase() : t('selectMonths').toLowerCase().slice(0, -1)}`
+                  : t('selectMonths')
                 }
               </Text>
               <Ionicons 
@@ -467,44 +470,44 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       <View className="mx-6 mb-4">
         <View className="flex-row space-x-3">
           <View className="flex-1 bg-green-100 rounded-xl p-4">
-            <Text className="text-green-600 text-sm font-medium">Total Income</Text>
+            <Text className="text-green-600 text-sm font-medium">{t('totalIncome')}</Text>
             <Text className="text-green-800 text-xl font-bold">
               {formatCurrency(analyticsData.totalIncome, selectedCurrency)}
             </Text>
             <Text className="text-green-600 text-xs">
-              Avg: {formatCurrency(analyticsData.averageMonthlyIncome, selectedCurrency)}/mo
+              {t('avg')}: {formatCurrency(analyticsData.averageMonthlyIncome, selectedCurrency)}/mo
             </Text>
           </View>
           
           <View className="flex-1 bg-red-100 rounded-xl p-4">
-            <Text className="text-red-600 text-sm font-medium">Total Expenses</Text>
+            <Text className="text-red-600 text-sm font-medium">{t('totalExpenses')}</Text>
             <Text className="text-red-800 text-xl font-bold">
               {formatCurrency(analyticsData.totalExpenses, selectedCurrency)}
             </Text>
             <Text className="text-red-600 text-xs">
-              Avg: {formatCurrency(analyticsData.averageMonthlyExpenses, selectedCurrency)}/mo
+              {t('avg')}: {formatCurrency(analyticsData.averageMonthlyExpenses, selectedCurrency)}/mo
             </Text>
           </View>
         </View>
         
         <View className="flex-row space-x-3 mt-3">
           <View className="flex-1 bg-blue-100 rounded-xl p-4">
-            <Text className="text-blue-600 text-sm font-medium">Net Savings</Text>
+            <Text className="text-blue-600 text-sm font-medium">{t('netSavings')}</Text>
             <Text className="text-blue-800 text-xl font-bold">
               {formatCurrency(analyticsData.totalBalance, selectedCurrency)}
             </Text>
             <Text className="text-blue-600 text-xs">
-              Rate: {analyticsData.savingsRate.toFixed(1)}%
+              {t('rate')}: {analyticsData.savingsRate.toFixed(1)}%
             </Text>
           </View>
           
           <View className="flex-1 bg-purple-100 rounded-xl p-4">
-            <Text className="text-purple-600 text-sm font-medium">Months Tracked</Text>
+            <Text className="text-purple-600 text-sm font-medium">{t('monthsTracked')}</Text>
             <Text className="text-purple-800 text-xl font-bold">
               {analyticsData.recentMonths}
             </Text>
             <Text className="text-purple-600 text-xs">
-              Categories: {analyticsData.categoryAnalytics.length}
+              {t('categories')}: {analyticsData.categoryAnalytics.length}
             </Text>
           </View>
         </View>
@@ -520,19 +523,19 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       {/* Insights */}
       <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          Key Insights
+          {t('keyInsights')}
         </Text>
         
         {analyticsData.topSpendingCategory && (
           <View className="mb-3 p-3 bg-orange-50 rounded-lg">
             <View className="flex-row items-center mb-1">
               <Ionicons name="trending-up" size={16} color="#ea580c" />
-              <Text className="text-orange-700 font-medium ml-2">Top Spending Category</Text>
+              <Text className="text-orange-700 font-medium ml-2">{t('topSpendingCategory')}</Text>
             </View>
             <Text className="text-gray-700">
-              You spent {formatCurrency(analyticsData.topSpendingCategory.totalAmount, selectedCurrency)} on{' '}
+              {t('youSpent')} {formatCurrency(analyticsData.topSpendingCategory.totalAmount, selectedCurrency)} {t('on')}{' '}
               <Text className="font-semibold">{analyticsData.topSpendingCategory.name}</Text>
-              {' '}({analyticsData.topSpendingCategory.percentage.toFixed(1)}% of total expenses)
+              {' '}({analyticsData.topSpendingCategory.percentage.toFixed(1)}% {t('ofTotal')} {t('expenses').toLowerCase()})
             </Text>
           </View>
         )}
@@ -541,11 +544,11 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           <View className="mb-3 p-3 bg-blue-50 rounded-lg">
             <View className="flex-row items-center mb-1">
               <Ionicons name="calendar" size={16} color="#2563eb" />
-              <Text className="text-blue-700 font-medium ml-2">Most Active Month</Text>
+              <Text className="text-blue-700 font-medium ml-2">{t('mostActiveMonth')}</Text>
             </View>
             <Text className="text-gray-700">
-              <Text className="font-semibold">{analyticsData.mostActiveMonth.monthName}</Text> was your most expensive month with{' '}
-              {formatCurrency(analyticsData.mostActiveMonth.expenses, selectedCurrency)} in expenses
+              <Text className="font-semibold">{analyticsData.mostActiveMonth.monthName}</Text> {t('wasYourMostExpensive')}{' '}
+              {formatCurrency(analyticsData.mostActiveMonth.expenses, selectedCurrency)} {t('inExpenses')}
             </Text>
           </View>
         )}
@@ -553,13 +556,13 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         <View className="p-3 bg-green-50 rounded-lg">
           <View className="flex-row items-center mb-1">
             <Ionicons name="wallet" size={16} color="#059669" />
-            <Text className="text-green-700 font-medium ml-2">Savings Performance</Text>
+            <Text className="text-green-700 font-medium ml-2">{t('savingsPerformance')}</Text>
           </View>
           <Text className="text-gray-700">
-            Your savings rate is {analyticsData.savingsRate.toFixed(1)}%
-            {analyticsData.savingsRate > 20 ? ' - Excellent!' : 
-             analyticsData.savingsRate > 10 ? ' - Good work!' : 
-             ' - Consider reducing expenses'}
+            {t('yourSavingsRateIs')} {analyticsData.savingsRate.toFixed(1)}%
+            {analyticsData.savingsRate > 20 ? t('excellent') : 
+             analyticsData.savingsRate > 10 ? t('goodWork') : 
+             t('considerReducing')}
           </Text>
         </View>
       </View>
@@ -567,35 +570,35 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       {/* Quick Tips */}
       <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          💡 Quick Tips
+          {t('quickTips')}
         </Text>
         
         <View>
           <View className="flex-row items-start mb-3">
             <View className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3" />
             <Text className="text-gray-700 flex-1">
-              Track expenses daily for better insights and patterns
+              {t('trackExpensesDaily')}
             </Text>
           </View>
           
           <View className="flex-row items-start mb-3">
             <View className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3" />
             <Text className="text-gray-700 flex-1">
-              Aim to save at least 20% of your income each month
+              {t('aimToSave')}
             </Text>
           </View>
           
           <View className="flex-row items-start mb-3">
             <View className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3" />
             <Text className="text-gray-700 flex-1">
-              Review your spending patterns monthly to identify areas for improvement
+              {t('reviewSpending')}
             </Text>
           </View>
           
           <View className="flex-row items-start">
             <View className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3" />
             <Text className="text-gray-700 flex-1">
-              Use the history tab to analyze your transaction patterns
+              {t('useHistoryTab')}
             </Text>
           </View>
         </View>
@@ -637,6 +640,7 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
   onClose,
   onApply,
 }) => {
+  const { t, translations } = useTranslation();
   const [tempSelectedMonths, setTempSelectedMonths] = useState<string[]>(selectedMonths);
 
   useEffect(() => {
@@ -676,7 +680,7 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
         <View className="bg-white rounded-t-3xl max-h-96">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 pb-4 border-b border-gray-200">
-            <Text className="text-xl font-semibold text-gray-900">Select Months</Text>
+            <Text className="text-xl font-semibold text-gray-900">{t('selectMonths')}</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#6b7280" />
             </TouchableOpacity>
@@ -688,18 +692,18 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
               className="px-4 py-2 bg-blue-100 rounded-lg"
               onPress={selectAll}
             >
-              <Text className="text-blue-600 font-medium">Select All</Text>
+              <Text className="text-blue-600 font-medium">{t('selectAll')}</Text>
             </TouchableOpacity>
             
             <Text className="text-sm text-gray-500 self-center">
-              {tempSelectedMonths.length} of {availableMonths.length} selected
+              {tempSelectedMonths.length} {t('of')} {availableMonths.length} {t('selected')}
             </Text>
             
             <TouchableOpacity 
               className="px-4 py-2 bg-gray-100 rounded-lg"
               onPress={clearAll}
             >
-              <Text className="text-gray-600 font-medium">Clear All</Text>
+              <Text className="text-gray-600 font-medium">{t('clearAll')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -707,7 +711,7 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
           <ScrollView className="max-h-64 px-6 py-2">
             {availableMonths.map((monthKey) => {
               const isSelected = tempSelectedMonths.includes(monthKey);
-              const monthName = getMonthName(monthKey);
+              const monthName = getTranslatedMonthName(monthKey, translations);
               
               return (
                 <TouchableOpacity
@@ -736,7 +740,7 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
               className="flex-1 py-3 border border-gray-300 rounded-xl"
               onPress={onClose}
             >
-              <Text className="text-gray-600 font-medium text-center">Cancel</Text>
+              <Text className="text-gray-600 font-medium text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -753,7 +757,7 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
                   ? 'text-white' 
                   : 'text-gray-500'
               }`}>
-                Apply
+                {t('apply')}
               </Text>
             </TouchableOpacity>
           </View>

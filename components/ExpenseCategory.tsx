@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { formatCurrency } from '../constants/currencies';
+import { useTranslation } from '../contexts/TranslationContext';
 
 // Type definition for expense category data
 export interface ExpenseCategoryData {
@@ -30,6 +31,7 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({
   isEditMode = false,
   currency = 'USD'
 }) => {
+  const { t } = useTranslation();
   const renderIcon = () => {
     const iconProps = {
       size: 24,
@@ -76,7 +78,7 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({
         <Text className={amountStyle}>{formatCurrency(category.amount, currency)}</Text>
       )}
       {category.isAddButton && (
-        <Text className={amountStyle}>New Category</Text>
+        <Text className={amountStyle}>{t('newCategory')}</Text>
       )}
     </TouchableOpacity>
   );

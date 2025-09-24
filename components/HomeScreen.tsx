@@ -32,6 +32,8 @@ import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
 import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/currencyService';
 import { WebView } from 'react-native-webview';
+import { useTranslation } from '../contexts/TranslationContext';
+import { getTranslatedMonthName } from '../utils/translationUtils';
 
 interface HomeScreenProps {
   onNavigateHistory: () => void;
@@ -44,6 +46,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateSettings,
   onDataChange
 }) => {
+  const { t, translations } = useTranslation();
   // State management
   const [currentMonthKey, setCurrentMonthKey] = useState(getCurrentMonthKey());
   const [monthlyData, setMonthlyData] = useState<MonthlyData | null>(null);
@@ -97,6 +100,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   }, [currentMonthKey]);
 
+  // Reload categories when language changes
+  useEffect(() => {
+    if (hasInitialLoaded.current && monthlyData) {
+      const reloadCategories = async () => {
+        const categories = await createExpenseCategories(monthlyData.categories, translations);
+        setExpenseCategories(categories);
+      };
+      reloadCategories();
+    }
+  }, [translations, monthlyData]);
+
   // Watch for currency changes and refresh rates when currency changes
   useEffect(() => {
     const checkCurrencyChange = async () => {
@@ -129,7 +143,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       setTotalBalance(totalBalance);
       
       // Load categories after other data is set
-      const categories = await createExpenseCategories(monthlyData.categories);
+      const categories = await createExpenseCategories(monthlyData.categories, translations);
       setExpenseCategories(categories);
       
       // Notify NavigationManager that data has changed
@@ -153,7 +167,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const data = await getMonthlyData(currentMonthKey);
     setMonthlyData(data);
     // Load categories with amounts
-    const categories = await createExpenseCategories(data.categories);
+    const categories = await createExpenseCategories(data.categories, translations);
     setExpenseCategories(categories);
   };
 
@@ -215,15 +229,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const categoryAmount = monthlyData?.categories[categoryId] || 0;
 
     Alert.alert(
-      'Delete Category',
-      `Are you sure you want to delete "${category.name}"?\n\nThis category has ${formatCurrency(categoryAmount, selectedCurrency)} in expenses. This action cannot be undone and the expenses will be removed from your balance calculation.`,
+      t('deleteCategory'),
+      t('deleteCategoryMessage', { 
+        categoryName: category.name, 
+        amount: formatCurrency(categoryAmount, selectedCurrency) 
+      }),
       [
         {
-          text: 'Cancel',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             if (categoryId.startsWith('custom_')) {
@@ -256,7 +273,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         },
       ]
     );
-  }, [expenseCategories, monthlyData, selectedCurrency]);
+  }, [expenseCategories, monthlyData, selectedCurrency, t]);
 
   const handleExpenseConfirm = useCallback(async (amount: number) => {
     if (!modalState.categoryId || !monthlyData) return;
@@ -280,12 +297,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       categoryName,
       monthKey: currentMonthKey,
       date: new Date().toISOString(),
-      description: `Expense added to ${categoryName}`,
+      description: t('expenseAdded', { categoryName }),
     };
     await addTransaction(transaction);
     
     await loadAllData();
-  }, [modalState.categoryId, monthlyData, expenseCategories, currentMonthKey]);
+  }, [modalState.categoryId, monthlyData, expenseCategories, currentMonthKey, t]);
 
   const handleAddToBalance = useCallback(() => {
     setModalState({
@@ -307,15 +324,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       type: 'income',
       amount,
       categoryId: 'income',
-      categoryName: 'Add to Balance',
+      categoryName: t('historyIncomeLabel'),
       monthKey: currentMonthKey,
       date: new Date().toISOString(),
-      description: 'Money added to balance',
+      description: t('moneyAddedToBalance'),
     };
     await addTransaction(transaction);
     
     await loadAllData();
-  }, [monthlyData, currentMonthKey]);
+  }, [monthlyData, currentMonthKey, t]);
 
   const handleModalClose = useCallback(() => {
     setModalState({ isVisible: false, type: null });
@@ -376,9 +393,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     
     if (!qrData || qrData.trim().length === 0) {
       Alert.alert(
-        'Empty QR Code',
-        'The QR code appears to be empty. Please try scanning again.',
-        [{ text: 'OK' }]
+        t('emptyQRCode'),
+        t('emptyQRMessage'),
+        [{ text: t('ok') }]
       );
       return;
     }
@@ -392,10 +409,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
     // Non-URL QR codes are not supported in this simplified flow
     Alert.alert(
-      'QR Not Supported',
-      'This QR format is not supported. Please scan a receipt URL QR code.'
+      t('qrNotSupported'),
+      t('qrNotSupportedMessage')
     );
-  }, []);
+  }, [t]);
 
   const handleWebViewMessage = useCallback((event: any) => {
     try {
@@ -425,15 +442,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         setIsReceiptModalVisible(true);
         setWebViewUrl(null);
       } else {
-        Alert.alert('Amount Not Found', 'Could not read total from the page.');
+        Alert.alert(t('amountNotFound'), t('amountNotFoundMessage'));
         setWebViewUrl(null);
       }
     } catch (e) {
       console.error('Error handling WebView message', e);
-      Alert.alert('Error', 'Failed to extract total amount.');
+      Alert.alert(t('error'), 'Failed to extract total amount.');
       setWebViewUrl(null);
     }
-  }, [webViewUrl]);
+  }, [webViewUrl, t]);
 
   const handleCloseQRScanner = useCallback(() => {
     setIsQRScannerVisible(false);
@@ -476,13 +493,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       categoryName,
       monthKey: currentMonthKey,
       date: new Date().toISOString(),
-      description: `Receipt expense - ${categoryName}${scannedReceiptData.merchant ? ` at ${scannedReceiptData.merchant}` : ''}`,
+      description: t('receiptExpense', { categoryName: `${categoryName}${scannedReceiptData.merchant ? ` at ${scannedReceiptData.merchant}` : ''}` }),
     };
     await addTransaction(transaction);
     
     await loadAllData();
     handleReceiptModalClose();
-  }, [scannedReceiptData, monthlyData, expenseCategories, currentMonthKey, handleReceiptModalClose]);
+  }, [scannedReceiptData, monthlyData, expenseCategories, currentMonthKey, handleReceiptModalClose, selectedCurrency, t]);
 
   const handleReceiptAddNewCategory = useCallback(() => {
     // Close receipt modal and open add category modal
@@ -549,14 +566,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Overall Balance Section */}
         <View className="mx-6 mt-8">
-          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">Overall Balance</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('overallBalance')}</Text>
           <View className="bg-blue-600 rounded-2xl p-6 shadow-lg items-center">
-            <Text className="text-white text-sm opacity-90 text-center">Total Balance</Text>
+            <Text className="text-white text-sm opacity-90 text-center">{t('totalBalance')}</Text>
             <Text className="text-white text-3xl font-bold mt-1 text-center">
               {formatCurrency(totalBalance, selectedCurrency)}
             </Text>
             <Text className="text-green-300 text-sm mt-2 text-center">
-              {monthlyData ? `Balance this month: ${formatCurrency(calculateBalance(monthlyData), selectedCurrency)}` : 'Loading...'}
+              {monthlyData ? `${t('balanceThisMonth')}: ${formatCurrency(calculateBalance(monthlyData), selectedCurrency)}` : t('loading')}
             </Text>
           </View>
           
@@ -569,13 +586,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               <Ionicons name="chevron-back" size={24} color="#6b7280" />
             </TouchableOpacity>
             <View className="items-center">
-              <Text className="text-lg font-semibold text-gray-900">{getMonthName(currentMonthKey)}</Text>
+              <Text className="text-lg font-semibold text-gray-900">{getTranslatedMonthName(currentMonthKey, translations)}</Text>
               {currentMonthKey !== getCurrentMonthKey() && (
                 <TouchableOpacity 
                   className="mt-1 px-3 py-1 bg-blue-100 rounded-full"
                   onPress={handleGoToCurrent}
                 >
-                  <Text className="text-blue-600 text-xs font-medium">Go to Current</Text>
+                  <Text className="text-blue-600 text-xs font-medium">{t('goToCurrent')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -590,16 +607,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Monthly Overview */}
         <View className="mx-6 mt-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">This Month</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('thisMonth')}</Text>
           <View className="flex-row justify-center">
             <View className="bg-white rounded-xl p-4 mr-2 shadow-sm w-32">
-              <Text className="text-gray-600 text-sm text-center">Income</Text>
+              <Text className="text-gray-600 text-sm text-center">{t('income')}</Text>
               <Text className="text-green-600 text-xl font-bold mt-1 text-center">
                 {formatCurrency(monthlyData?.income || 0, selectedCurrency)}
               </Text>
             </View>
             <View className="bg-white rounded-xl p-4 ml-2 shadow-sm w-32">
-              <Text className="text-gray-600 text-sm text-center">Expenses</Text>
+              <Text className="text-gray-600 text-sm text-center">{t('expenses')}</Text>
               <Text className="text-red-600 text-xl font-bold mt-1 text-center">
                 {formatCurrency(monthlyData?.expenses || 0, selectedCurrency)}
               </Text>
@@ -614,14 +631,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
              onPress={handleOpenQRScanner}
            >
              <Ionicons name="qr-code-outline" size={24} color="white" />
-             <Text className="text-white text-lg font-semibold ml-2">Scan Receipt QR Code</Text>
+             <Text className="text-white text-lg font-semibold ml-2">{t('scanReceiptQR')}</Text>
            </TouchableOpacity>
          </View>
 
         {/* Expense Categories */}
         <View className="mx-6 mt-6">
           <View className="flex-row items-center justify-center mb-3">
-            <Text className="text-lg font-semibold text-gray-900">Spending Categories</Text>
+            <Text className="text-lg font-semibold text-gray-900">{t('spendingCategories')}</Text>
             <TouchableOpacity 
               className="ml-2 p-1"
               onPress={handleToggleEditMode}
@@ -636,7 +653,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           
           {isEditMode && (
             <Text className="text-sm text-gray-600 text-center mb-3">
-              Tap any category to edit or delete
+              {t('tapCategoryToEdit')}
             </Text>
           )}
           
@@ -658,7 +675,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <TouchableOpacity className="bg-blue-600 rounded-2xl p-4 shadow-lg" onPress={handleAddToBalance}>
             <View className="flex-row items-center justify-center">
               <Ionicons name="add-circle" size={24} color="white" />
-              <Text className="text-white text-lg font-semibold ml-2">Add to Balance</Text>
+              <Text className="text-white text-lg font-semibold ml-2">{t('addToBalance')}</Text>
             </View>
           </TouchableOpacity>
         </View>
