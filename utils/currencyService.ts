@@ -47,6 +47,7 @@ currencyAPI.interceptors.response.use(
 // Fallback rates (same as your current hardcoded rates)
 const FALLBACK_RATES: { [key: string]: number } = {
   USD: 1.0,
+  RSD: 108.0,
   EUR: 0.85,
   GBP: 0.73,
   JPY: 110.0,
@@ -162,7 +163,7 @@ export const convertAmount = async (amount: number, fromCurrency: string, toCurr
   const rate = await getExchangeRate(fromCurrency, toCurrency);
   const convertedAmount = amount * rate;
   
-  return Math.round(convertedAmount * 100) / 100; // Round to 2 decimal places
+  return convertedAmount; // Do not round here; leave rounding to display layer
 };
 
 export const updateCurrencyRates = async (): Promise<boolean> => {

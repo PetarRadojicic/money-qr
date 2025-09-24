@@ -328,10 +328,13 @@ export const convertAllDataToCurrency = async (newCurrencyCode: string): Promise
         );
       }
       
+      // Recalculate expenses from converted categories to avoid double rounding drift
+      const convertedExpenses = Object.values(convertedCategories).reduce((sum, amount) => sum + amount, 0);
+
       convertedData[monthKey] = {
         ...monthData,
         income: await convertAmount(monthData.income, currentCurrency, newCurrencyCode),
-        expenses: await convertAmount(monthData.expenses, currentCurrency, newCurrencyCode),
+        expenses: convertedExpenses,
         categories: convertedCategories
       };
     }
