@@ -13,7 +13,8 @@ import SettingsScreen from './SettingsScreen';
 import AnalyticsScreen from './AnalyticsScreen';
 
 // Import data loading functions
-import { loadData, loadTransactionHistory, getSelectedCurrency } from '../utils/dataManager';
+import { loadData, loadTransactionHistory, getSelectedCurrency, getIsOnboardingDone } from '../utils/dataManager';
+import WelcomeScreen from './WelcomeScreen';
 
 export type ScreenType = 'home' | 'analytics' | 'history' | 'settings';
 
@@ -30,6 +31,7 @@ interface NavigationManagerProps {
   onCurrencyChange?: () => void;
   onDataReset?: () => void;
   dataChangeCounter?: number;
+  resetCounter?: number;
 }
 
 const NavigationManager: React.FC<NavigationManagerProps> = ({
@@ -37,8 +39,10 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   onCurrencyChange,
   onDataReset,
   dataChangeCounter,
+  resetCounter,
 }) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
+  const [showWelcome, setShowWelcome] = useState<boolean>(false);
   const [globalData, setGlobalData] = useState<GlobalData>({
     appData: {},
     transactionHistory: { transactions: [] },
@@ -56,14 +60,15 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   // Overlay fade animation to avoid shadow/border artifacts
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // Preload global data on app start
+  // Preload global data on app start and check onboarding
   useEffect(() => {
     const preloadGlobalData = async () => {
       try {
-        const [appData, transactionHistory, selectedCurrency] = await Promise.all([
+        const [appData, transactionHistory, selectedCurrency, onboardingDone] = await Promise.all([
           loadData(),
           loadTransactionHistory(),
           getSelectedCurrency(),
+          getIsOnboardingDone(),
         ]);
         
         setGlobalData({
@@ -72,6 +77,10 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
           selectedCurrency,
           isDataReady: true,
         });
+
+        if (!onboardingDone) {
+          setShowWelcome(true);
+        }
       } catch (error) {
         console.error('Error preloading global data:', error);
         // Set data ready to true even on error to prevent infinite loading
@@ -81,6 +90,55 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
     
     preloadGlobalData();
   }, []);
+
+  // Re-check onboarding flag when parent signals a reset
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      const done = await getIsOnboardingDone();
+      setShowWelcome(!done);
+    };
+    checkOnboarding();
+  }, [resetCounter]);
+
+  useEffect(() => {
+    // When currency changes or other global changes occur, no-op for welcome
+  }, [globalData.selectedCurrency]);
+
+  // Fade overlay out on initial data ready
+  useEffect(() => {
+    if (globalData.isDataReady) {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 450,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [globalData.isDataReady, fadeAnim]);
+
+  // Fade in the welcome screen when it appears
+  useEffect(() => {
+    if (showWelcome) {
+      fadeAnim.setValue(1);
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showWelcome, fadeAnim]);
+
+  const handleWelcomeComplete = useCallback(() => {
+    // Show overlay, wait 100ms (preload-like), then reveal app
+    fadeAnim.setValue(1);
+    setTimeout(() => {
+      setShowWelcome(false);
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }).start();
+    }, 100);
+  }, [fadeAnim]);
 
   // Update global data when currency changes
   useEffect(() => {
@@ -118,17 +176,6 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
       refreshGlobalData();
     }
   }, [dataChangeCounter, refreshGlobalData]);
-
-  // Fade overlay out on initial data ready
-  useEffect(() => {
-    if (globalData.isDataReady) {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 450,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [globalData.isDataReady, fadeAnim]);
 
   // Cleanup preload timeout on unmount
   useEffect(() => {
@@ -289,6 +336,29 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
     );
   }, [preloadingScreen, currentScreen, homeCallbacks, analyticsCallbacks, historyCallbacks, settingsCallbacks]);
 
+  // Render only the welcome screen while onboarding
+  if (showWelcome) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <StatusBar style="dark" />
+        <WelcomeScreen onComplete={handleWelcomeComplete} />
+        {/* White overlay to match navbar transition behavior */}
+        <Animated.View 
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#ffffff',
+            opacity: fadeAnim,
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar style="dark" />
@@ -318,7 +388,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
         }}
       />
       
-      {/* Bottom Navigation Bar - Always rendered */}
+      {/* Bottom Navigation Bar */}
       <BottomNavigation
         currentScreen={currentScreen}
         onNavigate={handleNavigationWithPreload}

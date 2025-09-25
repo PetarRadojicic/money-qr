@@ -5,6 +5,7 @@ import { convertAmount } from './currencyService';
 const STORAGE_KEY = 'money_tracker_data';
 const HISTORY_STORAGE_KEY = 'transaction_history';
 const CURRENCY_STORAGE_KEY = 'selected_currency';
+const ONBOARDING_DONE_KEY = 'onboarding_done';
 
 // Helper function to get current month key (YYYY-MM format)
 export const getCurrentMonthKey = (): string => {
@@ -275,7 +276,8 @@ export const resetAppData = async (): Promise<void> => {
       CUSTOM_CATEGORIES_KEY,
       'modified_categories',
       'hidden_categories',
-      CURRENCY_STORAGE_KEY
+      CURRENCY_STORAGE_KEY,
+      ONBOARDING_DONE_KEY
     ]);
   } catch (error) {
     console.error('Error resetting app data:', error);
@@ -299,6 +301,25 @@ export const saveSelectedCurrency = async (currencyCode: string): Promise<void> 
     await AsyncStorage.setItem(CURRENCY_STORAGE_KEY, currencyCode);
   } catch (error) {
     console.error('Error saving selected currency:', error);
+  }
+};
+
+// Onboarding state helpers
+export const getIsOnboardingDone = async (): Promise<boolean> => {
+  try {
+    const value = await AsyncStorage.getItem(ONBOARDING_DONE_KEY);
+    return value === 'true';
+  } catch (error) {
+    console.error('Error loading onboarding flag:', error);
+    return false;
+  }
+};
+
+export const setOnboardingDone = async (done: boolean): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_DONE_KEY, done ? 'true' : 'false');
+  } catch (error) {
+    console.error('Error saving onboarding flag:', error);
   }
 };
 

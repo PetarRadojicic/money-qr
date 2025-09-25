@@ -190,6 +190,19 @@ export interface Translations {
   failedToUpdateRates: string;
   editingCategory: string;
   all: string;
+
+  // Welcome / Onboarding
+  welcomeTitle: string;
+  welcomeHeadline: string;
+  welcomeBody1: string;
+  welcomeBody2: string;
+  welcomeContact: string;
+  welcomeHighlightsTitle: string;
+  welcomeHighlight1: string;
+  welcomeHighlight2: string;
+  welcomeHighlight3: string;
+  continue: string;
+  finish: string;
 }
 
 // English translations
@@ -380,6 +393,19 @@ const englishTranslations: Translations = {
   failedToUpdateRates: 'Failed to update exchange rates',
   editingCategory: 'Editing Category',
   all: 'All',
+
+  // Welcome / Onboarding
+  welcomeTitle: 'Welcome to Money QR',
+  welcomeHeadline: 'Thanks for checking out this learning project!',
+  welcomeBody1: "This app is part of my portfolio. It's a lightweight money tracker that lets you log expenses, analyze spending, and even parse receipt totals from QR-linked pages.",
+  welcomeBody2: 'I appreciate any feedback or bug reports as I continue improving it.',
+  welcomeContact: 'Found an issue? Reach me at {email}.',
+  welcomeHighlightsTitle: 'What you can do here',
+  welcomeHighlight1: 'Track income and expenses across months',
+  welcomeHighlight2: 'Scan receipt QR links and auto-extract totals',
+  welcomeHighlight3: 'Switch language and currency anytime in Settings',
+  continue: 'Continue',
+  finish: 'Finish',
 };
 
 // Serbian translations
@@ -570,6 +596,19 @@ const serbianTranslations: Translations = {
   failedToUpdateRates: 'Neuspešno ažuriranje kursnih lista',
   editingCategory: 'Uređivanje kategorije',
   all: 'Sve',
+
+  // Welcome / Onboarding
+  welcomeTitle: 'Dobrodošli u Money QR',
+  welcomeHeadline: 'Hvala što gledate ovaj projekat za učenje!',
+  welcomeBody1: 'Ova aplikacija je deo mog portfolija. Lagan je tracker novca koji omogućava beleženje troškova, analizu potrošnje i čak čitanje total iznosa sa stranica do kojih vodi QR kod sa računa.',
+  welcomeBody2: 'Svaki feedback ili prijava grešaka je dobrodošla dok je unapređujem.',
+  welcomeContact: 'Našli ste problem? Pišite mi na {email}.',
+  welcomeHighlightsTitle: 'Šta možete da radite',
+  welcomeHighlight1: 'Pratite prihode i troškove po mesecima',
+  welcomeHighlight2: 'Skenirajte QR linkove sa računa i automatski izdvojite total',
+  welcomeHighlight3: 'Promenite jezik i valutu bilo kada u Podešavanjima',
+  continue: 'Nastavi',
+  finish: 'Završi',
 };
 
 export type Language = 'en' | 'sr';
