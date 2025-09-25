@@ -98,19 +98,7 @@ export interface Translations {
   ofTotal: string;
   transactions: string;
   
-  // Financial Health Score
-  financialHealthScore: string;
-  healthScore: string;
-  excellent: string;
-  good: string;
-  fair: string;
-  poor: string;
-  healthFactors: string;
-  savingsRate: string;
-  expenseStability: string;
-  incomeGrowth: string;
-  categoryDiversification: string;
-  recommendations: string;
+  // (Removed) Financial Health Score strings
   selectAll: string;
   clearAll: string;
   apply: string;
@@ -319,19 +307,7 @@ const englishTranslations: Translations = {
   ofTotal: 'of total',
   transactions: 'transactions',
   
-  // Financial Health Score
-  financialHealthScore: 'Financial Health Score',
-  healthScore: 'Health Score',
-  excellent: 'Excellent',
-  good: 'Good',
-  fair: 'Fair',
-  poor: 'Poor',
-  healthFactors: 'Health Factors',
-  savingsRate: 'Savings Rate',
-  expenseStability: 'Expense Stability',
-  incomeGrowth: 'Income Growth',
-  categoryDiversification: 'Category Diversification',
-  recommendations: 'Recommendations',
+  // (Removed) Financial Health Score
   
   selectAll: 'Select All',
   clearAll: 'Clear All',
@@ -541,19 +517,7 @@ const serbianTranslations: Translations = {
   ofTotal: 'od ukupno',
   transactions: 'transakcije',
   
-  // Financial Health Score
-  financialHealthScore: 'Rezultat finansijskog zdravlja',
-  healthScore: 'Rezultat zdravlja',
-  excellent: 'Odličan',
-  good: 'Dobar',
-  fair: 'Prosečan',
-  poor: 'Loš',
-  healthFactors: 'Faktori zdravlja',
-  savingsRate: 'Stopa štednje',
-  expenseStability: 'Stabilnost troškova',
-  incomeGrowth: 'Rast prihoda',
-  categoryDiversification: 'Diverzifikacija kategorija',
-  recommendations: 'Preporuke',
+  // (Removed) Financial Health Score
   
   selectAll: 'Izaberi sve',
   clearAll: 'Obriši sve',

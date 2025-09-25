@@ -34,16 +34,7 @@ export interface BudgetRecommendation {
   priority: 'high' | 'medium' | 'low';
 }
 
-export interface FinancialHealth {
-  score: number; // 0-100
-  factors: {
-    savingsRate: { score: number; weight: number; description: string };
-    expenseStability: { score: number; weight: number; description: string };
-    incomeGrowth: { score: number; weight: number; description: string };
-    categoryDiversification: { score: number; weight: number; description: string };
-  };
-  recommendations: string[];
-}
+// (Removed) FinancialHealth interface and related calculation
 
 /**
  * Calculate income and expense trends over time
@@ -298,74 +289,7 @@ export const generateBudgetRecommendations = (
 /**
  * Calculate financial health score and recommendations
  */
-export const calculateFinancialHealth = (appData: AppData): FinancialHealth => {
-  const sortedMonths = Object.keys(appData).sort();
-  const recentMonths = sortedMonths.slice(-6); // Last 6 months
-  
-  if (recentMonths.length === 0) {
-    return {
-      score: 0,
-      factors: {
-        savingsRate: { score: 0, weight: 0.3, description: 'No data available' },
-        expenseStability: { score: 0, weight: 0.25, description: 'No data available' },
-        incomeGrowth: { score: 0, weight: 0.25, description: 'No data available' },
-        categoryDiversification: { score: 0, weight: 0.2, description: 'No data available' }
-      },
-      recommendations: ['Start tracking your income and expenses to get financial insights']
-    };
-  }
-  
-  // Calculate savings rate
-  const totalIncome = recentMonths.reduce((sum, month) => sum + appData[month].income, 0);
-  const totalExpenses = recentMonths.reduce((sum, month) => sum + appData[month].expenses, 0);
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
-  
-  const savingsScore = Math.max(0, Math.min(100, (savingsRate / 20) * 100)); // 20% savings rate = 100 score
-  
-  // Calculate expense stability (lower variance = higher score)
-  const monthlyExpenses = recentMonths.map(month => appData[month].expenses);
-  const avgExpenses = monthlyExpenses.reduce((sum, exp) => sum + exp, 0) / monthlyExpenses.length;
-  const expenseVariance = monthlyExpenses.reduce((sum, exp) => sum + Math.pow(exp - avgExpenses, 2), 0) / monthlyExpenses.length;
-  const expenseCV = avgExpenses > 0 ? Math.sqrt(expenseVariance) / avgExpenses : 0; // Coefficient of variation
-  const stabilityScore = Math.max(0, Math.min(100, (1 - expenseCV) * 100));
-  
-  // Calculate income growth
-  const incomes = recentMonths.map(month => appData[month].income);
-  const incomeGrowth = incomes.length >= 2 ? 
-    ((incomes[incomes.length - 1] - incomes[0]) / Math.max(incomes[0], 1)) * 100 : 0;
-  const growthScore = Math.max(0, Math.min(100, (incomeGrowth / 10) * 100 + 50)); // 10% growth = 100 score
-  
-  // Calculate category diversification (more categories = better diversification)
-  const allCategories = new Set<string>();
-  recentMonths.forEach(month => {
-    Object.keys(appData[month].categories).forEach(cat => allCategories.add(cat));
-  });
-  const diversificationScore = Math.min(100, allCategories.size * 10); // 10 categories = 100 score
-  
-  // Weighted total score
-  const factors = {
-    savingsRate: { score: savingsScore, weight: 0.3, description: `${savingsRate.toFixed(1)}% savings rate` },
-    expenseStability: { score: stabilityScore, weight: 0.25, description: `${(expenseCV * 100).toFixed(1)}% expense variability` },
-    incomeGrowth: { score: growthScore, weight: 0.25, description: `${incomeGrowth.toFixed(1)}% income growth` },
-    categoryDiversification: { score: diversificationScore, weight: 0.2, description: `${allCategories.size} spending categories` }
-  };
-  
-  const totalScore = Object.values(factors).reduce((sum, factor) => sum + (factor.score * factor.weight), 0);
-  
-  // Generate recommendations
-  const recommendations: string[] = [];
-  if (savingsScore < 50) recommendations.push('Aim to save at least 20% of your income');
-  if (stabilityScore < 50) recommendations.push('Try to stabilize your monthly expenses');
-  if (growthScore < 50) recommendations.push('Look for opportunities to increase your income');
-  if (diversificationScore < 50) recommendations.push('Consider tracking expenses in more specific categories');
-  if (totalScore > 80) recommendations.push('Great job! Your financial health is excellent');
-  
-  return {
-    score: Math.round(totalScore),
-    factors,
-    recommendations
-  };
-};
+// (Removed) calculateFinancialHealth
 
 /**
  * Helper function to get category name from transactions

@@ -16,7 +16,6 @@ A modern, multilingual React Native expense tracking application with QR code re
 - **Category Analysis**: Track spending patterns across different expense categories
 - **Monthly Comparisons**: Compare financial performance across different months
 - **Visual Charts**: Interactive charts and graphs for better financial insights
-- **Financial Health Score**: Algorithm-based financial health assessment
 
 ### 📸 QR Receipt Scanning
 - **Smart Receipt Scanning**: Scan QR codes from receipts to automatically extract amounts
@@ -164,7 +163,7 @@ money-qr/
 
 ### Viewing Analytics
 1. Navigate to the Analytics tab
-2. View spending trends, category breakdowns, and algorithmic financial health score
+2. View spending trends and category breakdowns
 3. Compare data across different months
 
 ### Settings
