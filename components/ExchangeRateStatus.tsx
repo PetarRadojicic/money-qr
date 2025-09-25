@@ -29,11 +29,11 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
     
     if (status.isFresh && status.hasRates) {
       const minutesLeft = Math.floor(status.timeUntilExpiry / (60 * 1000));
-      setLastUpdated(`Rates are fresh (${minutesLeft}m left)`);
+      setLastUpdated(t('ratesFreshWithTime', { minutesLeft: String(minutesLeft) }));
     } else if (status.hasRates) {
-      setLastUpdated('Rates are outdated');
+      setLastUpdated(t('ratesOutdated'));
     } else {
-      setLastUpdated('No rates available');
+      setLastUpdated(t('noRatesAvailable'));
     }
   };
 
@@ -120,7 +120,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
             </View>
             {ratesCount > 0 && (
               <Text className="text-gray-500 text-xs mt-1">
-                {ratesCount} currencies available
+                {t('currenciesAvailableCount', { count: String(ratesCount) })}
               </Text>
             )}
           </View>

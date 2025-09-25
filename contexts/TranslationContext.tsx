@@ -190,6 +190,11 @@ export interface Translations {
   failedToUpdateRates: string;
   editingCategory: string;
   all: string;
+  // Exchange rate status messages
+  ratesFreshWithTime: string; // e.g., "Rates are fresh ({minutesLeft}m left)"
+  ratesOutdated: string; // e.g., "Rates are outdated"
+  noRatesAvailable: string; // e.g., "No rates available"
+  currenciesAvailableCount: string; // e.g., "{count} currencies available"
 
   // Welcome / Onboarding
   welcomeTitle: string;
@@ -393,6 +398,11 @@ const englishTranslations: Translations = {
   failedToUpdateRates: 'Failed to update exchange rates',
   editingCategory: 'Editing Category',
   all: 'All',
+  // Exchange rate status messages
+  ratesFreshWithTime: 'Rates are fresh ({minutesLeft}m left)',
+  ratesOutdated: 'Rates are outdated',
+  noRatesAvailable: 'No rates available',
+  currenciesAvailableCount: '{count} currencies available',
 
   // Welcome / Onboarding
   welcomeTitle: 'Welcome to Money QR',
@@ -596,6 +606,11 @@ const serbianTranslations: Translations = {
   failedToUpdateRates: 'Neuspešno ažuriranje kursnih lista',
   editingCategory: 'Uređivanje kategorije',
   all: 'Sve',
+  // Exchange rate status messages
+  ratesFreshWithTime: 'Kurs je svež (preostalo {minutesLeft}m)',
+  ratesOutdated: 'Kurs je zastareo',
+  noRatesAvailable: 'Nema dostupnih kurseva',
+  currenciesAvailableCount: '{count} valuta dostupno',
 
   // Welcome / Onboarding
   welcomeTitle: 'Dobrodošli u Money QR',
