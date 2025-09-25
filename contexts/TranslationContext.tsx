@@ -97,11 +97,24 @@ export interface Translations {
   savingsPerformance: string;
   ofTotal: string;
   transactions: string;
+  
+  // Financial Health Score
+  financialHealthScore: string;
+  healthScore: string;
+  excellent: string;
+  good: string;
+  fair: string;
+  poor: string;
+  healthFactors: string;
+  savingsRate: string;
+  expenseStability: string;
+  incomeGrowth: string;
+  categoryDiversification: string;
+  recommendations: string;
   selectAll: string;
   clearAll: string;
   apply: string;
   noDataAvailable: string;
-  excellent: string;
   goodWork: string;
   considerReducing: string;
   trackExpensesDaily: string;
@@ -305,11 +318,25 @@ const englishTranslations: Translations = {
   savingsPerformance: 'Savings Performance',
   ofTotal: 'of total',
   transactions: 'transactions',
+  
+  // Financial Health Score
+  financialHealthScore: 'Financial Health Score',
+  healthScore: 'Health Score',
+  excellent: 'Excellent',
+  good: 'Good',
+  fair: 'Fair',
+  poor: 'Poor',
+  healthFactors: 'Health Factors',
+  savingsRate: 'Savings Rate',
+  expenseStability: 'Expense Stability',
+  incomeGrowth: 'Income Growth',
+  categoryDiversification: 'Category Diversification',
+  recommendations: 'Recommendations',
+  
   selectAll: 'Select All',
   clearAll: 'Clear All',
   apply: 'Apply',
   noDataAvailable: 'No data available for analytics',
-  excellent: ' - Excellent!',
   goodWork: ' - Good work!',
   considerReducing: ' - Consider reducing expenses',
   trackExpensesDaily: 'Track expenses daily for better insights and patterns',
@@ -513,11 +540,25 @@ const serbianTranslations: Translations = {
   savingsPerformance: 'Performanse štednje',
   ofTotal: 'od ukupno',
   transactions: 'transakcije',
+  
+  // Financial Health Score
+  financialHealthScore: 'Rezultat finansijskog zdravlja',
+  healthScore: 'Rezultat zdravlja',
+  excellent: 'Odličan',
+  good: 'Dobar',
+  fair: 'Prosečan',
+  poor: 'Loš',
+  healthFactors: 'Faktori zdravlja',
+  savingsRate: 'Stopa štednje',
+  expenseStability: 'Stabilnost troškova',
+  incomeGrowth: 'Rast prihoda',
+  categoryDiversification: 'Diverzifikacija kategorija',
+  recommendations: 'Preporuke',
+  
   selectAll: 'Izaberi sve',
   clearAll: 'Obriši sve',
   apply: 'Primeni',
   noDataAvailable: 'Nema dostupnih podataka za analitiku',
-  excellent: ' - Odlično!',
   goodWork: ' - Dobar rad!',
   considerReducing: ' - Razmislite o smanjenju troškova',
   trackExpensesDaily: 'Pratite troškove dnevno za bolje uvide i obrasce',

@@ -307,6 +307,104 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     return transaction?.categoryName || categoryId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  // Render financial health score
+  const renderFinancialHealthScore = () => {
+    if (!globalData?.appData || !globalData?.transactionHistory) return null;
+
+    const financialHealth = calculateFinancialHealth(globalData.appData);
+    
+    const getScoreColor = (score: number) => {
+      if (score >= 80) return 'text-green-600';
+      if (score >= 60) return 'text-blue-600';
+      if (score >= 40) return 'text-yellow-600';
+      return 'text-red-600';
+    };
+
+    const getScoreBackground = (score: number) => {
+      if (score >= 80) return 'bg-green-100';
+      if (score >= 60) return 'bg-blue-100';
+      if (score >= 40) return 'bg-yellow-100';
+      return 'bg-red-100';
+    };
+
+    const getScoreLabel = (score: number) => {
+      if (score >= 80) return t('excellent');
+      if (score >= 60) return t('good');
+      if (score >= 40) return t('fair');
+      return t('poor');
+    };
+
+    return (
+      <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
+        <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
+          {t('financialHealthScore')}
+        </Text>
+        
+        {/* Score Display */}
+        <View className={`${getScoreBackground(financialHealth.score)} rounded-2xl p-6 items-center mb-4`}>
+          <Text className="text-sm font-medium text-gray-600 mb-2">{t('healthScore')}</Text>
+          <Text className={`text-4xl font-bold ${getScoreColor(financialHealth.score)} mb-2`}>
+            {financialHealth.score}
+          </Text>
+          <Text className={`text-lg font-semibold ${getScoreColor(financialHealth.score)}`}>
+            {getScoreLabel(financialHealth.score)}
+          </Text>
+        </View>
+
+        {/* Health Factors */}
+        <View className="mb-4">
+          <Text className="text-md font-semibold text-gray-900 mb-3 text-center">
+            {t('healthFactors')}
+          </Text>
+          
+          {Object.entries(financialHealth.factors).map(([key, factor]) => (
+            <View key={key} className="mb-3">
+              <View className="flex-row justify-between items-center mb-1">
+                <Text className="text-sm font-medium text-gray-900">
+                  {key === 'savingsRate' && t('savingsRate')}
+                  {key === 'expenseStability' && t('expenseStability')}
+                  {key === 'incomeGrowth' && t('incomeGrowth')}
+                  {key === 'categoryDiversification' && t('categoryDiversification')}
+                </Text>
+                <Text className="text-sm text-gray-600">
+                  {factor.score.toFixed(0)}/100
+                </Text>
+              </View>
+              
+              <View className="bg-gray-200 rounded-full h-2 mb-1">
+                <View 
+                  className="bg-blue-500 h-2 rounded-full"
+                  style={{ width: `${factor.score}%` }}
+                />
+              </View>
+              
+              <Text className="text-xs text-gray-500">
+                {factor.description}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Recommendations */}
+        {financialHealth.recommendations.length > 0 && (
+          <View>
+            <Text className="text-md font-semibold text-gray-900 mb-3 text-center">
+              {t('recommendations')}
+            </Text>
+            {financialHealth.recommendations.map((recommendation, index) => (
+              <View key={index} className="flex-row items-start mb-2">
+                <Text className="text-green-600 mr-2 mt-0.5">•</Text>
+                <Text className="text-sm text-gray-700 flex-1">
+                  {recommendation}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   // Render simple bar chart for monthly data
   const renderMonthlyChart = () => {
     if (!analyticsData || analyticsData.monthlyAnalytics.length === 0) return null;
@@ -536,6 +634,9 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           </View>
         </View>
       </View>
+
+      {/* Financial Health Score */}
+      {renderFinancialHealthScore()}
 
       {/* Monthly Chart */}
       {renderMonthlyChart()}
