@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../contexts/TranslationContext';
+import { getSelectedCurrency } from '../utils/dataManager';
+import { getCurrencyByCode } from '../constants/currencies';
 
 interface ExpenseModalProps {
   isVisible: boolean;
@@ -25,6 +27,22 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
+  const [currencySymbol, setCurrencySymbol] = useState<string>('$');
+
+  useEffect(() => {
+    const loadCurrency = async () => {
+      try {
+        const code = await getSelectedCurrency();
+        const currency = getCurrencyByCode(code);
+        setCurrencySymbol(currency.symbol);
+      } catch (e) {
+        setCurrencySymbol('$');
+      }
+    };
+    if (isVisible) {
+      loadCurrency();
+    }
+  }, [isVisible]);
 
   const handleConfirm = () => {
     const numericAmount = parseFloat(amount);
@@ -67,7 +85,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <View className="mb-6">
             <Text className="text-gray-700 font-medium mb-2">{t('amount')}</Text>
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3">
-              <Text className="text-gray-600 text-lg mr-2">$</Text>
+              <Text className="text-gray-600 text-lg mr-2">{currencySymbol}</Text>
               <TextInput
                 className="flex-1 text-lg text-gray-900"
                 placeholder="0.00"
