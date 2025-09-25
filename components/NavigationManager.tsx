@@ -32,6 +32,7 @@ interface NavigationManagerProps {
   onDataReset?: () => void;
   dataChangeCounter?: number;
   resetCounter?: number;
+  currencyChangeCounter?: number;
 }
 
 const NavigationManager: React.FC<NavigationManagerProps> = ({
@@ -40,6 +41,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   onDataReset,
   dataChangeCounter,
   resetCounter,
+  currencyChangeCounter,
 }) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [showWelcome, setShowWelcome] = useState<boolean>(false);
@@ -142,14 +144,28 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
 
   // Update global data when currency changes
   useEffect(() => {
-    if (globalData.isDataReady && onCurrencyChange) {
-      const updateCurrency = async () => {
+    if (!globalData.isDataReady) return;
+    const refreshForCurrencyChange = async () => {
+      try {
+        const [appData, transactionHistory, currency] = await Promise.all([
+          loadData(),
+          loadTransactionHistory(),
+          getSelectedCurrency(),
+        ]);
+        setGlobalData(prev => ({
+          ...prev,
+          appData,
+          transactionHistory,
+          selectedCurrency: currency,
+        }));
+      } catch (e) {
+        // Still try to at least update currency so UI formats correctly
         const currency = await getSelectedCurrency();
         setGlobalData(prev => ({ ...prev, selectedCurrency: currency }));
-      };
-      updateCurrency();
-    }
-  }, [onCurrencyChange, globalData.isDataReady]);
+      }
+    };
+    refreshForCurrencyChange();
+  }, [currencyChangeCounter, globalData.isDataReady]);
 
   // Refresh global data when data changes
   const refreshGlobalData = useCallback(async () => {

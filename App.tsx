@@ -7,6 +7,7 @@ export default function App() {
   // State to force re-renders when data changes
   const [dataChangeCounter, setDataChangeCounter] = useState(0);
   const [resetCounter, setResetCounter] = useState(0);
+  const [currencyChangeCounter, setCurrencyChangeCounter] = useState(0);
 
   // Global data change handlers
   const handleDataChange = useCallback(() => {
@@ -18,6 +19,7 @@ export default function App() {
   const handleCurrencyChange = useCallback(() => {
     // This will be called when currency changes
     console.log('Currency changed - refreshing...');
+    setCurrencyChangeCounter(prev => prev + 1);
   }, []);
 
   const handleDataReset = useCallback(() => {
@@ -34,6 +36,7 @@ export default function App() {
         onDataReset={handleDataReset}
         dataChangeCounter={dataChangeCounter}
         resetCounter={resetCounter}
+        currencyChangeCounter={currencyChangeCounter}
       />
     </TranslationProvider>
   );

@@ -168,6 +168,30 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     }
   }, [timeRange, selectedMonths, skipInitialLoading, globalData?.isDataReady]);
 
+  // Recompute when selected currency changes via global data
+  useEffect(() => {
+    if (!globalData?.isDataReady) return;
+    const refreshOnCurrency = async () => {
+      try {
+        if (globalData?.appData && globalData?.transactionHistory) {
+          setSelectedCurrency(globalData.selectedCurrency);
+          const analytics = calculateAnalytics(
+            globalData.appData,
+            globalData.transactionHistory,
+            timeRange,
+            selectedMonths
+          );
+          setAnalyticsData(analytics);
+        } else {
+          await loadAnalyticsData();
+        }
+      } catch (e) {
+        await loadAnalyticsData();
+      }
+    };
+    refreshOnCurrency();
+  }, [globalData?.selectedCurrency]);
+
   // Calculate analytics from data
   const calculateAnalytics = (
     appData: AppData,
