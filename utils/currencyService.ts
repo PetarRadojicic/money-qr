@@ -19,7 +19,6 @@ const currencyAPI = axios.create({
 // Add request interceptor for logging
 currencyAPI.interceptors.request.use(
   (config) => {
-    console.log(`🌐 Fetching exchange rates from: ${config.url}`);
     return config;
   },
   (error) => {
@@ -31,7 +30,6 @@ currencyAPI.interceptors.request.use(
 // Add response interceptor for better error handling
 currencyAPI.interceptors.response.use(
   (response) => {
-    console.log(`✅ Exchange rates API response: ${response.status}`);
     return response;
   },
   (error) => {
@@ -85,7 +83,6 @@ const retryRequest = async (fn: () => Promise<any>, retries = 2, delay = 1000): 
     return await fn();
   } catch (error) {
     if (retries > 0) {
-      console.log(`🔄 Retrying request, ${retries} attempts left...`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return retryRequest(fn, retries - 1, delay * 2);
     }
@@ -98,7 +95,6 @@ export const fetchExchangeRates = async (): Promise<{ [key: string]: number }> =
   
   // Return cached rates if they're still fresh
   if (Object.keys(exchangeRatesCache).length > 0 && (now - lastFetchTime) < CACHE_DURATION) {
-    console.log('📋 Using cached exchange rates');
     return exchangeRatesCache;
   }
 
@@ -113,25 +109,12 @@ export const fetchExchangeRates = async (): Promise<{ [key: string]: number }> =
       exchangeRatesCache = response.data.rates;
       lastFetchTime = now;
       
-      console.log('✅ Exchange rates fetched successfully via axios');
-      console.log(`📊 Loaded ${Object.keys(exchangeRatesCache).length} currency rates`);
       return exchangeRatesCache;
     } else {
       throw new Error('Invalid API response format');
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.warn('⚠️ Axios error fetching exchange rates:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        url: error.config?.url,
-      });
-    } else {
-      console.warn('⚠️ Failed to fetch exchange rates, using fallback rates:', error);
-    }
-    console.log('🔄 Falling back to hardcoded exchange rates');
+    // In production, avoid noisy warnings/logs; only fallback silently
     return FALLBACK_RATES;
   }
 };

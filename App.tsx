@@ -12,19 +12,16 @@ export default function App() {
   // Global data change handlers
   const handleDataChange = useCallback(() => {
     // This will be called when data changes in any screen
-    console.log('Data changed - refreshing...');
     setDataChangeCounter(prev => prev + 1);
   }, []);
 
   const handleCurrencyChange = useCallback(() => {
     // This will be called when currency changes
-    console.log('Currency changed - refreshing...');
     setCurrencyChangeCounter(prev => prev + 1);
   }, []);
 
   const handleDataReset = useCallback(() => {
     // This will be called when app data is reset
-    console.log('App data reset');
     setResetCounter(prev => prev + 1);
   }, []);
 
