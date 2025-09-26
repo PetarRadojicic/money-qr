@@ -6,6 +6,7 @@ const STORAGE_KEY = 'money_tracker_data';
 const HISTORY_STORAGE_KEY = 'transaction_history';
 const CURRENCY_STORAGE_KEY = 'selected_currency';
 const ONBOARDING_DONE_KEY = 'onboarding_done';
+const VISITED_MONTHS_KEY = 'visited_months';
 
 // Helper function to get current month key (YYYY-MM format)
 export const getCurrentMonthKey = (): string => {
@@ -143,6 +144,32 @@ export const saveData = async (data: AppData): Promise<void> => {
   }
 };
 
+// Track visited months
+export const addVisitedMonth = async (monthKey: string): Promise<void> => {
+  try {
+    const visitedMonths = await getVisitedMonths();
+    if (!visitedMonths.includes(monthKey)) {
+      visitedMonths.push(monthKey);
+      await AsyncStorage.setItem(VISITED_MONTHS_KEY, JSON.stringify(visitedMonths));
+    }
+  } catch (error) {
+    console.error('Error adding visited month:', error);
+  }
+};
+
+export const getVisitedMonths = async (): Promise<string[]> => {
+  try {
+    const data = await AsyncStorage.getItem(VISITED_MONTHS_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+    return [];
+  } catch (error) {
+    console.error('Error loading visited months:', error);
+    return [];
+  }
+};
+
 // Get or create monthly data
 export const getMonthlyData = async (monthKey: string): Promise<MonthlyData> => {
   const data = await loadData();
@@ -150,6 +177,8 @@ export const getMonthlyData = async (monthKey: string): Promise<MonthlyData> => 
     data[monthKey] = createDefaultMonthlyData();
     await saveData(data);
   }
+  // Track that this month has been visited
+  await addVisitedMonth(monthKey);
   return data[monthKey];
 };
 
@@ -277,7 +306,8 @@ export const resetAppData = async (): Promise<void> => {
       'modified_categories',
       'hidden_categories',
       CURRENCY_STORAGE_KEY,
-      ONBOARDING_DONE_KEY
+      ONBOARDING_DONE_KEY,
+      VISITED_MONTHS_KEY
     ]);
   } catch (error) {
     console.error('Error resetting app data:', error);

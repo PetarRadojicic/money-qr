@@ -9,6 +9,7 @@ import {
   getMonthName,
   getAdjacentMonthKey,
   calculateBalance,
+  getVisitedMonths,
 } from '../utils/dataManager';
 import { AppData, MonthlyData, Transaction, HistoryData } from '../types';
 import { formatCurrency } from '../constants/currencies';
@@ -117,7 +118,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           setSelectedMonths(months);
         }
 
-        const analytics = calculateAnalytics(globalData.appData, globalData.transactionHistory, timeRange, selectedMonths);
+        const analytics = await calculateAnalytics(globalData.appData, globalData.transactionHistory, timeRange, selectedMonths);
         setAnalyticsData(analytics);
         return; // Exit early - we're done!
       }
@@ -155,7 +156,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         setSelectedMonths(months);
       }
 
-      const analytics = calculateAnalytics(appData, historyData, timeRange, selectedMonths);
+      const analytics = await calculateAnalytics(appData, historyData, timeRange, selectedMonths);
       setAnalyticsData(analytics);
     } catch (error) {
       console.error('Error loading analytics data:', error);
@@ -190,7 +191,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         setSelectedCurrency(currentCurrency);
         
         if (globalData?.appData && globalData?.transactionHistory) {
-          const analytics = calculateAnalytics(
+          const analytics = await calculateAnalytics(
             globalData.appData,
             globalData.transactionHistory,
             timeRange,
@@ -213,26 +214,51 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   }, [analyticsData]);
 
   // Calculate analytics from data
-  const calculateAnalytics = (
+  const calculateAnalytics = async (
     appData: AppData,
     historyData: HistoryData,
     range: 'specific' | 'all',
     monthsToInclude: string[] = []
-  ): AnalyticsData => {
+  ): Promise<AnalyticsData> => {
     const currentMonthKey = getCurrentMonthKey();
-    const monthKeys = Object.keys(appData).sort();
+    const existingMonthKeys = Object.keys(appData).sort();
+    
+    // Get visited months to ensure we include months that have been accessed
+    const visitedMonths = await getVisitedMonths();
+    
+    // Create a comprehensive list of months to include
+    // This ensures we include months that have been accessed but might not have data
+    let allMonthKeys = [...existingMonthKeys];
+    
+    // Add months from transaction history that might not be in appData
+    const historyMonthKeys = historyData.transactions
+      .map(t => t.monthKey)
+      .filter((monthKey, index, arr) => arr.indexOf(monthKey) === index) // Remove duplicates
+      .sort();
+    
+    // Add visited months
+    const visitedMonthKeys = visitedMonths.sort();
+    
+    // Merge and deduplicate month keys
+    allMonthKeys = [...new Set([...allMonthKeys, ...historyMonthKeys, ...visitedMonthKeys])].sort();
+    
+    // If we have no months at all, just include the current month
+    if (allMonthKeys.length === 0) {
+      const currentMonthKey = getCurrentMonthKey();
+      allMonthKeys.push(currentMonthKey);
+    }
     
     // Filter months based on selection
-    let filteredMonthKeys = monthKeys;
+    let filteredMonthKeys = allMonthKeys;
     if (range === 'specific' && monthsToInclude.length > 0) {
-      filteredMonthKeys = monthsToInclude.filter(month => monthKeys.includes(month)).sort();
+      filteredMonthKeys = monthsToInclude.filter(month => allMonthKeys.includes(month)).sort();
     } else if (range === 'all') {
-      filteredMonthKeys = monthKeys;
+      filteredMonthKeys = allMonthKeys;
     }
 
     // Calculate monthly analytics
     const monthlyAnalytics: MonthlyAnalytics[] = filteredMonthKeys.map(monthKey => {
-      const monthData = appData[monthKey];
+      const monthData = appData[monthKey] || { income: 0, expenses: 0, categories: {} };
       const balance = calculateBalance(monthData);
       
       // Find top category
@@ -260,7 +286,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     const categoryTotals: { [categoryId: string]: { amount: number; transactions: number; name: string } } = {};
     
     filteredMonthKeys.forEach(monthKey => {
-      const monthData = appData[monthKey];
+      const monthData = appData[monthKey] || { income: 0, expenses: 0, categories: {} };
       Object.entries(monthData.categories).forEach(([categoryId, amount]) => {
         if (!categoryTotals[categoryId]) {
           categoryTotals[categoryId] = { 

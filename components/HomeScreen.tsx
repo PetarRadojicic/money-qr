@@ -27,6 +27,7 @@ import {
   saveHiddenCategories,
   addTransaction,
   getSelectedCurrency,
+  addVisitedMonth,
 } from '../utils/dataManager';
 import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
@@ -82,6 +83,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   // Initial load only once
   useEffect(() => {
     const init = async () => {
+      // Track current month as visited
+      await addVisitedMonth(currentMonthKey);
       await loadAllData();
       hasInitialLoaded.current = true;
     };
