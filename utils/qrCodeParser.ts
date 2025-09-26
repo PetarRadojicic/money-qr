@@ -3,6 +3,8 @@
  * Supports multiple QR code formats for payments and receipts
  */
 
+import { Translations } from '../contexts/TranslationContext';
+
 export interface ParsedQRData {
   format: 'ips' | 'emv' | 'sepa' | 'url' | 'generic' | 'unknown';
   amount?: number;
@@ -250,13 +252,13 @@ function getCurrencyFromCode(code: number): string {
  * Main QR code parser function
  * Attempts to parse QR data using various format parsers
  */
-export function parseQRCode(data: string): ParsedQRData {
+export function parseQRCode(data: string, t?: (key: keyof Translations, params?: Record<string, string>) => string): ParsedQRData {
   if (!data || data.trim().length === 0) {
     return {
       format: 'unknown',
       rawData: data,
       success: false,
-      error: 'Empty QR code data'
+      error: t ? t('emptyQRCode') : 'Empty QR code data'
     };
   }
   
@@ -298,15 +300,15 @@ export function parseQRCode(data: string): ParsedQRData {
     format: 'unknown',
     rawData: trimmedData,
     success: false,
-    error: 'Unsupported QR code format'
+    error: t ? t('unsupportedQRFormat') : 'Unsupported QR code format'
   };
 }
 
 /**
  * Enhanced parser for specific regional formats
  */
-export function parseRegionalQRCode(data: string, region: 'serbia' | 'eu' | 'global' = 'global'): ParsedQRData {
-  const result = parseQRCode(data);
+export function parseRegionalQRCode(data: string, region: 'serbia' | 'eu' | 'global' = 'global', t?: (key: keyof Translations, params?: Record<string, string>) => string): ParsedQRData {
+  const result = parseQRCode(data, t);
   
   // Apply regional defaults if needed
   if (result.success && !result.currency) {

@@ -76,6 +76,7 @@ export interface Translations {
   rawQRData: string;
   merchant: string;
   format: string;
+  unsupportedQRFormat: string;
   
   // Transaction descriptions
   expenseAdded: string;
@@ -295,6 +296,7 @@ const englishTranslations: Translations = {
   rawQRData: 'Raw QR Data',
   merchant: 'Merchant',
   format: 'Format',
+  unsupportedQRFormat: 'Unsupported QR code format',
   
   // Transaction descriptions
   expenseAdded: 'Expense added to {categoryName}',
@@ -515,6 +517,7 @@ const serbianTranslations: Translations = {
   rawQRData: 'Sirovi QR podaci',
   merchant: 'Trgovac',
   format: 'Format',
+  unsupportedQRFormat: 'Nepodržan format QR koda',
   
   // Transaction descriptions
   expenseAdded: 'Trošak dodat u {categoryName}',
@@ -648,17 +651,18 @@ const serbianTranslations: Translations = {
 
   // Welcome / Onboarding
   welcomeTitle: 'Dobrodošli u Money QR',
-  welcomeHeadline: 'Hvala što gledate ovaj projekat za učenje!',
-  welcomeBody1: 'Ova aplikacija je deo mog portfolija. Lagan je tracker novca koji omogućava beleženje troškova, analizu potrošnje i čak čitanje total iznosa sa stranica do kojih vodi QR kod sa računa.',
-  welcomeBody2: 'Svaki feedback ili prijava grešaka je dobrodošla dok je unapređujem.',
-  welcomeContact: 'Našli ste problem? Pišite mi na {email}.',
-  welcomeHighlightsTitle: 'Šta možete da radite',
-  welcomeHighlight1: 'Pratite prihode i troškove po mesecima',
-  welcomeHighlight2: 'Skenirajte QR linkove sa računa i automatski izdvojite total',
-  welcomeHighlight3: 'Promenite jezik i valutu bilo kada u Podešavanjima',
+  welcomeHeadline: 'Hvala što isprobavate ovaj projekat!',
+  welcomeBody1: 'Money QR je deo mog portfolija – jednostavna aplikacija za praćenje finansija. Omogućava beleženje prihoda i troškova, pregled analitike potrošnje i čak automatsko prepoznavanje ukupnog iznosa sa računa putem QR koda.',
+  welcomeBody2: 'Aplikacija je još u razvoju, pa je svaki komentar ili prijava greške dragocena.',
+  welcomeContact: 'Našli ste problem ili imate predlog? Pišite mi na {email}.',
+  welcomeHighlightsTitle: 'Šta možete da uradite',
+  welcomeHighlight1: 'Evidentirajte prihode i troškove po mesecima',
+  welcomeHighlight2: 'Skenirajte QR kodove sa računa i automatski prepoznajte ukupni iznos',
+  welcomeHighlight3: 'Promenite jezik i valutu u bilo kom trenutku',
   continue: 'Nastavi',
   finish: 'Završi',
-  chooseLanguage: 'Izaberite željeni jezik',
+  chooseLanguage: 'Izaberite jezik',
+
 };
 
 export type Language = 'en' | 'sr';

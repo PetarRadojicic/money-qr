@@ -390,7 +390,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
     
     // Parse QR code using the comprehensive parser
-    const parsed = parseRegionalQRCode(qrData, 'serbia'); // Use Serbian regional settings
+    const parsed = parseRegionalQRCode(qrData, 'serbia', t); // Use Serbian regional settings with translation
     
     console.log('🔍 Parsed QR Data:', parsed);
     
