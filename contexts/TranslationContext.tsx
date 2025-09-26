@@ -218,6 +218,7 @@ export interface Translations {
   welcomeHighlight3: string;
   continue: string;
   finish: string;
+  chooseLanguage: string;
 }
 
 // English translations
@@ -437,6 +438,7 @@ const englishTranslations: Translations = {
   welcomeHighlight3: 'Switch language and currency anytime in Settings',
   continue: 'Continue',
   finish: 'Finish',
+  chooseLanguage: 'Choose your preferred language',
 };
 
 // Serbian translations
@@ -656,6 +658,7 @@ const serbianTranslations: Translations = {
   welcomeHighlight3: 'Promenite jezik i valutu bilo kada u Podešavanjima',
   continue: 'Nastavi',
   finish: 'Završi',
+  chooseLanguage: 'Izaberite željeni jezik',
 };
 
 export type Language = 'en' | 'sr';

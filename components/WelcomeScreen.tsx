@@ -11,13 +11,13 @@ interface WelcomeScreenProps {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
   const { t, language, setLanguage } = useTranslation();
-  const [page, setPage] = useState<number>(0); // 0 -> intro, 1 -> language+currency
+  const [page, setPage] = useState<number>(0); // 0 -> language, 1 -> intro, 2 -> currency
   const [selectedCurrency, setSelectedCurrencyState] = useState<string>('USD');
 
   const popular = useMemo(() => ['USD', 'EUR', 'RSD', 'GBP'], []);
 
-  const handleNext = () => setPage(1);
-  const handleBack = () => setPage(0);
+  const handleNext = () => setPage(page + 1);
+  const handleBack = () => setPage(page - 1);
 
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
@@ -37,18 +37,43 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
     <View className="flex-1 bg-white">
       {/* Header */}
       <View className="px-6 pt-12 pb-6">
-        {page === 1 ? (
+        {page > 0 ? (
           <TouchableOpacity onPress={handleBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={22} color="#374151" />
-            <Text className="text-lg font-semibold text-gray-900 ml-2">{t('welcomeTitle')}</Text>
+            <Text className="text-lg font-semibold text-gray-900 ml-2">
+              {page === 1 ? t('welcomeTitle') : t('selectCurrency')}
+            </Text>
           </TouchableOpacity>
         ) : (
-          <Text className="text-2xl font-extrabold text-gray-900">{t('welcomeTitle')}</Text>
+          <Text className="text-2xl font-extrabold text-gray-900">{t('language')}</Text>
         )}
       </View>
 
       {/* Content */}
       {page === 0 ? (
+        // Language Selection Page
+        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+          <View className="bg-gray-50 rounded-2xl p-5 mb-4">
+            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('language')}</Text>
+            <Text className="text-gray-600 mb-4">{t('chooseLanguage')}</Text>
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => handleLanguageChange('en')}
+                className={`px-6 py-3 rounded-xl ${language === 'en' ? 'bg-blue-600' : 'bg-white border border-gray-200'}`}
+              >
+                <Text className={`${language === 'en' ? 'text-white' : 'text-gray-900'} font-semibold text-lg`}>English</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleLanguageChange('sr')}
+                className={`px-6 py-3 rounded-xl ${language === 'sr' ? 'bg-blue-600' : 'bg-white border border-gray-200'}`}
+              >
+                <Text className={`${language === 'sr' ? 'text-white' : 'text-gray-900'} font-semibold text-lg`}>Srpski</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      ) : page === 1 ? (
+        // Welcome Text Page
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
           <View className="bg-gray-50 rounded-2xl p-5 mb-4">
             <Text className="text-xl font-bold text-gray-900 mb-2">{t('welcomeHeadline')}</Text>
@@ -74,25 +99,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
           </View>
         </ScrollView>
       ) : (
+        // Currency Selection Page
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('language')}</Text>
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                onPress={() => handleLanguageChange('en')}
-                className={`px-4 py-2 rounded-xl ${language === 'en' ? 'bg-blue-600' : 'bg-gray-100'}`}
-              >
-                <Text className={`${language === 'en' ? 'text-white' : 'text-gray-900'} font-semibold`}>English</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleLanguageChange('sr')}
-                className={`px-4 py-2 rounded-xl ${language === 'sr' ? 'bg-blue-600' : 'bg-gray-100'}`}
-              >
-                <Text className={`${language === 'sr' ? 'text-white' : 'text-gray-900'} font-semibold`}>Srpski</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-3">{t('selectCurrency')}</Text>
             <Text className="text-gray-600 mb-3">{t('choosePreferredCurrency')}</Text>
@@ -134,6 +142,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
       {/* Footer */}
       <View className="px-6 py-4 border-t border-gray-100 bg-white">
         {page === 0 ? (
+          <TouchableOpacity onPress={handleNext} className="bg-blue-600 rounded-xl py-4 items-center">
+            <Text className="text-white font-semibold">{t('continue')}</Text>
+          </TouchableOpacity>
+        ) : page === 1 ? (
           <TouchableOpacity onPress={handleNext} className="bg-blue-600 rounded-xl py-4 items-center">
             <Text className="text-white font-semibold">{t('continue')}</Text>
           </TouchableOpacity>
