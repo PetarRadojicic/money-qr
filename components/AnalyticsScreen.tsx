@@ -76,9 +76,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 }) => {
   const { t, translations } = useTranslation();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    globalData?.selectedCurrency || 'USD'
-  );
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isLoading, setIsLoading] = useState(!skipInitialLoading);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<'specific' | 'all'>('all');
@@ -88,12 +86,26 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
   const screenWidth = Dimensions.get('window').width;
 
+  // Load currency immediately on mount
+  useEffect(() => {
+    const loadCurrency = async () => {
+      try {
+        const currency = await getSelectedCurrency();
+        setSelectedCurrency(currency);
+      } catch (error) {
+        console.error('Error loading initial currency:', error);
+      }
+    };
+    loadCurrency();
+  }, []);
+
   // Fast loading from preloaded cache
   const loadAnalyticsDataFromCache = useCallback(async () => {
     try {
       if (globalData?.isDataReady && globalData.appData && globalData.transactionHistory) {
-        // Use preloaded data directly
-        setSelectedCurrency(globalData.selectedCurrency);
+        // Always get fresh currency to ensure consistency
+        const currentCurrency = await getSelectedCurrency();
+        setSelectedCurrency(currentCurrency);
         
         // Get available months from preloaded data
         const months = Object.keys(globalData.appData).sort();
@@ -172,8 +184,11 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     if (!globalData?.isDataReady) return;
     const refreshOnCurrency = async () => {
       try {
+        // Always get fresh currency to ensure consistency
+        const currentCurrency = await getSelectedCurrency();
+        setSelectedCurrency(currentCurrency);
+        
         if (globalData?.appData && globalData?.transactionHistory) {
-          setSelectedCurrency(globalData.selectedCurrency);
           const analytics = calculateAnalytics(
             globalData.appData,
             globalData.transactionHistory,
