@@ -73,7 +73,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Function to force refresh exchange rates (for manual refresh or currency change)
   const forceRefreshRates = useCallback(async () => {
-    console.log('🔄 Force refreshing exchange rates...');
     await updateCurrencyRates();
   }, []);
 
@@ -112,7 +111,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const checkCurrencyChange = async () => {
       const currentCurrency = await getSelectedCurrency();
       if (selectedCurrency && selectedCurrency !== currentCurrency) {
-        console.log(`💱 Currency changed from ${selectedCurrency} to ${currentCurrency}, refreshing rates...`);
         await forceRefreshRates();
       }
     };
@@ -147,10 +145,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       
       // Only fetch exchange rates if they're not fresh (non-blocking)
       if (!areRatesFresh()) {
-        console.log('🔄 Exchange rates are stale, updating...');
         updateCurrencyRates();
       } else {
-        console.log('✅ Exchange rates are fresh, skipping update');
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -383,9 +379,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   
 
   const handleQRScanned = useCallback((qrData: string) => {
-    console.log('📱 QR Data received:', qrData);
-    console.log('📱 QR Data length:', qrData.length);
-    console.log('📱 QR Data type:', typeof qrData);
     
     if (!qrData || qrData.trim().length === 0) {
       Alert.alert(
@@ -527,7 +520,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         amountToSave = await convertAmount(scannedReceiptData.amount || 0, scannedReceiptData.currency, selectedCurrency);
       }
     } catch (e) {
-      console.warn('Currency conversion failed, saving raw amount:', e);
     }
 
     const updatedCategories = {

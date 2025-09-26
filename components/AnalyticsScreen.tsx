@@ -13,7 +13,6 @@ import {
 import { AppData, MonthlyData, Transaction, HistoryData } from '../types';
 import { formatCurrency } from '../constants/currencies';
 import { 
-  calculateFinancialHealth, 
   analyzeCategoryTrends, 
   calculateYearOverYearComparison 
 } from '../utils/analyticsUtils';
@@ -168,6 +167,30 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     }
   }, [timeRange, selectedMonths, skipInitialLoading, globalData?.isDataReady]);
 
+  // Recompute when selected currency changes via global data
+  useEffect(() => {
+    if (!globalData?.isDataReady) return;
+    const refreshOnCurrency = async () => {
+      try {
+        if (globalData?.appData && globalData?.transactionHistory) {
+          setSelectedCurrency(globalData.selectedCurrency);
+          const analytics = calculateAnalytics(
+            globalData.appData,
+            globalData.transactionHistory,
+            timeRange,
+            selectedMonths
+          );
+          setAnalyticsData(analytics);
+        } else {
+          await loadAnalyticsData();
+        }
+      } catch (e) {
+        await loadAnalyticsData();
+      }
+    };
+    refreshOnCurrency();
+  }, [globalData?.selectedCurrency]);
+
   // Calculate analytics from data
   const calculateAnalytics = (
     appData: AppData,
@@ -282,6 +305,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     const transaction = transactions.find(t => t.categoryId === categoryId);
     return transaction?.categoryName || categoryId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
+
+  // (Removed) financial health score UI
 
   // Render simple bar chart for monthly data
   const renderMonthlyChart = () => {
@@ -513,6 +538,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         </View>
       </View>
 
+      {/* Financial Health Score removed */}
+
       {/* Monthly Chart */}
       {renderMonthlyChart()}
 
@@ -560,9 +587,9 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           </View>
           <Text className="text-gray-700">
             {t('yourSavingsRateIs')} {analyticsData.savingsRate.toFixed(1)}%
-            {analyticsData.savingsRate > 20 ? t('excellent') : 
-             analyticsData.savingsRate > 10 ? t('goodWork') : 
-             t('considerReducing')}
+            {analyticsData.savingsRate > 20 ? ' - Excellent!' : 
+             analyticsData.savingsRate > 10 ? ' - Good work!' : 
+             ' - Consider reducing expenses'}
           </Text>
         </View>
       </View>

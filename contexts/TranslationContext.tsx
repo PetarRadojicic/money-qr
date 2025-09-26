@@ -102,11 +102,12 @@ export interface Translations {
   savingsPerformance: string;
   ofTotal: string;
   transactions: string;
+  
+  // (Removed) Financial Health Score strings
   selectAll: string;
   clearAll: string;
   apply: string;
   noDataAvailable: string;
-  excellent: string;
   goodWork: string;
   considerReducing: string;
   trackExpensesDaily: string;
@@ -195,6 +196,24 @@ export interface Translations {
   failedToUpdateRates: string;
   editingCategory: string;
   all: string;
+  // Exchange rate status messages
+  ratesFreshWithTime: string; // e.g., "Rates are fresh ({minutesLeft}m left)"
+  ratesOutdated: string; // e.g., "Rates are outdated"
+  noRatesAvailable: string; // e.g., "No rates available"
+  currenciesAvailableCount: string; // e.g., "{count} currencies available"
+
+  // Welcome / Onboarding
+  welcomeTitle: string;
+  welcomeHeadline: string;
+  welcomeBody1: string;
+  welcomeBody2: string;
+  welcomeContact: string;
+  welcomeHighlightsTitle: string;
+  welcomeHighlight1: string;
+  welcomeHighlight2: string;
+  welcomeHighlight3: string;
+  continue: string;
+  finish: string;
 }
 
 // English translations
@@ -297,11 +316,13 @@ const englishTranslations: Translations = {
   savingsPerformance: 'Savings Performance',
   ofTotal: 'of total',
   transactions: 'transactions',
+  
+  // (Removed) Financial Health Score
+  
   selectAll: 'Select All',
   clearAll: 'Clear All',
   apply: 'Apply',
   noDataAvailable: 'No data available for analytics',
-  excellent: ' - Excellent!',
   goodWork: ' - Good work!',
   considerReducing: ' - Consider reducing expenses',
   trackExpensesDaily: 'Track expenses daily for better insights and patterns',
@@ -390,6 +411,24 @@ const englishTranslations: Translations = {
   failedToUpdateRates: 'Failed to update exchange rates',
   editingCategory: 'Editing Category',
   all: 'All',
+  // Exchange rate status messages
+  ratesFreshWithTime: 'Rates are fresh ({minutesLeft}m left)',
+  ratesOutdated: 'Rates are outdated',
+  noRatesAvailable: 'No rates available',
+  currenciesAvailableCount: '{count} currencies available',
+
+  // Welcome / Onboarding
+  welcomeTitle: 'Welcome to Money QR',
+  welcomeHeadline: 'Thanks for checking out this learning project!',
+  welcomeBody1: "This app is part of my portfolio. It's a lightweight money tracker that lets you log expenses, analyze spending, and even parse receipt totals from QR-linked pages.",
+  welcomeBody2: 'I appreciate any feedback or bug reports as I continue improving it.',
+  welcomeContact: 'Found an issue? Reach me at {email}.',
+  welcomeHighlightsTitle: 'What you can do here',
+  welcomeHighlight1: 'Track income and expenses across months',
+  welcomeHighlight2: 'Scan receipt QR links and auto-extract totals',
+  welcomeHighlight3: 'Switch language and currency anytime in Settings',
+  continue: 'Continue',
+  finish: 'Finish',
 };
 
 // Serbian translations
@@ -492,11 +531,13 @@ const serbianTranslations: Translations = {
   savingsPerformance: 'Performanse štednje',
   ofTotal: 'od ukupno',
   transactions: 'transakcije',
+  
+  // (Removed) Financial Health Score
+  
   selectAll: 'Izaberi sve',
   clearAll: 'Obriši sve',
   apply: 'Primeni',
   noDataAvailable: 'Nema dostupnih podataka za analitiku',
-  excellent: ' - Odlično!',
   goodWork: ' - Dobar rad!',
   considerReducing: ' - Razmislite o smanjenju troškova',
   trackExpensesDaily: 'Pratite troškove dnevno za bolje uvide i obrasce',
@@ -585,6 +626,24 @@ const serbianTranslations: Translations = {
   failedToUpdateRates: 'Neuspešno ažuriranje kursnih lista',
   editingCategory: 'Uređivanje kategorije',
   all: 'Sve',
+  // Exchange rate status messages
+  ratesFreshWithTime: 'Kurs je svež (preostalo {minutesLeft}m)',
+  ratesOutdated: 'Kurs je zastareo',
+  noRatesAvailable: 'Nema dostupnih kurseva',
+  currenciesAvailableCount: '{count} valuta dostupno',
+
+  // Welcome / Onboarding
+  welcomeTitle: 'Dobrodošli u Money QR',
+  welcomeHeadline: 'Hvala što gledate ovaj projekat za učenje!',
+  welcomeBody1: 'Ova aplikacija je deo mog portfolija. Lagan je tracker novca koji omogućava beleženje troškova, analizu potrošnje i čak čitanje total iznosa sa stranica do kojih vodi QR kod sa računa.',
+  welcomeBody2: 'Svaki feedback ili prijava grešaka je dobrodošla dok je unapređujem.',
+  welcomeContact: 'Našli ste problem? Pišite mi na {email}.',
+  welcomeHighlightsTitle: 'Šta možete da radite',
+  welcomeHighlight1: 'Pratite prihode i troškove po mesecima',
+  welcomeHighlight2: 'Skenirajte QR linkove sa računa i automatski izdvojite total',
+  welcomeHighlight3: 'Promenite jezik i valutu bilo kada u Podešavanjima',
+  continue: 'Nastavi',
+  finish: 'Završi',
 };
 
 export type Language = 'en' | 'sr';
