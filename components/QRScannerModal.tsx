@@ -112,7 +112,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
           facing="back"
           onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
+            barcodeTypes: ['qr', 'pdf417', 'datamatrix', 'code128', 'ean13', 'ean8'],
           }}
         >
           {/* Scanning overlay */}

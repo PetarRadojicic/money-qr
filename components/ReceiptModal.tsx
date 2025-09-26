@@ -108,6 +108,40 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   {t('amountCannotBeChanged')}
                 </Text>
               </View>
+              
+              {/* Additional QR Data */}
+              {receiptData && (
+                <View className="mt-4 space-y-2">
+                  {receiptData.merchant && (
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-600 text-sm">{t('merchant')}:</Text>
+                      <Text className="text-gray-900 text-sm font-medium">{receiptData.merchant}</Text>
+                    </View>
+                  )}
+                  {receiptData.format && receiptData.format !== 'generic' && (
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-600 text-sm">{t('format')}:</Text>
+                      <Text className="text-gray-900 text-sm font-medium">{receiptData.format.toUpperCase()}</Text>
+                    </View>
+                  )}
+                  {receiptData.reference && (
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-600 text-sm">Reference:</Text>
+                      <Text className="text-gray-900 text-sm font-medium" numberOfLines={1}>
+                        {receiptData.reference}
+                      </Text>
+                    </View>
+                  )}
+                  {receiptData.description && receiptData.description !== receiptData.merchant && (
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-600 text-sm">Description:</Text>
+                      <Text className="text-gray-900 text-sm font-medium" numberOfLines={1}>
+                        {receiptData.description}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
 
             {/* Category Selection */}

@@ -34,6 +34,7 @@ import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/curr
 import { WebView } from 'react-native-webview';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getTranslatedMonthName } from '../utils/translationUtils';
+import { parseRegionalQRCode, validateQRData, formatQRAmount, ParsedQRData } from '../utils/qrCodeParser';
 
 interface HomeScreenProps {
   onNavigateHistory: () => void;
@@ -65,12 +66,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [scannedReceiptData, setScannedReceiptData] = useState<ParsedReceiptData | null>(null);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
 
-  interface ParsedReceiptData {
-    amount: number;
-    currency?: string;
-    rawData: string;
-    merchant?: string;
-    date?: string;
+  interface ParsedReceiptData extends ParsedQRData {
     receiptNumber?: string;
     tax?: number;
   }
@@ -400,18 +396,73 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       return;
     }
     
-    // If QR is a URL, trigger hidden WebView to extract total from #totalAmountLabel
-    if (qrData.startsWith('http')) {
+    // Parse QR code using the comprehensive parser
+    const parsed = parseRegionalQRCode(qrData, 'serbia'); // Use Serbian regional settings
+    
+    console.log('🔍 Parsed QR Data:', parsed);
+    
+    // Handle URL format (existing WebView functionality)
+    if (parsed.format === 'url') {
       setIsQRScannerVisible(false);
       setWebViewUrl(qrData);
       return;
     }
-
-    // Non-URL QR codes are not supported in this simplified flow
-    Alert.alert(
-      t('qrNotSupported'),
-      t('qrNotSupportedMessage')
-    );
+    
+    // Validate parsed data
+    if (!validateQRData(parsed)) {
+      Alert.alert(
+        t('qrNotSupported'),
+        parsed.error || t('qrNotSupportedMessage'),
+        [
+          { text: t('ok') },
+          {
+            text: t('showRawData'),
+            onPress: () => {
+              Alert.alert(
+                t('rawQRData'),
+                qrData,
+                [{ text: t('ok') }]
+              );
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    // Successfully parsed payment QR code
+    setIsQRScannerVisible(false);
+    
+    // Create receipt data from parsed QR
+    const receiptData: ParsedReceiptData = {
+      ...parsed,
+      amount: parsed.amount || 0,
+      currency: parsed.currency || 'RSD',
+      rawData: qrData,
+      success: parsed.success
+    };
+    
+    setScannedReceiptData(receiptData);
+    setIsReceiptModalVisible(true);
+    
+    // Show success message with parsed info
+    const formatMessage = () => {
+      let message = t('qrCodeParsedSuccessfully');
+      if (parsed.amount) {
+        message += `\n${t('amount')}: ${formatQRAmount(parsed.amount, parsed.currency || 'RSD')}`;
+      }
+      if (parsed.merchant) {
+        message += `\n${t('merchant')}: ${parsed.merchant}`;
+      }
+      if (parsed.format !== 'generic') {
+        message += `\n${t('format')}: ${parsed.format.toUpperCase()}`;
+      }
+      return message;
+    };
+    
+    // Optional: Show a brief success toast instead of blocking alert
+    console.log('✅ QR Code parsed successfully:', formatMessage());
+    
   }, [t]);
 
   const handleWebViewMessage = useCallback((event: any) => {
@@ -437,6 +488,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           amount,
           currency: 'RSD',
           rawData: webViewUrl || cleaned,
+          format: 'url',
+          success: true
         };
         setScannedReceiptData(data);
         setIsReceiptModalVisible(true);
@@ -468,10 +521,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const categoryName = category?.name || 'Unknown';
 
     // If the receipt currency is RSD and selectedCurrency differs, convert before saving
-    let amountToSave = scannedReceiptData.amount;
+    let amountToSave = scannedReceiptData.amount || 0;
     try {
       if (scannedReceiptData.currency && scannedReceiptData.currency !== selectedCurrency) {
-        amountToSave = await convertAmount(scannedReceiptData.amount, scannedReceiptData.currency, selectedCurrency);
+        amountToSave = await convertAmount(scannedReceiptData.amount || 0, scannedReceiptData.currency, selectedCurrency);
       }
     } catch (e) {
       console.warn('Currency conversion failed, saving raw amount:', e);

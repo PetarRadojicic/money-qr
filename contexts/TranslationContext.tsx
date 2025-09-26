@@ -71,6 +71,11 @@ export interface Translations {
   qrNotSupportedMessage: string;
   amountNotFound: string;
   amountNotFoundMessage: string;
+  qrCodeParsedSuccessfully: string;
+  showRawData: string;
+  rawQRData: string;
+  merchant: string;
+  format: string;
   
   // Transaction descriptions
   expenseAdded: string;
@@ -258,9 +263,14 @@ const englishTranslations: Translations = {
   emptyQRCode: 'Empty QR Code',
   emptyQRMessage: 'The QR code appears to be empty. Please try scanning again.',
   qrNotSupported: 'QR Not Supported',
-  qrNotSupportedMessage: 'This QR format is not supported. Please scan a receipt URL QR code.',
+  qrNotSupportedMessage: 'This QR format is not supported. Only payment QR codes and receipt URLs are supported.',
   amountNotFound: 'Amount Not Found',
   amountNotFoundMessage: 'Could not read total from the page.',
+  qrCodeParsedSuccessfully: 'QR Code parsed successfully!',
+  showRawData: 'Show Raw Data',
+  rawQRData: 'Raw QR Data',
+  merchant: 'Merchant',
+  format: 'Format',
   
   // Transaction descriptions
   expenseAdded: 'Expense added to {categoryName}',
@@ -448,9 +458,14 @@ const serbianTranslations: Translations = {
   emptyQRCode: 'Prazan QR kod',
   emptyQRMessage: 'QR kod izgleda da je prazan. Molimo pokušajte ponovo da skenirate.',
   qrNotSupported: 'QR nije podržan',
-  qrNotSupportedMessage: 'Ovaj format QR koda nije podržan. Molimo skenirajte QR kod URL-a računa.',
+  qrNotSupportedMessage: 'Ovaj format QR koda nije podržan. Podržani su samo QR kodovi za plaćanje i URL-ovi računa.',
   amountNotFound: 'Iznos nije pronađen',
   amountNotFoundMessage: 'Nije moguće pročitati ukupan iznos sa stranice.',
+  qrCodeParsedSuccessfully: 'QR kod je uspešno parsiran!',
+  showRawData: 'Prikaži sirove podatke',
+  rawQRData: 'Sirovi QR podaci',
+  merchant: 'Trgovac',
+  format: 'Format',
   
   // Transaction descriptions
   expenseAdded: 'Trošak dodat u {categoryName}',
