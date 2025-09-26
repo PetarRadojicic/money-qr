@@ -63,6 +63,15 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
             <Text className="text-gray-600 mb-1">• {t('welcomeHighlight2')}</Text>
             <Text className="text-gray-600 mb-1">• {t('welcomeHighlight3')}</Text>
           </View>
+
+          {/* QR Testing Warning */}
+          <View className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mt-4">
+            <View className="flex-row items-center mb-2">
+              <Ionicons name="warning" size={20} color="#D97706" />
+              <Text className="text-yellow-800 font-semibold ml-2">{t('qrTestingWarning')}</Text>
+            </View>
+            <Text className="text-yellow-700 text-sm">{t('qrTestingWarningText')}</Text>
+          </View>
         </ScrollView>
       ) : (
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>

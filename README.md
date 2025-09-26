@@ -22,6 +22,7 @@ A modern, multilingual React Native expense tracking application with QR code re
 - **Web Integration**: Extract total amounts from receipt web pages using WebView
 - **Automatic Categorization**: Quickly assign scanned receipts to expense categories
 - **Currency Conversion**: Automatic currency conversion for international receipts
+- **⚠️ Serbia Testing**: QR scanning has been primarily tested with Serbian receipts (e.g., Infostan bills and receipts from stores) and may not work with all international formats
 
 ### 🎨 User Experience
 - **Modern UI**: Clean, intuitive interface built with NativeWind (Tailwind CSS)
@@ -103,6 +104,10 @@ money-qr/
     ├── splash-icon.png # Splash screen
     └── ...
 ```
+
+## ⚠️ Important Notice
+
+**QR Code Scanning Testing**: This application's QR code scanning functionality has been primarily tested with Serbian receipts and bills (such as Infostan utility bills and receipts from stores). While the app supports multiple QR code formats including IPS, EMV, SEPA, and generic patterns, compatibility with all international receipt formats cannot be guaranteed. Users outside of Serbia should test QR scanning with their local receipts and report any issues.
 
 ## 🚀 Getting Started
 

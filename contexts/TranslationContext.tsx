@@ -196,6 +196,10 @@ export interface Translations {
   failedToUpdateRates: string;
   editingCategory: string;
   all: string;
+  
+  // Welcome Screen
+  qrTestingWarning: string;
+  qrTestingWarningText: string;
   // Exchange rate status messages
   ratesFreshWithTime: string; // e.g., "Rates are fresh ({minutesLeft}m left)"
   ratesOutdated: string; // e.g., "Rates are outdated"
@@ -411,6 +415,10 @@ const englishTranslations: Translations = {
   failedToUpdateRates: 'Failed to update exchange rates',
   editingCategory: 'Editing Category',
   all: 'All',
+  
+  // Welcome Screen
+  qrTestingWarning: 'QR Scanning Notice',
+  qrTestingWarningText: 'QR scanning has been primarily tested with Serbian receipts (e.g., Infostan bills and receipts from stores). Compatibility with all international formats cannot be guaranteed.',
   // Exchange rate status messages
   ratesFreshWithTime: 'Rates are fresh ({minutesLeft}m left)',
   ratesOutdated: 'Rates are outdated',
@@ -626,6 +634,10 @@ const serbianTranslations: Translations = {
   failedToUpdateRates: 'Neuspešno ažuriranje kursnih lista',
   editingCategory: 'Uređivanje kategorije',
   all: 'Sve',
+  
+  // Welcome Screen
+  qrTestingWarning: 'Obaveštenje o QR skeniranju',
+  qrTestingWarningText: 'QR skeniranje je prvenstveno testirano sa srpskim računima (npr. Infostan računi i računi iz prodavnica). Kompatibilnost sa svim međunarodnim formatima ne može biti garantovana.',
   // Exchange rate status messages
   ratesFreshWithTime: 'Kurs je svež (preostalo {minutesLeft}m)',
   ratesOutdated: 'Kurs je zastareo',
