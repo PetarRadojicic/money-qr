@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Dimensions, RefreshControl, Modal } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Dimensions, RefreshControl, Modal, Animated, PanResponder } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   loadData,
@@ -83,6 +83,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [currentChartPage, setCurrentChartPage] = useState(0);
 
   const screenWidth = Dimensions.get('window').width;
 
@@ -206,6 +207,11 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     refreshOnCurrency();
   }, [globalData?.selectedCurrency]);
 
+  // Reset chart page when data changes
+  useEffect(() => {
+    setCurrentChartPage(0);
+  }, [analyticsData]);
+
   // Calculate analytics from data
   const calculateAnalytics = (
     appData: AppData,
@@ -323,25 +329,99 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
   // (Removed) financial health score UI
 
-  // Render simple bar chart for monthly data
+  // Render swipeable bar chart for monthly data (3 months per view)
   const renderMonthlyChart = () => {
     if (!analyticsData || analyticsData.monthlyAnalytics.length === 0) return null;
 
+    const monthsPerPage = 3;
+    const totalPages = Math.ceil(analyticsData.monthlyAnalytics.length / monthsPerPage);
+    const startIndex = currentChartPage * monthsPerPage;
+    const endIndex = Math.min(startIndex + monthsPerPage, analyticsData.monthlyAnalytics.length);
+    const currentPageMonths = analyticsData.monthlyAnalytics.slice(startIndex, endIndex);
+
     const maxAmount = Math.max(
-      ...analyticsData.monthlyAnalytics.map(m => Math.max(m.income, m.expenses))
+      ...currentPageMonths.map(m => Math.max(m.income, m.expenses))
     );
 
     const chartWidth = screenWidth - 48; // Account for padding
-    const barWidth = (chartWidth - 40) / analyticsData.monthlyAnalytics.length;
+    const barWidth = (chartWidth - 40) / monthsPerPage;
+
+    const goToPreviousPage = () => {
+      if (currentChartPage > 0) {
+        setCurrentChartPage(currentChartPage - 1);
+      }
+    };
+
+    const goToNextPage = () => {
+      if (currentChartPage < totalPages - 1) {
+        setCurrentChartPage(currentChartPage + 1);
+      }
+    };
+
+    // Pan responder for swipe gestures
+    const panResponder = PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > 50) {
+          // Swipe right - go to previous page
+          goToPreviousPage();
+        } else if (gestureState.dx < -50) {
+          // Swipe left - go to next page
+          goToNextPage();
+        }
+      },
+    });
 
     return (
       <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
-        <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          {t('monthlyIncomeVsExpenses')}
-        </Text>
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-lg font-semibold text-gray-900">
+            {t('monthlyIncomeVsExpenses')}
+          </Text>
+          
+          {/* Navigation Controls */}
+          <View className="flex-row items-center space-x-2">
+            <TouchableOpacity
+              onPress={goToPreviousPage}
+              disabled={currentChartPage === 0}
+              className={`p-2 rounded-full ${
+                currentChartPage === 0 ? 'bg-gray-100' : 'bg-blue-100'
+              }`}
+            >
+              <Ionicons 
+                name="chevron-back" 
+                size={20} 
+                color={currentChartPage === 0 ? '#9ca3af' : '#3b82f6'} 
+              />
+            </TouchableOpacity>
+            
+            <Text className="text-sm text-gray-600 px-2">
+              {currentChartPage + 1} / {totalPages}
+            </Text>
+            
+            <TouchableOpacity
+              onPress={goToNextPage}
+              disabled={currentChartPage === totalPages - 1}
+              className={`p-2 rounded-full ${
+                currentChartPage === totalPages - 1 ? 'bg-gray-100' : 'bg-blue-100'
+              }`}
+            >
+              <Ionicons 
+                name="chevron-forward" 
+                size={20} 
+                color={currentChartPage === totalPages - 1 ? '#9ca3af' : '#3b82f6'} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
         
-        <View className="flex-row items-end justify-between h-40 mb-2">
-          {analyticsData.monthlyAnalytics.map((month, index) => {
+        <View 
+          className="flex-row items-end justify-between h-40 mb-2"
+          {...panResponder.panHandlers}
+        >
+          {currentPageMonths.map((month, index) => {
             const incomeHeight = maxAmount > 0 ? (month.income / maxAmount) * 120 : 0;
             const expenseHeight = maxAmount > 0 ? (month.expenses / maxAmount) * 120 : 0;
 
@@ -349,20 +429,35 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               <View key={month.monthKey} className="items-center" style={{ width: barWidth }}>
                 <View className="flex-row items-end space-x-1" style={{ height: 120 }}>
                   <View 
-                    className="bg-green-500 rounded-t w-3"
+                    className="bg-green-500 rounded-t w-4"
                     style={{ height: incomeHeight }}
                   />
                   <View 
-                    className="bg-red-500 rounded-t w-3"
+                    className="bg-red-500 rounded-t w-4"
                     style={{ height: expenseHeight }}
                   />
                 </View>
                 <Text className="text-xs text-gray-600 mt-1 text-center">
                   {month.monthName.split(' ')[0].slice(0, 3)}
                 </Text>
+                <Text className="text-xs text-gray-500 mt-1 text-center">
+                  {month.monthName.split(' ')[1]}
+                </Text>
               </View>
             );
           })}
+        </View>
+        
+        {/* Page Indicators */}
+        <View className="flex-row justify-center space-x-2 mb-3">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <View
+              key={index}
+              className={`w-2 h-2 rounded-full ${
+                index === currentChartPage ? 'bg-blue-500' : 'bg-gray-300'
+              }`}
+            />
+          ))}
         </View>
         
         <View className="flex-row justify-center space-x-4">
