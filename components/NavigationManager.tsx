@@ -7,14 +7,14 @@ import { Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from '../contexts/TranslationContext';
 
 // Import all screen components
-import HomeScreen from './HomeScreen';
-import HistoryScreen from './HistoryScreen';
-import SettingsScreen from './SettingsScreen';
-import AnalyticsScreen from './AnalyticsScreen';
+import HomeScreen from '../screens/HomeScreen';
+import HistoryScreen from '../screens/HistoryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
 
 // Import data loading functions
 import { loadData, loadTransactionHistory, getSelectedCurrency, getIsOnboardingDone } from '../utils/dataManager';
-import WelcomeScreen from './WelcomeScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
 
 export type ScreenType = 'home' | 'analytics' | 'history' | 'settings';
 

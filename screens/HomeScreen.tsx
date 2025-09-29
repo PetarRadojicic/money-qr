@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ExpenseCategory from './ExpenseCategory';
-import ExpenseModal from './ExpenseModal';
-import AddBalanceModal from './AddBalanceModal';
-import AddCategoryModal from './AddCategoryModal';
-import EditCategoryModal from './EditCategoryModal';
-import QRScannerModal from './QRScannerModal';
-import ReceiptModal from './ReceiptModal';
+import ExpenseCategory from '../components/ExpenseCategory';
+import ExpenseModal from '../components/ExpenseModal';
+import AddBalanceModal from '../components/AddBalanceModal';
+import AddCategoryModal from '../components/AddCategoryModal';
+import EditCategoryModal from '../components/EditCategoryModal';
+import QRScannerModal from '../components/QRScannerModal';
+import ReceiptModal from '../components/ReceiptModal';
 import { createExpenseCategories } from '../constants/expenseCategories';
 import {
   getCurrentMonthKey,

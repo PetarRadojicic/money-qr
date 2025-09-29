@@ -10,9 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { resetAppData, getSelectedCurrency } from '../utils/dataManager';
 import { getCurrencyByCode, formatCurrency } from '../constants/currencies';
-import CurrencyModal from './CurrencyModal';
-import LanguageModal from './LanguageModal';
-import ExchangeRateStatus from './ExchangeRateStatus';
+import CurrencyModal from '../components/CurrencyModal';
+import LanguageModal from '../components/LanguageModal';
+import ExchangeRateStatus from '../components/ExchangeRateStatus';
 import { useTranslation, Language } from '../contexts/TranslationContext';
 
 interface SettingsScreenProps {
