@@ -32,10 +32,8 @@ import {
 import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
 import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/currencyService';
-import { WebView } from 'react-native-webview';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getTranslatedMonthName } from '../utils/translationUtils';
-import { parseRegionalQRCode, validateQRData, formatQRAmount, ParsedQRData } from '../utils/qrCodeParser';
 
 interface HomeScreenProps {
   onNavigateHistory: () => void;
@@ -64,13 +62,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isQRScannerVisible, setIsQRScannerVisible] = useState(false);
   const [isReceiptModalVisible, setIsReceiptModalVisible] = useState(false);
-  const [scannedReceiptData, setScannedReceiptData] = useState<ParsedReceiptData | null>(null);
-  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
 
-  interface ParsedReceiptData extends ParsedQRData {
-    receiptNumber?: string;
-    tax?: number;
-  }
+  // QR parsing is disabled; keeping modal UI but without parsing logic
 
   // Function to force refresh exchange rates (for manual refresh or currency change)
   const forceRefreshRates = useCallback(async () => {
@@ -343,12 +336,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     customCategories[newCategory.id] = newCategory;
     await saveCustomCategories(customCategories);
     await loadAllData();
-    
-    // If we came from receipt modal, reopen it
-    if (scannedReceiptData) {
-      setIsReceiptModalVisible(true);
-    }
-  }, [scannedReceiptData]);
+  }, []);
 
   const handleEditCategoryConfirm = useCallback(async (categoryId: string, updates: Partial<CustomCategory>) => {
     if (!editingCategory) return;
@@ -382,124 +370,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   
 
   const handleQRScanned = useCallback((qrData: string) => {
-    
+    // Disable parsing logic for now; preserve UI flow
     if (!qrData || qrData.trim().length === 0) {
-      Alert.alert(
-        t('emptyQRCode'),
-        t('emptyQRMessage'),
-        [{ text: t('ok') }]
-      );
+      Alert.alert(t('emptyQRCode'), t('emptyQRMessage'), [{ text: t('ok') }]);
       return;
     }
-    
-    // Parse QR code using the comprehensive parser
-    const parsed = parseRegionalQRCode(qrData, 'serbia', t); // Use Serbian regional settings with translation
-    
-    console.log('🔍 Parsed QR Data:', parsed);
-    
-    // Handle URL format (existing WebView functionality)
-    if (parsed.format === 'url') {
-      setIsQRScannerVisible(false);
-      setWebViewUrl(qrData);
-      return;
-    }
-    
-    // Validate parsed data
-    if (!validateQRData(parsed)) {
-      Alert.alert(
-        t('qrNotSupported'),
-        parsed.error || t('qrNotSupportedMessage'),
-        [
-          { text: t('ok') },
-          {
-            text: t('showRawData'),
-            onPress: () => {
-              Alert.alert(
-                t('rawQRData'),
-                qrData,
-                [{ text: t('ok') }]
-              );
-            }
-          }
-        ]
-      );
-      return;
-    }
-    
-    // Successfully parsed payment QR code
+
     setIsQRScannerVisible(false);
-    
-    // Create receipt data from parsed QR
-    const receiptData: ParsedReceiptData = {
-      ...parsed,
-      amount: parsed.amount || 0,
-      currency: parsed.currency || 'RSD',
-      rawData: qrData,
-      success: parsed.success
-    };
-    
-    setScannedReceiptData(receiptData);
     setIsReceiptModalVisible(true);
-    
-    // Show success message with parsed info
-    const formatMessage = () => {
-      let message = t('qrCodeParsedSuccessfully');
-      if (parsed.amount) {
-        message += `\n${t('amount')}: ${formatQRAmount(parsed.amount, parsed.currency || 'RSD')}`;
-      }
-      if (parsed.merchant) {
-        message += `\n${t('merchant')}: ${parsed.merchant}`;
-      }
-      if (parsed.format !== 'generic') {
-        message += `\n${t('format')}: ${parsed.format.toUpperCase()}`;
-      }
-      return message;
-    };
-    
-    // Optional: Show a brief success toast instead of blocking alert
-    console.log('✅ QR Code parsed successfully:', formatMessage());
-    
   }, [t]);
 
-  const handleWebViewMessage = useCallback((event: any) => {
-    try {
-      const rawText: string = event?.nativeEvent?.data || '';
-      const cleaned = rawText.replace(/\s+/g, ' ').trim();
-      // Extract number-like patterns, allowing comma or dot as decimal separator
-      const numeric = cleaned.replace(/[^0-9.,-]/g, '');
-      let amount = NaN;
-      if (numeric.includes(',') && numeric.includes('.')) {
-        // Remove thousands separators heuristically: assume last separator is decimal
-        const lastComma = numeric.lastIndexOf(',');
-        const lastDot = numeric.lastIndexOf('.');
-        const decimalIsComma = lastComma > lastDot;
-        const withoutThousands = numeric.replace(decimalIsComma ? /\./g : /,/g, '');
-        amount = parseFloat((decimalIsComma ? withoutThousands.replace(',', '.') : withoutThousands));
-      } else {
-        amount = parseFloat(numeric.replace(',', '.'));
-      }
-
-      if (!isNaN(amount) && amount > 0) {
-        const data: ParsedReceiptData = {
-          amount,
-          currency: 'RSD',
-          rawData: webViewUrl || cleaned,
-          format: 'url',
-          success: true
-        };
-        setScannedReceiptData(data);
-        setIsReceiptModalVisible(true);
-        setWebViewUrl(null);
-      } else {
-        Alert.alert(t('amountNotFound'), t('amountNotFoundMessage'));
-        setWebViewUrl(null);
-      }
-    } catch (e) {
-      console.error('Error handling WebView message', e);
-      Alert.alert(t('error'), 'Failed to extract total amount.');
-      setWebViewUrl(null);
-    }
-  }, [webViewUrl, t]);
+  // URL/WebView extraction disabled with parsing removal
 
   const handleCloseQRScanner = useCallback(() => {
     setIsQRScannerVisible(false);
@@ -507,47 +388,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleReceiptModalClose = useCallback(() => {
     setIsReceiptModalVisible(false);
-    setScannedReceiptData(null);
   }, []);
 
-  const handleReceiptCategorySelect = useCallback(async (categoryId: string) => {
-    if (!scannedReceiptData || !monthlyData) return;
-
-    const category = expenseCategories.find(cat => cat.id === categoryId);
-    const categoryName = category?.name || 'Unknown';
-
-    // If the receipt currency is RSD and selectedCurrency differs, convert before saving
-    let amountToSave = scannedReceiptData.amount || 0;
-    try {
-      if (scannedReceiptData.currency && scannedReceiptData.currency !== selectedCurrency) {
-        amountToSave = await convertAmount(scannedReceiptData.amount || 0, scannedReceiptData.currency, selectedCurrency);
-      }
-    } catch (e) {
-    }
-
-    const updatedCategories = {
-      ...monthlyData.categories,
-      [categoryId]: (monthlyData.categories[categoryId] || 0) + amountToSave,
-    };
-
-    await updateMonthlyData(currentMonthKey, { categories: updatedCategories });
-    
-    // Add transaction to history
-    const transaction: Transaction = {
-      id: `receipt_${Date.now()}_${Math.random()}`,
-      type: 'expense',
-      amount: amountToSave,
-      categoryId,
-      categoryName,
-      monthKey: currentMonthKey,
-      date: new Date().toISOString(),
-      description: t('receiptExpense', { categoryName: `${categoryName}${scannedReceiptData.merchant ? ` at ${scannedReceiptData.merchant}` : ''}` }),
-    };
-    await addTransaction(transaction);
-    
-    await loadAllData();
+  // Disable applying receipt to categories while logic is being rebuilt
+  const handleReceiptCategorySelect = useCallback(async (_categoryId: string) => {
+    Alert.alert(t('qrNotSupported'), t('unsupportedQRFormat'));
     handleReceiptModalClose();
-  }, [scannedReceiptData, monthlyData, expenseCategories, currentMonthKey, handleReceiptModalClose, selectedCurrency, t]);
+  }, [handleReceiptModalClose, t]);
 
   const handleReceiptAddNewCategory = useCallback(() => {
     // Close receipt modal and open add category modal
@@ -767,43 +614,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         onQRScanned={handleQRScanned}
       />
 
-      {/* Hidden WebView for extracting total from pages */}
-      {webViewUrl ? (
-        <View style={{ width: 0, height: 0, overflow: 'hidden' }}>
-          <WebView
-            source={{ uri: webViewUrl }}
-            onMessage={handleWebViewMessage}
-            javaScriptEnabled
-            domStorageEnabled
-            injectedJavaScript={`
-              (function(){
-                function send(){
-                  try{
-                    var el = document.getElementById('totalAmountLabel');
-                    var text = el ? (el.innerText || el.textContent || '') : '';
-                    window.ReactNativeWebView && window.ReactNativeWebView.postMessage(text || '');
-                  }catch(e){ window.ReactNativeWebView && window.ReactNativeWebView.postMessage(''); }
-                }
-                // Try a few times to catch late-rendered content
-                send();
-                setTimeout(send, 600);
-                setTimeout(send, 1200);
-              })();
-              true;
-            `}
-          />
-        </View>
-      ) : null}
-
       <ReceiptModal
         isVisible={isReceiptModalVisible}
         onClose={handleReceiptModalClose}
         onConfirm={handleReceiptCategorySelect}
         onAddNewCategory={handleReceiptAddNewCategory}
-        receiptAmount={scannedReceiptData?.amount || 0}
-        receiptData={scannedReceiptData}
+        receiptAmount={0}
+        receiptData={undefined}
         categories={expenseCategories}
-        currency={scannedReceiptData?.currency || selectedCurrency}
+        currency={selectedCurrency}
       />
     </>
   );
