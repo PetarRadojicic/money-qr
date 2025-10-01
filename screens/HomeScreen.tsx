@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Alert, Modal } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ExpenseCategory from '../components/ExpenseCategory';
 import ExpenseModal from '../components/ExpenseModal';
@@ -32,6 +32,7 @@ import {
 import { MonthlyData, ModalState, CustomCategory, Transaction } from '../types';
 import { formatCurrency } from '../constants/currencies';
 import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/currencyService';
+import { parseReceiptFromRawData } from '../utils/receiptService';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getTranslatedMonthName } from '../utils/translationUtils';
 
@@ -62,6 +63,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isQRScannerVisible, setIsQRScannerVisible] = useState(false);
   const [isReceiptModalVisible, setIsReceiptModalVisible] = useState(false);
+  const [isFetchingReceipt, setIsFetchingReceipt] = useState(false);
+  const [receiptAmount, setReceiptAmount] = useState<number | null>(null);
+  const [receiptCurrency, setReceiptCurrency] = useState<string>('USD');
+  const [receiptMetadata, setReceiptMetadata] = useState<{ vendor?: string; date?: string } | undefined>(undefined);
+  const [receiptConvertedAmount, setReceiptConvertedAmount] = useState<number | undefined>(undefined);
+
 
   // QR parsing is disabled; keeping modal UI but without parsing logic
 
@@ -364,20 +371,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // QR Scanner handlers
   const handleOpenQRScanner = useCallback(() => {
+    if (isFetchingReceipt) {
+      return;
+    }
     setIsQRScannerVisible(true);
-  }, []);
+  }, [isFetchingReceipt]);
 
-  
 
-  const handleQRScanned = useCallback((qrData: string) => {
-    // Disable parsing logic for now; preserve UI flow
+  const handleQRScanned = useCallback(async (qrData: string) => {
     if (!qrData || qrData.trim().length === 0) {
       Alert.alert(t('emptyQRCode'), t('emptyQRMessage'), [{ text: t('ok') }]);
       return;
     }
 
     setIsQRScannerVisible(false);
-    setIsReceiptModalVisible(true);
+    setIsFetchingReceipt(true);
+
+    try {
+      const result = await parseReceiptFromRawData(qrData);
+
+      setReceiptAmount(result.total);
+      setReceiptCurrency(result.currency);
+      setReceiptMetadata({ vendor: result.vendor, date: result.date });
+
+      const currentCurrency = await getSelectedCurrency();
+      setSelectedCurrency(currentCurrency);
+
+      if (result.currency && currentCurrency && result.currency !== currentCurrency) {
+        const converted = await convertAmount(result.total, result.currency, currentCurrency);
+        setReceiptConvertedAmount(converted);
+      } else {
+        setReceiptConvertedAmount(undefined);
+      }
+
+      setIsReceiptModalVisible(true);
+    } catch (error: any) {
+      console.error('Failed to parse receipt:', error);
+      Alert.alert(t('error'), error?.message || 'Unable to parse receipt.');
+    } finally {
+      setIsFetchingReceipt(false);
+    }
   }, [t]);
 
   // URL/WebView extraction disabled with parsing removal
@@ -388,13 +421,45 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleReceiptModalClose = useCallback(() => {
     setIsReceiptModalVisible(false);
-  }, []);
+    setReceiptAmount(null);
+    setReceiptMetadata(undefined);
+    setReceiptConvertedAmount(undefined);
+    setReceiptCurrency(selectedCurrency);
+  }, [selectedCurrency]);
 
-  // Disable applying receipt to categories while logic is being rebuilt
-  const handleReceiptCategorySelect = useCallback(async (_categoryId: string) => {
-    Alert.alert(t('qrNotSupported'), t('unsupportedQRFormat'));
+  const handleReceiptCategorySelect = useCallback(async (categoryId: string) => {
+    const amountToApply = typeof receiptConvertedAmount === 'number' ? receiptConvertedAmount : receiptAmount;
+    if (!amountToApply || amountToApply <= 0 || !monthlyData) {
+      Alert.alert(t('amountNotFound'), t('amountNotFoundMessage'));
+      handleReceiptModalClose();
+      return;
+    }
+
+    const category = expenseCategories.find(cat => cat.id === categoryId);
+    const categoryName = category?.name || 'Receipt';
+
+    const updatedCategories = {
+      ...monthlyData.categories,
+      [categoryId]: (monthlyData.categories[categoryId] || 0) + amountToApply,
+    };
+
+    await updateMonthlyData(currentMonthKey, { categories: updatedCategories });
+
+    const transaction: Transaction = {
+      id: `receipt_${Date.now()}_${Math.random()}`,
+      type: 'expense',
+      amount: amountToApply,
+      categoryId,
+      categoryName,
+      monthKey: currentMonthKey,
+      date: new Date().toISOString(),
+      description: t('receiptExpense', { categoryName }),
+    };
+    await addTransaction(transaction);
+
     handleReceiptModalClose();
-  }, [handleReceiptModalClose, t]);
+    await loadAllData();
+  }, [receiptConvertedAmount, receiptAmount, monthlyData, expenseCategories, currentMonthKey, t, handleReceiptModalClose]);
 
   const handleReceiptAddNewCategory = useCallback(() => {
     // Close receipt modal and open add category modal
@@ -619,11 +684,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         onClose={handleReceiptModalClose}
         onConfirm={handleReceiptCategorySelect}
         onAddNewCategory={handleReceiptAddNewCategory}
-        receiptAmount={0}
-        receiptData={undefined}
+        receiptAmount={receiptAmount ?? 0}
+        receiptCurrency={receiptCurrency}
+        receiptMetadata={receiptMetadata}
+        convertedAmount={receiptConvertedAmount}
         categories={expenseCategories}
         currency={selectedCurrency}
       />
+
+      {/* Loading Overlay for QR Processing */}
+      <Modal
+        visible={isFetchingReceipt}
+        transparent={true}
+        animationType="fade"
+      >
+        <View className="flex-1 bg-black/70 justify-center items-center">
+          <View className="bg-white rounded-3xl p-8 items-center shadow-2xl">
+            <ActivityIndicator size="large" color="#3b82f6" />
+            <Text className="text-gray-900 text-lg font-semibold mt-4">
+              {t('processingReceipt')}
+            </Text>
+            <Text className="text-gray-600 text-sm mt-2 text-center">
+              {t('pleaseWait')}
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };

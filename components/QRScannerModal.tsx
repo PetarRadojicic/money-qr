@@ -4,10 +4,8 @@ import {
   Text,
   TouchableOpacity,
   Modal,
-  Alert,
-  Dimensions,
 } from 'react-native';
-import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../contexts/TranslationContext';
 
@@ -106,7 +104,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
           </Text>
         </View>
 
-        {/* Camera */}
+        {/* Scanner */}
         <CameraView
           style={{ flex: 1 }}
           facing="back"

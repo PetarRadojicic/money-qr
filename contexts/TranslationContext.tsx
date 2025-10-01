@@ -174,10 +174,17 @@ export interface Translations {
   scanReceiptQRCode: string;
   positionQRCode: string;
   pointCameraAtQR: string;
+  processingReceipt: string;
+  pleaseWait: string;
   
   // Navigation
   home: string;
   history: string;
+  // Receipt Metadata
+  receiptDateLabel: string;
+  receiptVendorLabel: string;
+  receiptCurrencyLabel: string;
+  convertedAmountLabel: string;
   
   // Additional Components
   newCategory: string;
@@ -395,10 +402,17 @@ const englishTranslations: Translations = {
   scanReceiptQRCode: 'Scan Receipt QR Code',
   positionQRCode: 'Position the QR code within the frame',
   pointCameraAtQR: 'Point your camera at the QR code on your receipt',
+  processingReceipt: 'Processing Receipt',
+  pleaseWait: 'Please wait...',
   
   // Navigation
   home: 'Home',
   history: 'History',
+  // Receipt Metadata
+  receiptDateLabel: 'Date',
+  receiptVendorLabel: 'Vendor',
+  receiptCurrencyLabel: 'Receipt currency',
+  convertedAmountLabel: 'Converted amount',
   
   // Additional Components
   newCategory: 'New Category',
@@ -616,10 +630,17 @@ const serbianTranslations: Translations = {
   scanReceiptQRCode: 'Skeniraj QR kod računa',
   positionQRCode: 'Postavite QR kod unutar okvira',
   pointCameraAtQR: 'Usmerite kameru na QR kod na vašem računu',
+  processingReceipt: 'Obrađuje se račun',
+  pleaseWait: 'Molimo sačekajte...',
   
   // Navigation
   home: 'Početna',
   history: 'Istorija',
+  // Receipt Metadata
+  receiptDateLabel: 'Datum',
+  receiptVendorLabel: 'Prodavac',
+  receiptCurrencyLabel: 'Valuta računa',
+  convertedAmountLabel: 'Konvertovani iznos',
   
   // Additional Components
   newCategory: 'Nova kategorija',

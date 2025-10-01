@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { formatCurrency } from '../constants/currencies';
+import { ExpenseCategoryData } from './ExpenseCategory';
 import { useTranslation } from '../contexts/TranslationContext';
 
 interface ReceiptModalProps {
@@ -18,8 +19,13 @@ interface ReceiptModalProps {
   onConfirm: (categoryId: string) => void;
   onAddNewCategory: () => void;
   receiptAmount: number;
-  receiptData?: any;
-  categories: any[];
+  receiptCurrency: string;
+  receiptMetadata?: {
+    date?: string;
+    vendor?: string;
+  };
+  convertedAmount?: number;
+  categories: ExpenseCategoryData[];
   currency: string;
 }
 
@@ -29,7 +35,9 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
   onConfirm,
   onAddNewCategory,
   receiptAmount,
-  receiptData,
+  receiptCurrency,
+  receiptMetadata,
+  convertedAmount,
   categories,
   currency,
 }) => {
@@ -99,44 +107,43 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: contentMaxHeight }}>
             {/* Receipt Amount */}
             <View className="p-6 border-b border-gray-200">
-              <View className="bg-green-50 rounded-xl p-4 items-center">
+            <View className="bg-green-50 rounded-xl p-4 items-center">
                 <Text className="text-gray-600 text-sm">{t('scannedAmount')}</Text>
                 <Text className="text-green-600 text-3xl font-bold mt-1">
-                  {formatCurrency(Number.isFinite(receiptAmount) ? receiptAmount : 0, currency)}
+                  {formatCurrency(Number.isFinite(receiptAmount) ? receiptAmount : 0, receiptCurrency)}
                 </Text>
+                {receiptCurrency ? (
+                  <Text className="text-gray-500 text-xs mt-1">
+                    {t('receiptCurrencyLabel')}: {receiptCurrency}
+                  </Text>
+                ) : null}
                 <Text className="text-gray-500 text-xs mt-1">
                   {t('amountCannotBeChanged')}
                 </Text>
               </View>
               
               {/* Additional QR Data */}
-              {receiptData && (
+              {(receiptMetadata || typeof convertedAmount === 'number') && (
                 <View className="mt-4 space-y-2">
-                  {receiptData.merchant && (
+                  {receiptMetadata?.vendor && (
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-gray-600 text-sm">{t('merchant')}:</Text>
-                      <Text className="text-gray-900 text-sm font-medium">{receiptData.merchant}</Text>
-                    </View>
-                  )}
-                  {receiptData.format && receiptData.format !== 'generic' && (
-                    <View className="flex-row justify-between items-center">
-                      <Text className="text-gray-600 text-sm">{t('format')}:</Text>
-                      <Text className="text-gray-900 text-sm font-medium">{receiptData.format.toUpperCase()}</Text>
-                    </View>
-                  )}
-                  {receiptData.reference && (
-                    <View className="flex-row justify-between items-center">
-                      <Text className="text-gray-600 text-sm">Reference:</Text>
+                      <Text className="text-gray-600 text-sm">{t('receiptVendorLabel')}:</Text>
                       <Text className="text-gray-900 text-sm font-medium" numberOfLines={1}>
-                        {receiptData.reference}
+                        {receiptMetadata.vendor}
                       </Text>
                     </View>
                   )}
-                  {receiptData.description && receiptData.description !== receiptData.merchant && (
+                  {receiptMetadata?.date && (
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-gray-600 text-sm">Description:</Text>
-                      <Text className="text-gray-900 text-sm font-medium" numberOfLines={1}>
-                        {receiptData.description}
+                      <Text className="text-gray-600 text-sm">{t('receiptDateLabel')}:</Text>
+                      <Text className="text-gray-900 text-sm font-medium">{receiptMetadata.date}</Text>
+                    </View>
+                  )}
+                  {typeof convertedAmount === 'number' && receiptCurrency !== currency && (
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-600 text-sm">{t('convertedAmountLabel')}:</Text>
+                      <Text className="text-gray-900 text-sm font-medium">
+                        {formatCurrency(convertedAmount, currency)}
                       </Text>
                     </View>
                   )}

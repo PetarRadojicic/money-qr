@@ -18,6 +18,7 @@ A modern, multilingual React Native expense tracking application with QR code re
 - **Visual Charts**: Interactive charts and graphs for better financial insights
 
 ### 📸 QR Receipt Scanning
+- **AI-Powered Receipt Processing**: Uses AI to automatically extract amounts and details from receipt data
 - **Smart Receipt Scanning**: Scan QR codes from receipts to automatically extract amounts
 - **Web Integration**: Extract total amounts from receipt web pages using WebView
 - **Automatic Categorization**: Quickly assign scanned receipts to expense categories
@@ -59,6 +60,7 @@ A modern, multilingual React Native expense tracking application with QR code re
 - **expo-camera ^17.0.8** - Camera functionality
 - **expo-barcode-scanner ^13.0.1** - QR code scanning
 - **react-native-webview 13.15.0** - Web content rendering
+- **AI-Powered Backend** - Custom API service for intelligent receipt data extraction and parsing
 
 ### Internationalization
 - **Custom Translation System** - Multi-language support with context-based translations
@@ -158,7 +160,8 @@ money-qr/
 1. Tap the "Scan Receipt QR" button on the home screen
 2. Allow camera permissions when prompted
 3. Point your camera at the QR code on the receipt
-4. The app will extract the amount and let you assign it to a category
+4. The AI-powered backend processes the receipt data and extracts the amount
+5. Assign the extracted amount to a category of your choice
 
 ### Managing Categories
 1. Tap the edit icon (pencil) in the spending categories section
