@@ -194,7 +194,6 @@ export interface Translations {
   currencyChanged: string;
   currencyConvertedMessage: string;
   convertingCurrency: string;
-  choosePreferredCurrency: string;
   exchangeRates: string;
   lastUpdated: string;
   updating: string;
@@ -227,6 +226,14 @@ export interface Translations {
   continue: string;
   finish: string;
   chooseLanguage: string;
+  
+  // New welcome screen text
+  discoverYour: string;
+  moneyQR: string;
+  satisfiedUsers: string;
+  nextGenOfFinances: string;
+  trackExpensesGrow: string;
+  selectedCurrency: string;
 }
 
 // English translations
@@ -422,7 +429,6 @@ const englishTranslations: Translations = {
   currencyChanged: 'Currency Changed',
   currencyConvertedMessage: 'All your data has been converted to {currencyName} ({currencySymbol}).\n\nExample: {example}',
   convertingCurrency: 'Converting all data to new currency...',
-  choosePreferredCurrency: 'Choose your preferred currency. All existing data will be automatically converted.',
   exchangeRates: 'Exchange Rates',
   lastUpdated: 'Last updated',
   updating: 'Updating...',
@@ -455,6 +461,14 @@ const englishTranslations: Translations = {
   continue: 'Continue',
   finish: 'Finish',
   chooseLanguage: 'Choose your preferred language',
+  
+  // New welcome screen text
+  discoverYour: 'Discover Your',
+  moneyQR: 'MONEY QR',
+  satisfiedUsers: '300+ Satisfied Users',
+  nextGenOfFinances: 'THE NEXT GEN OF YOUR FINANCES',
+  trackExpensesGrow: 'Track expenses and watch your money grow',
+  selectedCurrency: 'Selected Currency',
 };
 
 // Serbian translations
@@ -645,12 +659,11 @@ const serbianTranslations: Translations = {
   // Additional Components
   newCategory: 'Nova kategorija',
   selectCurrency: 'Izaberite valutu',
-  popularCurrencies: 'Popularne',
+  popularCurrencies: 'Popularno',
   allCurrencies: 'Sve valute',
   currencyChanged: 'Valuta promenjena',
   currencyConvertedMessage: 'Svi vaši podaci su konvertovani u {currencyName} ({currencySymbol}).\n\nPrimer: {example}',
   convertingCurrency: 'Konvertovanje svih podataka u novu valutu...',
-  choosePreferredCurrency: 'Izaberite željenu valutu. Svi postojeći podaci će biti automatski konvertovani.',
   exchangeRates: 'Kursne liste',
   lastUpdated: 'Poslednje ažuriranje',
   updating: 'Ažuriranje...',
@@ -683,6 +696,14 @@ const serbianTranslations: Translations = {
   continue: 'Nastavi',
   finish: 'Završi',
   chooseLanguage: 'Izaberite jezik',
+  
+  // New welcome screen text
+  discoverYour: 'Otkrijte',
+  moneyQR: 'MONEY QR',
+  satisfiedUsers: '300+ Zadovoljnih Korisnika',
+  nextGenOfFinances: 'SLEDEĆA GENERACIJA VAŠIH FINANSIJA',
+  trackExpensesGrow: 'Pratite troškove i gledajte kako vaš novac raste',
+  selectedCurrency: 'Izabrana Valuta',
 
 };
 

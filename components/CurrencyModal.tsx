@@ -144,10 +144,6 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
             </View>
           )}
 
-          <Text className="text-gray-600 text-sm mb-4">
-            {t('choosePreferredCurrency')}
-          </Text>
-
           {/* Popular Currencies */}
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-3">{t('popularCurrencies')}</Text>
