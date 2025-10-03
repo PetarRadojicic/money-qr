@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { categoryIcons, getAllCategories } from '../constants/categoryIcons';
 import { CustomCategory } from '../types';
 import { useTranslation } from '../contexts/TranslationContext';
@@ -80,7 +81,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   const renderIcon = (icon: typeof categoryIcons[0]) => {
     const iconProps = {
       size: 24,
-      color: selectedIcon.name === icon.name ? '#2563eb' : '#6b7280',
+      color: selectedIcon.name === icon.name ? '#fbbf24' : '#9ca3af',
     };
 
     const iconName = icon.name as any;
@@ -108,24 +109,31 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90%]">
+      <View className="flex-1 bg-black/70 justify-center items-center px-6">
+        <View className="bg-gray-900/90 rounded-2xl p-6 w-full max-w-lg max-h-[90%] border border-gray-700/50" style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.3,
+          shadowRadius: 16,
+          elevation: 8,
+        }}>
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-gray-900">
+            <Text className="text-xl font-bold text-white">
               {t('editCategory')}
             </Text>
             <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close" size={24} color="#6b7280" />
+              <Ionicons name="close" size={24} color="#fbbf24" />
             </TouchableOpacity>
           </View>
 
           {/* Category Name Input */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">{t('categoryName')}</Text>
+            <Text className="text-gray-300 font-medium mb-2">{t('categoryName')}</Text>
             <TextInput
-              className="border border-gray-300 rounded-xl px-4 py-3 text-lg text-gray-900"
+              className="border border-gray-600/50 rounded-xl px-4 py-3 text-lg text-white bg-gray-800/50"
               placeholder={t('pleaseEnterCategoryName')}
+              placeholderTextColor="#9ca3af"
               value={categoryName}
               onChangeText={setCategoryName}
               autoFocus={true}
@@ -134,17 +142,17 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
           {/* Category Filter */}
           <View className="mb-4">
-            <Text className="text-gray-700 font-medium mb-2">{t('icons')}</Text>
+            <Text className="text-gray-300 font-medium mb-2">{t('icons')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row space-x-2">
                 <TouchableOpacity
                   className={`px-4 py-2 rounded-full ${
-                    selectedCategory === 'All' ? 'bg-blue-100' : 'bg-gray-100'
+                    selectedCategory === 'All' ? 'bg-yellow-500/20' : 'bg-gray-700/50'
                   }`}
                   onPress={() => setSelectedCategory('All')}
                 >
                   <Text className={`text-sm font-medium ${
-                    selectedCategory === 'All' ? 'text-blue-600' : 'text-gray-600'
+                    selectedCategory === 'All' ? 'text-yellow-400' : 'text-gray-400'
                   }`}>
                     {t('all')}
                   </Text>
@@ -153,12 +161,12 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
                   <TouchableOpacity
                     key={category}
                     className={`px-4 py-2 rounded-full ${
-                      selectedCategory === category ? 'bg-blue-100' : 'bg-gray-100'
+                      selectedCategory === category ? 'bg-yellow-500/20' : 'bg-gray-700/50'
                     }`}
                     onPress={() => setSelectedCategory(category)}
                   >
                     <Text className={`text-sm font-medium ${
-                      selectedCategory === category ? 'text-blue-600' : 'text-gray-600'
+                      selectedCategory === category ? 'text-yellow-400' : 'text-gray-400'
                     }`}>
                       {category}
                     </Text>
@@ -170,7 +178,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
           {/* Icon Selection */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">{t('selectIcon')}</Text>
+            <Text className="text-gray-300 font-medium mb-2">{t('selectIcon')}</Text>
             <ScrollView className="max-h-48" showsVerticalScrollIndicator={false}>
               <View className="flex-row flex-wrap justify-between">
                 {filteredIcons.map((icon, index) => (
@@ -178,8 +186,8 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
                     key={index}
                     className={`w-16 h-16 items-center justify-center rounded-xl mb-2 border-2 ${
                       selectedIcon.name === icon.name 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 bg-gray-50'
+                        ? 'border-yellow-500/50 bg-yellow-500/10' 
+                        : 'border-gray-600/50 bg-gray-800/50'
                     }`}
                     onPress={() => setSelectedIcon(icon)}
                   >
@@ -193,24 +201,38 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
           {/* Buttons */}
           <View className="flex-row space-x-3">
             <TouchableOpacity
-              className="flex-1 bg-red-600 rounded-xl py-4"
+              className="flex-1"
               onPress={handleDelete}
             >
-              <Text className="text-white font-semibold text-center">{t('delete')}</Text>
+              <LinearGradient
+                colors={['#dc2626', '#b91c1c']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-xl py-4 justify-center items-center"
+              >
+                <Text className="text-white font-semibold">{t('delete')}</Text>
+              </LinearGradient>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1 bg-gray-200 rounded-xl py-4"
+              className="flex-1 bg-gray-700/50 rounded-xl py-4 border border-gray-600/50"
               onPress={handleClose}
             >
-              <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
+              <Text className="text-gray-300 font-semibold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1 bg-blue-600 rounded-xl py-4"
+              className="flex-1"
               onPress={handleConfirm}
             >
-              <Text className="text-white font-semibold text-center">{t('save')}</Text>
+              <LinearGradient
+                colors={['#3b82f6', '#1d4ed8']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-xl py-4 justify-center items-center"
+              >
+                <Text className="text-white font-semibold">{t('save')}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>

@@ -113,14 +113,14 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1 rounded-xl py-4"
+              className="flex-1"
               onPress={handleConfirm}
             >
               <LinearGradient
                 colors={['#10b981', '#059669']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 rounded-xl py-4 justify-center items-center"
+                className="rounded-xl py-4 justify-center items-center"
               >
                 <Text className="text-white font-semibold">{t('add')}</Text>
               </LinearGradient>

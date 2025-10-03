@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../contexts/TranslationContext';
 
 interface QRScannerModalProps {
@@ -52,28 +53,41 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
         animationType="slide"
         onRequestClose={onClose}
       >
-        <View className="flex-1 bg-black/50 justify-center items-center px-6">
-          <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+        <View className="flex-1 bg-black/70 justify-center items-center px-6">
+          <View className="bg-gray-900/90 rounded-2xl p-6 w-full max-w-sm border border-gray-700/50" style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.3,
+            shadowRadius: 16,
+            elevation: 8,
+          }}>
             <View className="items-center">
-              <Ionicons name="camera" size={48} color="#6b7280" />
-              <Text className="text-lg font-bold text-gray-900 mt-4 text-center">
+              <Ionicons name="camera" size={48} color="#fbbf24" />
+              <Text className="text-lg font-bold text-white mt-4 text-center">
                 {t('cameraPermissionRequired')}
               </Text>
-              <Text className="text-gray-600 mt-2 text-center">
+              <Text className="text-gray-400 mt-2 text-center">
                 {t('cameraAccessNeeded')}
               </Text>
               <View className="flex-row space-x-3 mt-6 w-full">
                 <TouchableOpacity
-                  className="flex-1 bg-gray-200 rounded-xl py-3"
+                  className="flex-1 bg-gray-700/50 rounded-xl py-3 border border-gray-600/50"
                   onPress={onClose}
                 >
-                  <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
+                  <Text className="text-gray-300 font-semibold text-center">{t('cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 bg-blue-600 rounded-xl py-3"
+                  className="flex-1"
                   onPress={requestPermission}
                 >
-                  <Text className="text-white font-semibold text-center">{t('allowCamera')}</Text>
+                  <LinearGradient
+                    colors={['#3b82f6', '#1d4ed8']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="rounded-xl py-3 justify-center items-center"
+                  >
+                    <Text className="text-white font-semibold">{t('allowCamera')}</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
             </View>
@@ -92,14 +106,14 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
     >
       <View className="flex-1 bg-black">
         {/* Header */}
-        <View className="absolute top-0 left-0 right-0 z-10 bg-black/50 pt-12 pb-4 px-6">
+        <View className="absolute top-0 left-0 right-0 z-10 bg-black/70 pt-12 pb-4 px-6">
           <View className="flex-row items-center justify-between">
             <Text className="text-white text-lg font-semibold">{t('scanReceiptQRCode')}</Text>
             <TouchableOpacity onPress={onClose} className="p-2">
-              <Ionicons name="close" size={24} color="white" />
+              <Ionicons name="close" size={24} color="#fbbf24" />
             </TouchableOpacity>
           </View>
-          <Text className="text-white/80 text-sm mt-2">
+          <Text className="text-gray-300 text-sm mt-2">
             {t('positionQRCode')}
           </Text>
         </View>
@@ -115,18 +129,18 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({
         >
           {/* Scanning overlay */}
           <View className="flex-1 justify-center items-center">
-            <View className="w-64 h-64 border-2 border-white/50">
-              <View className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white" />
-              <View className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white" />
-              <View className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white" />
-              <View className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white" />
+            <View className="w-64 h-64 border-2 border-yellow-400/70">
+              <View className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-yellow-400" />
+              <View className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-yellow-400" />
+              <View className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-yellow-400" />
+              <View className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-yellow-400" />
             </View>
           </View>
         </CameraView>
 
         {/* Instructions */}
-        <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-6">
-          <Text className="text-white text-center text-sm">
+        <View className="absolute bottom-0 left-0 right-0 bg-black/70 p-6">
+          <Text className="text-gray-300 text-center text-sm">
             {t('pointCameraAtQR')}
           </Text>
         </View>
