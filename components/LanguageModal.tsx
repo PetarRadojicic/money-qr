@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation, Language } from '../contexts/TranslationContext';
 
 interface LanguageOption {
@@ -62,15 +63,22 @@ const LanguageModal: React.FC<LanguageModalProps> = ({ isVisible, onClose }) => 
     
     return (
       <TouchableOpacity
-        className={`bg-white rounded-xl p-4 mb-3 shadow-sm ${
-          isSelected ? 'border-2 border-blue-500' : 'border border-gray-200'
+        className={`bg-gray-800/50 rounded-xl p-4 mb-3 border ${
+          isSelected ? 'border-yellow-500/50' : 'border-gray-700/50'
         }`}
         onPress={() => handleLanguageSelect(languageOption)}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
       >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${
-              isSelected ? 'bg-blue-100' : 'bg-gray-100'
+              isSelected ? 'bg-yellow-500/20' : 'bg-gray-700/50'
             }`}>
               <Text className="text-lg">
                 {languageOption.flag}
@@ -79,18 +87,18 @@ const LanguageModal: React.FC<LanguageModalProps> = ({ isVisible, onClose }) => 
             
             <View className="flex-1">
               <Text className={`font-semibold text-base ${
-                isSelected ? 'text-blue-600' : 'text-gray-900'
+                isSelected ? 'text-yellow-400' : 'text-white'
               }`}>
                 {languageOption.name}
               </Text>
-              <Text className="text-gray-500 text-sm mt-1">
+              <Text className="text-gray-400 text-sm mt-1">
                 {languageOption.nativeName}
               </Text>
             </View>
           </View>
           
           {isSelected && (
-            <Ionicons name="checkmark-circle" size={24} color="#2563eb" />
+            <Ionicons name="checkmark-circle" size={24} color="#fbbf24" />
           )}
         </View>
       </TouchableOpacity>
@@ -104,21 +112,21 @@ const LanguageModal: React.FC<LanguageModalProps> = ({ isVisible, onClose }) => 
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1 bg-black">
         {/* Header */}
-        <View className="bg-white px-6 py-4 shadow-sm">
+        <View className="bg-gray-900/50 px-6 py-4 border-b border-gray-800/50">
           <View className="flex-row items-center justify-between">
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#374151" />
+              <Ionicons name="close" size={24} color="#fbbf24" />
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-gray-900">{t('language')}</Text>
+            <Text className="text-lg font-semibold text-white">{t('language')}</Text>
             <View className="w-6" />
           </View>
         </View>
 
         {/* Content */}
         <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
-          <Text className="text-gray-600 text-sm mb-4">
+          <Text className="text-gray-400 text-sm mb-4">
             {t('language') === 'Language' ? 'Choose your preferred language. The app will restart with the new language.' : 'Izaberite željeni jezik. Aplikacija će se restartovati sa novim jezikom.'}
           </Text>
 

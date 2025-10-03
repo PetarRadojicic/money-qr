@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../contexts/TranslationContext';
 
 // Import all screen components
@@ -376,13 +377,13 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-black">
+      <StatusBar style="light" />
       
       {/* Main Content Area */}
       <Animated.View 
         className="flex-1"
-        style={{ backgroundColor: '#ffffff' }}
+        style={{ backgroundColor: '#000000' }}
       >
         {renderCurrentScreen}
       </Animated.View>
@@ -390,7 +391,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
       {/* Preloading screen in background (hidden) */}
       {renderPreloadingScreen}
       
-      {/* White overlay to avoid gray borders during fades */}
+      {/* Dark overlay to avoid gray borders during fades */}
       <Animated.View 
         pointerEvents="none"
         style={{
@@ -399,7 +400,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#000000',
           opacity: fadeAnim,
         }}
       />
@@ -430,7 +431,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
   const isSettingsActive = currentScreen === 'settings';
 
   return (
-    <View className="bg-white border-t border-gray-200 px-4 py-2">
+    <View className="bg-gray-900/95 backdrop-blur-sm border-t border-gray-700 px-4 py-3">
       <View className="flex-row justify-around items-center">
         {/* Home Tab */}
         <TouchableOpacity 
@@ -438,13 +439,23 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           onPress={() => onNavigate('home')}
           activeOpacity={0.7}
         >
-          <Ionicons 
-            name="home" 
-            size={24} 
-            color={isHomeActive ? "#2563eb" : "#6b7280"} 
-          />
+          {isHomeActive ? (
+            <View className="bg-yellow-500/20 rounded-xl p-2 mb-1">
+              <Ionicons 
+                name="home" 
+                size={24} 
+                color="#FFD700" 
+              />
+            </View>
+          ) : (
+            <Ionicons 
+              name="home-outline" 
+              size={24} 
+              color="#9CA3AF" 
+            />
+          )}
           <Text className={`text-xs mt-1 ${
-            isHomeActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+            isHomeActive ? 'text-yellow-400 font-bold' : 'text-gray-400'
           }`}>
             {t('home')}
           </Text>
@@ -456,13 +467,23 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           onPress={() => onNavigate('analytics')}
           activeOpacity={0.7}
         >
-          <Ionicons 
-            name="analytics" 
-            size={24} 
-            color={isAnalyticsActive ? "#2563eb" : "#6b7280"} 
-          />
+          {isAnalyticsActive ? (
+            <View className="bg-yellow-500/20 rounded-xl p-2 mb-1">
+              <Ionicons 
+                name="analytics" 
+                size={24} 
+                color="#FFD700" 
+              />
+            </View>
+          ) : (
+            <Ionicons 
+              name="analytics-outline" 
+              size={24} 
+              color="#9CA3AF" 
+            />
+          )}
           <Text className={`text-xs mt-1 ${
-            isAnalyticsActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+            isAnalyticsActive ? 'text-yellow-400 font-bold' : 'text-gray-400'
           }`}>
             {t('analytics')}
           </Text>
@@ -474,13 +495,23 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           onPress={() => onNavigate('history')}
           activeOpacity={0.7}
         >
-          <Ionicons 
-            name="time" 
-            size={24} 
-            color={isHistoryActive ? "#2563eb" : "#6b7280"} 
-          />
+          {isHistoryActive ? (
+            <View className="bg-yellow-500/20 rounded-xl p-2 mb-1">
+              <Ionicons 
+                name="time" 
+                size={24} 
+                color="#FFD700" 
+              />
+            </View>
+          ) : (
+            <Ionicons 
+              name="time-outline" 
+              size={24} 
+              color="#9CA3AF" 
+            />
+          )}
           <Text className={`text-xs mt-1 ${
-            isHistoryActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+            isHistoryActive ? 'text-yellow-400 font-bold' : 'text-gray-400'
           }`}>
             {t('history')}
           </Text>
@@ -492,13 +523,23 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
           onPress={() => onNavigate('settings')}
           activeOpacity={0.7}
         >
-          <Ionicons 
-            name="settings" 
-            size={24} 
-            color={isSettingsActive ? "#2563eb" : "#6b7280"} 
-          />
+          {isSettingsActive ? (
+            <View className="bg-yellow-500/20 rounded-xl p-2 mb-1">
+              <Ionicons 
+                name="settings" 
+                size={24} 
+                color="#FFD700" 
+              />
+            </View>
+          ) : (
+            <Ionicons 
+              name="settings-outline" 
+              size={24} 
+              color="#9CA3AF" 
+            />
+          )}
           <Text className={`text-xs mt-1 ${
-            isSettingsActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+            isSettingsActive ? 'text-yellow-400 font-bold' : 'text-gray-400'
           }`}>
             {t('settings')}
           </Text>

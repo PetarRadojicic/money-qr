@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CURRENCIES, Currency, getCurrencyByCode, formatCurrency } from '../constants/currencies';
 import { getSelectedCurrency, convertAllDataToCurrency } from '../utils/dataManager';
 import { useTranslation } from '../contexts/TranslationContext';
@@ -74,19 +75,26 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
     
     return (
       <TouchableOpacity
-        className={`bg-white rounded-xl p-4 mb-3 shadow-sm ${
-          isSelected ? 'border-2 border-blue-500' : 'border border-gray-200'
+        className={`bg-gray-800/50 rounded-xl p-4 mb-3 border ${
+          isSelected ? 'border-yellow-500/50' : 'border-gray-700/50'
         }`}
         onPress={() => handleCurrencySelect(currency)}
         disabled={isConverting}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
       >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${
-              isSelected ? 'bg-blue-100' : 'bg-gray-100'
+              isSelected ? 'bg-yellow-500/20' : 'bg-gray-700/50'
             }`}>
               <Text className={`text-lg font-bold ${
-                isSelected ? 'text-blue-600' : 'text-gray-600'
+                isSelected ? 'text-yellow-400' : 'text-gray-400'
               }`}>
                 {currency.symbol}
               </Text>
@@ -94,18 +102,18 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
             
             <View className="flex-1">
               <Text className={`font-semibold text-base ${
-                isSelected ? 'text-blue-600' : 'text-gray-900'
+                isSelected ? 'text-yellow-400' : 'text-white'
               }`}>
                 {currency.name}
               </Text>
-              <Text className="text-gray-500 text-sm mt-1">
+              <Text className="text-gray-400 text-sm mt-1">
                 {currency.code} • {formatCurrency(100, currency.code)}
               </Text>
             </View>
           </View>
           
           {isSelected && (
-            <Ionicons name="checkmark-circle" size={24} color="#2563eb" />
+            <Ionicons name="checkmark-circle" size={24} color="#fbbf24" />
           )}
         </View>
       </TouchableOpacity>
@@ -119,14 +127,14 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1 bg-black">
         {/* Header */}
-        <View className="bg-white px-6 py-4 shadow-sm">
+        <View className="bg-gray-900/50 px-6 py-4 border-b border-gray-800/50">
           <View className="flex-row items-center justify-between">
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#374151" />
+              <Ionicons name="close" size={24} color="#fbbf24" />
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-gray-900">{t('selectCurrency')}</Text>
+            <Text className="text-lg font-semibold text-white">{t('selectCurrency')}</Text>
             <View className="w-6" />
           </View>
         </View>
@@ -134,10 +142,10 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
         {/* Content */}
         <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
           {isConverting && (
-            <View className="bg-blue-50 rounded-xl p-4 mb-4">
+            <View className="bg-yellow-500/10 rounded-xl p-4 mb-4 border border-yellow-500/20">
               <View className="flex-row items-center">
-                <Ionicons name="sync" size={20} color="#2563eb" />
-                <Text className="text-blue-600 font-medium ml-2">
+                <Ionicons name="sync" size={20} color="#fbbf24" />
+                <Text className="text-yellow-400 font-medium ml-2">
                   {t('convertingCurrency')}
                 </Text>
               </View>
@@ -146,7 +154,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
 
           {/* Popular Currencies */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('popularCurrencies')}</Text>
+            <Text className="text-lg font-semibold text-white mb-3">{t('popularCurrencies')}</Text>
             {CURRENCIES.slice(0, 8).map((currency) => (
               <CurrencyItem key={currency.code} currency={currency} />
             ))}
@@ -154,7 +162,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
 
           {/* All Currencies */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">{t('allCurrencies')}</Text>
+            <Text className="text-lg font-semibold text-white mb-3">{t('allCurrencies')}</Text>
             {CURRENCIES.slice(8).map((currency) => (
               <CurrencyItem key={currency.code} currency={currency} />
             ))}

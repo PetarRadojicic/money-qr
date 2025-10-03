@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Dimensions, RefreshControl, Modal, Animated, PanResponder } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   loadData,
   loadTransactionHistory,
@@ -401,9 +402,9 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     });
 
     return (
-      <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
+      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-semibold text-gray-900">
+          <Text className="text-lg font-bold text-white">
             {t('monthlyIncomeVsExpenses')}
           </Text>
           
@@ -413,17 +414,17 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               onPress={goToPreviousPage}
               disabled={currentChartPage === 0}
               className={`p-2 rounded-full ${
-                currentChartPage === 0 ? 'bg-gray-100' : 'bg-blue-100'
+                currentChartPage === 0 ? 'bg-gray-700' : 'bg-yellow-500/20'
               }`}
             >
               <Ionicons 
                 name="chevron-back" 
                 size={20} 
-                color={currentChartPage === 0 ? '#9ca3af' : '#3b82f6'} 
+                color={currentChartPage === 0 ? '#6b7280' : '#FFD700'} 
               />
             </TouchableOpacity>
             
-            <Text className="text-sm text-gray-600 px-2">
+            <Text className="text-sm text-gray-300 px-2">
               {currentChartPage + 1} / {totalPages}
             </Text>
             
@@ -431,13 +432,13 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               onPress={goToNextPage}
               disabled={currentChartPage === totalPages - 1}
               className={`p-2 rounded-full ${
-                currentChartPage === totalPages - 1 ? 'bg-gray-100' : 'bg-blue-100'
+                currentChartPage === totalPages - 1 ? 'bg-gray-700' : 'bg-yellow-500/20'
               }`}
             >
               <Ionicons 
                 name="chevron-forward" 
                 size={20} 
-                color={currentChartPage === totalPages - 1 ? '#9ca3af' : '#3b82f6'} 
+                color={currentChartPage === totalPages - 1 ? '#6b7280' : '#FFD700'} 
               />
             </TouchableOpacity>
           </View>
@@ -463,10 +464,10 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
                     style={{ height: expenseHeight }}
                   />
                 </View>
-                <Text className="text-xs text-gray-600 mt-1 text-center">
+                <Text className="text-xs text-gray-300 mt-1 text-center">
                   {month.monthName.split(' ')[0].slice(0, 3)}
                 </Text>
-                <Text className="text-xs text-gray-500 mt-1 text-center">
+                <Text className="text-xs text-gray-400 mt-1 text-center">
                   {month.monthName.split(' ')[1]}
                 </Text>
               </View>
@@ -480,7 +481,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             <View
               key={index}
               className={`w-2 h-2 rounded-full ${
-                index === currentChartPage ? 'bg-blue-500' : 'bg-gray-300'
+                index === currentChartPage ? 'bg-yellow-500' : 'bg-gray-600'
               }`}
             />
           ))}
@@ -489,11 +490,11 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         <View className="flex-row justify-center space-x-4">
           <View className="flex-row items-center">
             <View className="w-3 h-3 bg-green-500 rounded mr-1" />
-            <Text className="text-xs text-gray-600">{t('income')}</Text>
+            <Text className="text-xs text-gray-300">{t('income')}</Text>
           </View>
           <View className="flex-row items-center">
             <View className="w-3 h-3 bg-red-500 rounded mr-1" />
-            <Text className="text-xs text-gray-600">{t('expenses')}</Text>
+            <Text className="text-xs text-gray-300">{t('expenses')}</Text>
           </View>
         </View>
       </View>
@@ -507,8 +508,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     const topCategories = analyticsData.categoryAnalytics.slice(0, 5);
 
     return (
-      <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
-        <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
+      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
+        <Text className="text-lg font-bold text-white mb-4 text-center">
           {t('topSpendingCategories')}
         </Text>
         
@@ -519,13 +520,13 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           return (
             <View key={category.id} className="mb-3">
               <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-sm font-medium text-gray-900">{category.name}</Text>
-                <Text className="text-sm text-gray-600">
+                <Text className="text-sm font-bold text-white">{category.name}</Text>
+                <Text className="text-sm text-gray-300">
                   {formatCurrency(category.totalAmount, selectedCurrency)}
                 </Text>
               </View>
               
-              <View className="bg-gray-200 rounded-full h-2 mb-1">
+              <View className="bg-gray-700 rounded-full h-2 mb-1">
                 <View 
                   className={`${color} h-2 rounded-full`}
                   style={{ width: `${category.percentage}%` }}
@@ -533,10 +534,10 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-xs text-gray-500">
+                <Text className="text-xs text-gray-400">
                   {category.percentage.toFixed(1)}% {t('ofTotal')}
                 </Text>
-                <Text className="text-xs text-gray-500">
+                <Text className="text-xs text-gray-400">
                   {category.transactionCount} {t('transactions')}
                 </Text>
               </View>
@@ -549,13 +550,15 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
   // Loading skeleton
   const LoadingSkeleton = () => (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-      <View className="mx-6 mt-8">
-        {[...Array(6)].map((_, index) => (
-          <View key={index} className="bg-gray-200 rounded-xl p-4 mb-4 h-32" />
-        ))}
-      </View>
-    </ScrollView>
+    <View className="flex-1 bg-black">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="mx-6 mt-8">
+          {[...Array(6)].map((_, index) => (
+            <View key={index} className="bg-gray-800 rounded-xl p-4 mb-4 h-32" />
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 
   if (isLoading) {
@@ -564,30 +567,30 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
   if (!analyticsData) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-gray-500 text-lg">{t('noDataAvailable')}</Text>
+      <View className="flex-1 bg-black justify-center items-center">
+        <Text className="text-gray-300 text-lg">{t('noDataAvailable')}</Text>
       </View>
     );
   }
 
   return (
-    <>
-    <ScrollView 
-      className="flex-1" 
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View className="flex-1 bg-black">
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
       {/* Header */}
       <View className="mx-6 mt-8 mb-4">
-        <Text className="text-2xl font-bold text-gray-900 text-center mb-2">{t('analytics')}</Text>
+        <Text className="text-2xl font-bold text-white text-center mb-2">{t('analytics')}</Text>
         
         {/* Time Range Selector */}
         <View className="flex-row justify-center space-x-3">
           <TouchableOpacity
             className={`px-4 py-2 rounded-full ${
-              timeRange === 'all' ? 'bg-blue-600' : 'bg-gray-200'
+              timeRange === 'all' ? 'bg-yellow-500' : 'bg-gray-800'
             }`}
             onPress={() => {
               setTimeRange('all');
@@ -595,7 +598,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             }}
           >
             <Text className={`text-sm ${
-              timeRange === 'all' ? 'text-white font-medium' : 'text-gray-600'
+              timeRange === 'all' ? 'text-black font-bold' : 'text-gray-300'
             }`}>
               {t('allTime')}
             </Text>
@@ -603,13 +606,13 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
           
           <TouchableOpacity
             className={`px-4 py-2 rounded-full ${
-              timeRange === 'specific' ? 'bg-blue-600' : 'bg-gray-200'
+              timeRange === 'specific' ? 'bg-yellow-500' : 'bg-gray-800'
             }`}
             onPress={() => setShowMonthPicker(true)}
           >
             <View className="flex-row items-center">
               <Text className={`text-sm ${
-                timeRange === 'specific' ? 'text-white font-medium' : 'text-gray-600'
+                timeRange === 'specific' ? 'text-black font-bold' : 'text-gray-300'
               }`}>
                 {timeRange === 'specific' && selectedMonths.length > 0 
                   ? `${selectedMonths.length} ${selectedMonths.length !== 1 ? t('selectMonths').toLowerCase() : t('selectMonths').toLowerCase().slice(0, -1)}`
@@ -619,7 +622,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
               <Ionicons 
                 name="chevron-down" 
                 size={16} 
-                color={timeRange === 'specific' ? 'white' : '#6b7280'} 
+                color={timeRange === 'specific' ? '#000000' : '#9CA3AF'} 
                 style={{ marginLeft: 4 }}
               />
             </View>
@@ -684,7 +687,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
 
       {/* Insights */}
-      <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
+      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
           {t('keyInsights')}
         </Text>
@@ -731,7 +734,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       </View>
 
       {/* Quick Tips */}
-      <View className="bg-white rounded-xl p-4 mx-6 mb-4 shadow-sm">
+      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
         <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
           {t('quickTips')}
         </Text>
@@ -783,7 +786,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         setShowMonthPicker(false);
       }}
     />
-  </>
+    </View>
   );
 };
 
@@ -840,33 +843,33 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
       onRequestClose={onClose}
     >
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-3xl max-h-96">
+        <View className="bg-gray-900 rounded-t-3xl max-h-96 border-t border-gray-700">
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 pb-4 border-b border-gray-200">
-            <Text className="text-xl font-semibold text-gray-900">{t('selectMonths')}</Text>
+          <View className="flex-row items-center justify-between p-6 pb-4 border-b border-gray-700">
+            <Text className="text-xl font-bold text-white">{t('selectMonths')}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#6b7280" />
+              <Ionicons name="close" size={24} color="#FFD700" />
             </TouchableOpacity>
           </View>
 
           {/* Quick Actions */}
-          <View className="flex-row justify-between px-6 py-3 border-b border-gray-100">
+          <View className="flex-row justify-between px-6 py-3 border-b border-gray-700">
             <TouchableOpacity 
-              className="px-4 py-2 bg-blue-100 rounded-lg"
+              className="px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg"
               onPress={selectAll}
             >
-              <Text className="text-blue-600 font-medium">{t('selectAll')}</Text>
+              <Text className="text-yellow-400 font-bold">{t('selectAll')}</Text>
             </TouchableOpacity>
             
-            <Text className="text-sm text-gray-500 self-center">
+            <Text className="text-sm text-gray-300 self-center">
               {tempSelectedMonths.length} {t('of')} {availableMonths.length} {t('selected')}
             </Text>
             
             <TouchableOpacity 
-              className="px-4 py-2 bg-gray-100 rounded-lg"
+              className="px-4 py-2 bg-gray-700/60 border border-gray-600 rounded-lg"
               onPress={clearAll}
             >
-              <Text className="text-gray-600 font-medium">{t('clearAll')}</Text>
+              <Text className="text-gray-300 font-bold">{t('clearAll')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -879,17 +882,17 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
               return (
                 <TouchableOpacity
                   key={monthKey}
-                  className="flex-row items-center justify-between py-3 border-b border-gray-50"
+                  className="flex-row items-center justify-between py-3 border-b border-gray-800"
                   onPress={() => toggleMonth(monthKey)}
                 >
-                  <Text className="text-gray-900 font-medium">{monthName}</Text>
+                  <Text className="text-white font-bold">{monthName}</Text>
                   <View className={`w-6 h-6 rounded-full border-2 ${
                     isSelected 
-                      ? 'bg-blue-600 border-blue-600' 
-                      : 'border-gray-300'
+                      ? 'bg-yellow-500 border-yellow-500' 
+                      : 'border-gray-600'
                   } items-center justify-center`}>
                     {isSelected && (
-                      <Ionicons name="checkmark" size={16} color="white" />
+                      <Ionicons name="checkmark" size={16} color="black" />
                     )}
                   </View>
                 </TouchableOpacity>
@@ -900,25 +903,25 @@ const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
           {/* Footer */}
           <View className="flex-row space-x-3 p-6 pt-4">
             <TouchableOpacity 
-              className="flex-1 py-3 border border-gray-300 rounded-xl"
+              className="flex-1 py-3 border border-gray-600 rounded-xl bg-gray-800/60"
               onPress={onClose}
             >
-              <Text className="text-gray-600 font-medium text-center">{t('cancel')}</Text>
+              <Text className="text-gray-300 font-bold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               className={`flex-1 py-3 rounded-xl ${
                 tempSelectedMonths.length > 0 
-                  ? 'bg-blue-600' 
-                  : 'bg-gray-300'
+                  ? 'bg-yellow-500' 
+                  : 'bg-gray-700'
               }`}
               onPress={handleApply}
               disabled={tempSelectedMonths.length === 0}
             >
-              <Text className={`font-medium text-center ${
+              <Text className={`font-bold text-center ${
                 tempSelectedMonths.length > 0 
-                  ? 'text-white' 
-                  : 'text-gray-500'
+                  ? 'text-black' 
+                  : 'text-gray-400'
               }`}>
                 {t('apply')}
               </Text>

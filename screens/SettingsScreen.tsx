@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { resetAppData, getSelectedCurrency } from '../utils/dataManager';
 import { getCurrencyByCode, formatCurrency } from '../constants/currencies';
 import CurrencyModal from '../components/CurrencyModal';
@@ -123,27 +124,34 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     
     return (
       <TouchableOpacity
-        className="bg-white rounded-xl p-4 mb-3 shadow-sm flex-row items-center"
+        className="bg-gray-800/50 rounded-xl p-4 mb-3 border border-gray-700/50 flex-row items-center"
         onPress={onPress}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
       >
         <View className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
-          isDestructive ? 'bg-red-100' : 'bg-blue-100'
+          isDestructive ? 'bg-red-900/30' : 'bg-yellow-500/20'
         }`}>
           <IconComponent 
             name={icon} 
             size={20} 
-            color={isDestructive ? '#dc2626' : '#2563eb'} 
+            color={isDestructive ? '#f87171' : '#fbbf24'} 
           />
         </View>
         
         <View className="flex-1">
           <Text className={`font-semibold text-base ${
-            isDestructive ? 'text-red-600' : 'text-gray-900'
+            isDestructive ? 'text-red-400' : 'text-white'
           }`}>
             {title}
           </Text>
           {subtitle && (
-            <Text className="text-gray-500 text-sm mt-1">{subtitle}</Text>
+            <Text className="text-gray-400 text-sm mt-1">{subtitle}</Text>
           )}
         </View>
         
@@ -153,13 +161,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <>
+    <View className="flex-1 bg-black">
       {/* Header */}
-      <View className="bg-white px-6 py-4 shadow-sm">
+      <View className="bg-gray-900/50 px-6 py-4 border-b border-gray-800/50">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity onPress={onNavigateHome} className="flex-row items-center">
-            <Ionicons name="arrow-back" size={24} color="#374151" />
-            <Text className="text-lg font-semibold text-gray-900 ml-2">{t('settings')}</Text>
+            <Ionicons name="arrow-back" size={24} color="#fbbf24" />
+            <Text className="text-lg font-semibold text-white ml-2">{t('settings')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -169,7 +177,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Language Section */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('language')}</Text>
+          <Text className="text-lg font-semibold text-white mb-4">{t('language')}</Text>
           
           <SettingsItem
             icon="language"
@@ -182,7 +190,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Currency Section */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('currency')}</Text>
+          <Text className="text-lg font-semibold text-white mb-4">{t('currency')}</Text>
           
           <ExchangeRateStatus onRatesUpdated={handleCurrencyChange} />
           
@@ -197,7 +205,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Reset App Section */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">{t('resetApp')}</Text>
+          <Text className="text-lg font-semibold text-white mb-4">{t('resetApp')}</Text>
           
           <SettingsItem
             icon="refresh"
@@ -223,7 +231,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         isVisible={showLanguageModal}
         onClose={() => setShowLanguageModal(false)}
       />
-    </>
+    </View>
   );
 };
 

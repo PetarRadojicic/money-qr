@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { formatCurrency } from '../constants/currencies';
 import { useTranslation } from '../contexts/TranslationContext';
 
@@ -50,35 +51,44 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({
     }
   };
 
-  const containerStyle = category.isAddButton
-    ? "bg-gray-100 rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center justify-center border-2 border-dashed border-gray-300"
-    : isEditMode 
-      ? "bg-blue-50 rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center border-2 border-blue-200"
-      : "bg-white rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center";
+  if (category.isAddButton) {
+    return (
+      <TouchableOpacity 
+        className="bg-gray-800/40 backdrop-blur-sm rounded-2xl p-4 mb-3 mx-1 w-[47%] border-2 border-dashed border-gray-600 items-center justify-center"
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <View className="bg-gray-700/60 rounded-xl p-3 w-12 h-12 items-center justify-center mb-3">
+          <Ionicons name="add" size={24} color="#FFD700" />
+        </View>
+        <Text className="text-gray-300 font-bold text-center text-sm">{t('newCategory')}</Text>
+      </TouchableOpacity>
+    );
+  }
 
-  const iconContainerStyle = category.isAddButton
-    ? "bg-gray-200 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3"
-    : `${category.backgroundColor} rounded-lg p-3 w-12 h-12 items-center justify-center mb-3`;
-
-  const titleStyle = category.isAddButton
-    ? "text-gray-600 font-semibold text-center"
-    : "text-gray-900 font-semibold text-center";
-
-  const amountStyle = category.isAddButton
-    ? "text-gray-500 text-sm text-center"
-    : "text-gray-600 text-sm text-center";
+  const isEditModeStyle = isEditMode 
+    ? "bg-yellow-500/20 border-2 border-yellow-500/50" 
+    : "bg-gray-800/60 border border-gray-700";
 
   return (
-    <TouchableOpacity className={containerStyle} onPress={onPress}>
-      <View className={iconContainerStyle}>
+    <TouchableOpacity 
+      className={`${isEditModeStyle} rounded-2xl p-4 mb-3 mx-1 w-[47%] backdrop-blur-sm shadow-lg items-center`}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View className={`${category.backgroundColor} rounded-xl p-3 w-12 h-12 items-center justify-center mb-3 shadow-sm`}>
         {renderIcon()}
       </View>
-      <Text className={titleStyle}>{category.name}</Text>
-      {!category.isAddButton && (
-        <Text className={amountStyle}>{formatCurrency(category.amount, currency)}</Text>
-      )}
-      {category.isAddButton && (
-        <Text className={amountStyle}>{t('newCategory')}</Text>
+      <Text className="text-white font-bold text-center text-sm mb-1">{category.name}</Text>
+      <View className="bg-gray-700/40 rounded-xl px-2 py-1">
+        <Text className="text-gray-300 text-xs text-center font-medium">
+          {formatCurrency(category.amount, currency)}
+        </Text>
+      </View>
+      {isEditMode && (
+        <View className="absolute top-2 right-2 w-4 h-4 bg-yellow-500 rounded-full items-center justify-center">
+          <Ionicons name="pencil" size={8} color="#000000" />
+        </View>
       )}
     </TouchableOpacity>
   );

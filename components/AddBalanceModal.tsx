@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getSelectedCurrency } from '../utils/dataManager';
 import { getCurrencyByCode } from '../constants/currencies';
@@ -67,26 +68,33 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+      <View className="flex-1 bg-black/70 justify-center items-center px-6">
+        <View className="bg-gray-900/90 rounded-2xl p-6 w-full max-w-sm border border-gray-700/50" style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.3,
+          shadowRadius: 16,
+          elevation: 8,
+        }}>
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-gray-900">
+            <Text className="text-xl font-bold text-white">
               {t('addToBalance')}
             </Text>
             <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close" size={24} color="#6b7280" />
+              <Ionicons name="close" size={24} color="#fbbf24" />
             </TouchableOpacity>
           </View>
 
           {/* Amount Input */}
           <View className="mb-6">
-            <Text className="text-gray-700 font-medium mb-2">{t('amount')}</Text>
-            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3">
-              <Text className="text-gray-600 text-lg mr-2">{currencySymbol}</Text>
+            <Text className="text-gray-300 font-medium mb-2">{t('amount')}</Text>
+            <View className="flex-row items-center border border-gray-600/50 rounded-xl px-4 py-3 bg-gray-800/50">
+              <Text className="text-yellow-400 text-lg mr-2">{currencySymbol}</Text>
               <TextInput
-                className="flex-1 text-lg text-gray-900"
+                className="flex-1 text-lg text-white"
                 placeholder="0.00"
+                placeholderTextColor="#9ca3af"
                 value={amount}
                 onChangeText={setAmount}
                 keyboardType="decimal-pad"
@@ -98,17 +106,24 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
           {/* Buttons */}
           <View className="flex-row space-x-3">
             <TouchableOpacity
-              className="flex-1 bg-gray-200 rounded-xl py-4"
+              className="flex-1 bg-gray-700/50 rounded-xl py-4 border border-gray-600/50"
               onPress={handleClose}
             >
-              <Text className="text-gray-700 font-semibold text-center">{t('cancel')}</Text>
+              <Text className="text-gray-300 font-semibold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1 bg-green-600 rounded-xl py-4"
+              className="flex-1 rounded-xl py-4"
               onPress={handleConfirm}
             >
-              <Text className="text-white font-semibold text-center">{t('add')}</Text>
+              <LinearGradient
+                colors={['#10b981', '#059669']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="flex-1 rounded-xl py-4 justify-center items-center"
+              >
+                <Text className="text-white font-semibold">{t('add')}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>

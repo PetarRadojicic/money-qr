@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Alert, ActivityIndicator, Modal, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import ExpenseCategory from '../components/ExpenseCategory';
 import ExpenseModal from '../components/ExpenseModal';
 import AddBalanceModal from '../components/AddBalanceModal';
@@ -35,6 +36,8 @@ import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/curr
 import { parseReceiptFromRawData } from '../utils/receiptService';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getTranslatedMonthName } from '../utils/translationUtils';
+
+const { width, height } = Dimensions.get('window');
 
 interface HomeScreenProps {
   onNavigateHistory: () => void;
@@ -472,48 +475,79 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-      {/* Balance Skeleton */}
-      <View className="mx-6 mt-8">
-        <View className="h-6 bg-gray-200 rounded mb-3 mx-auto w-32" />
-        <View className="bg-gray-200 rounded-2xl p-6 items-center">
-          <View className="h-4 bg-gray-300 rounded w-24 mb-2" />
-          <View className="h-8 bg-gray-300 rounded w-40 mb-2" />
-          <View className="h-4 bg-gray-300 rounded w-32" />
-        </View>
-        
-        {/* Month Navigation Skeleton */}
-        <View className="flex-row items-center justify-center mt-6">
-          <View className="w-12 h-12 bg-gray-200 rounded-full mr-4" />
-          <View className="h-6 bg-gray-200 rounded w-24" />
-          <View className="w-12 h-12 bg-gray-200 rounded-full ml-4" />
-        </View>
+    <View className="flex-1 bg-black">
+      {/* Gold Gradient Background */}
+      <LinearGradient
+        colors={['#000000', '#1a1a1a', '#000000']}
+        locations={[0, 0.5, 1]}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
+      
+      {/* Gold Vertical Lines Pattern */}
+      <View className="absolute inset-0 opacity-20">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <View
+            key={i}
+            className="absolute bg-gradient-to-b from-transparent via-yellow-400 to-transparent"
+            style={{
+              left: (width / 8) * i,
+              width: 2,
+              height: height,
+              opacity: 0.3 - (Math.abs(i - 4) * 0.05),
+            }}
+          />
+        ))}
       </View>
 
-      {/* Monthly Overview Skeleton */}
-      <View className="mx-6 mt-6">
-        <View className="h-6 bg-gray-200 rounded mb-3 mx-auto w-24" />
-        <View className="flex-row justify-center">
-          <View className="bg-gray-200 rounded-xl p-4 mr-2 w-32 h-20" />
-          <View className="bg-gray-200 rounded-xl p-4 ml-2 w-32 h-20" />
+      <ScrollView className="flex-1 relative z-10" showsVerticalScrollIndicator={false}>
+        {/* Balance Skeleton */}
+        <View className="mx-6 mt-8">
+          <View className="h-6 bg-gray-700 rounded mb-3 mx-auto w-32" />
+          <View className="bg-gray-800 rounded-2xl p-6 items-center">
+            <View className="h-4 bg-gray-600 rounded w-24 mb-2" />
+            <View className="h-8 bg-gray-600 rounded w-40 mb-2" />
+            <View className="h-4 bg-gray-600 rounded w-32" />
+          </View>
+          
+          {/* Month Navigation Skeleton */}
+          <View className="flex-row items-center justify-center mt-6">
+            <View className="w-12 h-12 bg-gray-700 rounded-full mr-4" />
+            <View className="h-6 bg-gray-700 rounded w-24" />
+            <View className="w-12 h-12 bg-gray-700 rounded-full ml-4" />
+          </View>
         </View>
-      </View>
 
-      {/* Categories Skeleton */}
-      <View className="mx-6 mt-6">
-        <View className="h-6 bg-gray-200 rounded mb-3 mx-auto w-40" />
-        <View className="flex-row flex-wrap justify-center">
-          {[...Array(8)].map((_, index) => (
-            <View key={index} className="bg-gray-200 rounded-xl p-4 m-1 w-20 h-20" />
-          ))}
+        {/* Monthly Overview Skeleton */}
+        <View className="mx-6 mt-6">
+          <View className="h-6 bg-gray-700 rounded mb-3 mx-auto w-24" />
+          <View className="flex-row justify-center">
+            <View className="bg-gray-800 rounded-xl p-4 mr-2 w-32 h-20" />
+            <View className="bg-gray-800 rounded-xl p-4 ml-2 w-32 h-20" />
+          </View>
         </View>
-      </View>
 
-      {/* Add Button Skeleton */}
-      <View className="mx-6 mt-6">
-        <View className="bg-gray-200 rounded-2xl p-4 h-16" />
-      </View>
-    </ScrollView>
+        {/* Categories Skeleton */}
+        <View className="mx-6 mt-6">
+          <View className="h-6 bg-gray-700 rounded mb-3 mx-auto w-40" />
+          <View className="flex-row flex-wrap justify-center">
+            {[...Array(8)].map((_, index) => (
+              <View key={index} className="bg-gray-800 rounded-xl p-4 m-1 w-20 h-20" />
+            ))}
+          </View>
+        </View>
+
+        {/* Add Button Skeleton */}
+        <View className="mx-6 mt-6">
+          <View className="bg-gray-800 rounded-2xl p-4 h-16" />
+        </View>
+      </ScrollView>
+    </View>
   );
 
   // Show loading skeleton while data is loading
@@ -522,99 +556,145 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   }
 
   return (
-    <>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <View className="flex-1 bg-black">
+      {/* Gold Gradient Background */}
+      <LinearGradient
+        colors={['#000000', '#1a1a1a', '#000000']}
+        locations={[0, 0.5, 1]}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
+      
+      {/* Gold Vertical Lines Pattern */}
+      <View className="absolute inset-0 opacity-20">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <View
+            key={i}
+            className="absolute bg-gradient-to-b from-transparent via-yellow-400 to-transparent"
+            style={{
+              left: (width / 8) * i,
+              width: 2,
+              height: height,
+              opacity: 0.3 - (Math.abs(i - 4) * 0.05),
+            }}
+          />
+        ))}
+      </View>
+
+      <ScrollView className="flex-1 relative z-10" showsVerticalScrollIndicator={false}>
         {/* Overall Balance Section */}
-        <View className="mx-8 mt-8">
-          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('overallBalance')}</Text>
-          <View className="bg-blue-600 rounded-2xl p-6 shadow-lg items-center">
-            <Text className="text-white text-sm opacity-90 text-center">{t('totalBalance')}</Text>
-            <Text className="text-white text-3xl font-bold mt-1 text-center">
+        <View className="mx-6 mt-8">
+          <Text className="text-lg font-semibold text-white mb-4 text-center">{t('overallBalance')}</Text>
+          <View className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-3xl p-6 border border-gray-700 shadow-lg">
+            <Text className="text-gray-300 text-sm opacity-90 text-center mb-2">{t('totalBalance')}</Text>
+            <Text className="text-white text-4xl font-black mt-1 text-center mb-2">
               {formatCurrency(totalBalance, selectedCurrency)}
             </Text>
-            <Text className="text-green-300 text-sm mt-2 text-center">
-              {monthlyData ? `${t('balanceThisMonth')}: ${formatCurrency(calculateBalance(monthlyData), selectedCurrency)}` : t('loading')}
-            </Text>
+            <View className="bg-yellow-500/20 rounded-2xl p-3 mt-3">
+              <Text className="text-yellow-300 text-sm text-center font-medium">
+                {monthlyData ? `${t('balanceThisMonth')}: ${formatCurrency(calculateBalance(monthlyData), selectedCurrency)}` : t('loading')}
+              </Text>
+            </View>
           </View>
           
           {/* Month Navigation */}
           <View className="flex-row items-center justify-center mt-6">
             <TouchableOpacity 
-              className="bg-white w-12 h-12 rounded-full shadow-sm mr-4 items-center justify-center"
+              className="bg-gray-800/60 border border-gray-600 w-12 h-12 rounded-full backdrop-blur-sm mr-4 items-center justify-center"
               onPress={handlePreviousMonth}
             >
-              <Ionicons name="chevron-back" size={24} color="#6b7280" />
+              <Ionicons name="chevron-back" size={24} color="#FFD700" />
             </TouchableOpacity>
             <View className="items-center">
-              <Text className="text-lg font-semibold text-gray-900">{getTranslatedMonthName(currentMonthKey, translations)}</Text>
+              <Text className="text-lg font-bold text-white">{getTranslatedMonthName(currentMonthKey, translations)}</Text>
               {currentMonthKey !== getCurrentMonthKey() && (
                 <TouchableOpacity 
-                  className="mt-1 px-3 py-1 bg-blue-100 rounded-full"
+                  className="mt-2 px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border border-yellow-500/30 rounded-full"
                   onPress={handleGoToCurrent}
                 >
-                  <Text className="text-blue-600 text-xs font-medium">{t('goToCurrent')}</Text>
+                  <Text className="text-yellow-400 text-xs font-medium">{t('goToCurrent')}</Text>
                 </TouchableOpacity>
               )}
             </View>
             <TouchableOpacity 
-              className="bg-white w-12 h-12 rounded-full shadow-sm ml-4 items-center justify-center"
+              className="bg-gray-800/60 border border-gray-600 w-12 h-12 rounded-full backdrop-blur-sm ml-4 items-center justify-center"
               onPress={handleNextMonth}
             >
-              <Ionicons name="chevron-forward" size={24} color="#6b7280" />
+              <Ionicons name="chevron-forward" size={24} color="#FFD700" />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Monthly Overview */}
-        <View className="mx-8 mt-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('thisMonth')}</Text>
-          <View className="flex-row justify-center">
-            <View className="bg-white rounded-xl p-4 mr-2 shadow-sm w-32">
-              <Text className="text-gray-600 text-sm text-center">{t('income')}</Text>
-              <Text className="text-green-600 text-xl font-bold mt-1 text-center">
-                {formatCurrency(monthlyData?.income || 0, selectedCurrency)}
-              </Text>
+        <View className="mx-6 mt-6">
+          <Text className="text-lg font-bold text-white mb-4 text-center">{t('thisMonth')}</Text>
+          <View className="flex-row justify-center gap-4">
+            <View className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-4 border border-gray-700 shadow-lg flex-1 max-w-[160px]">
+              <View className="items-center">
+                <View className="w-8 h-8 bg-green-500/20 rounded-full items-center justify-center mb-2">
+                  <Ionicons name="trending-up" size={16} color="#10B981" />
+                </View>
+                <Text className="text-gray-300 text-sm text-center font-medium">{t('income')}</Text>
+                <Text className="text-green-400 text-xl font-bold mt-1 text-center">
+                  {formatCurrency(monthlyData?.income || 0, selectedCurrency)}
+                </Text>
+              </View>
             </View>
-            <View className="bg-white rounded-xl p-4 ml-2 shadow-sm w-32">
-              <Text className="text-gray-600 text-sm text-center">{t('expenses')}</Text>
-              <Text className="text-red-600 text-xl font-bold mt-1 text-center">
-                {formatCurrency(monthlyData?.expenses || 0, selectedCurrency)}
-              </Text>
+            <View className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-4 border border-gray-700 shadow-lg flex-1 max-w-[160px]">
+              <View className="items-center">
+                <View className="w-8 h-8 bg-red-500/20 rounded-full items-center justify-center mb-2">
+                  <Ionicons name="trending-down" size={16} color="#EF4444" />
+                </View>
+                <Text className="text-gray-300 text-sm text-center font-medium">{t('expenses')}</Text>
+                <Text className="text-red-400 text-xl font-bold mt-1 text-center">
+                  {formatCurrency(monthlyData?.expenses || 0, selectedCurrency)}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
          {/* QR Scanner Button */}
-         <View className="mx-8 mt-6">
+         <View className="mx-6 mt-6">
            <TouchableOpacity 
-             className="bg-purple-600 rounded-2xl p-4 shadow-lg flex-row items-center justify-center"
+             className="rounded-2xl overflow-hidden shadow-lg"
              onPress={handleOpenQRScanner}
+             activeOpacity={0.8}
            >
-             <Ionicons name="qr-code-outline" size={24} color="white" />
-             <Text className="text-white text-lg font-semibold ml-2">{t('scanReceiptQR')}</Text>
+             <LinearGradient colors={['#EAB308', '#F59E0B']} className="p-4 flex-row items-center justify-center">
+               <Ionicons name="qr-code-outline" size={24} color="black" />
+               <Text className="text-black text-lg font-bold ml-2">{t('scanReceiptQR')}</Text>
+             </LinearGradient>
            </TouchableOpacity>
          </View>
 
         {/* Expense Categories */}
-        <View className="mx-8 mt-6">
-          <View className="flex-row items-center justify-center mb-3">
-            <Text className="text-lg font-semibold text-gray-900">{t('spendingCategories')}</Text>
+        <View className="mx-6 mt-6">
+          <View className="flex-row items-center justify-center mb-4">
+            <Text className="text-lg font-bold text-white">{t('spendingCategories')}</Text>
             <TouchableOpacity 
-              className="ml-2 p-1"
+              className="ml-3 p-2 bg-gray-800/60 border border-gray-600 rounded-xl"
               onPress={handleToggleEditMode}
             >
               <Ionicons 
                 name="pencil" 
-                size={20} 
-                color={isEditMode ? "#2563eb" : "#6b7280"} 
+                size={18} 
+                color={isEditMode ? "#FFD700" : "#9CA3AF"} 
               />
             </TouchableOpacity>
           </View>
           
           {isEditMode && (
-            <Text className="text-sm text-gray-600 text-center mb-3">
-              {t('tapCategoryToEdit')}
-            </Text>
+            <View className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-3 mb-4">
+              <Text className="text-yellow-300 text-sm text-center font-medium">
+                {t('tapCategoryToEdit')}
+              </Text>
+            </View>
           )}
           
           <View className="flex-row flex-wrap justify-center">
@@ -631,12 +711,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         {/* Add to Balance Button */}
-        <View className="mx-8 mt-6">
-          <TouchableOpacity className="bg-blue-600 rounded-2xl p-4 shadow-lg" onPress={handleAddToBalance}>
-            <View className="flex-row items-center justify-center">
-              <Ionicons name="add-circle" size={24} color="white" />
-              <Text className="text-white text-lg font-semibold ml-2">{t('addToBalance')}</Text>
-            </View>
+        <View className="mx-6 mt-6">
+          <TouchableOpacity 
+            className="rounded-2xl overflow-hidden shadow-lg" 
+            onPress={handleAddToBalance}
+            activeOpacity={0.8}
+          >
+            <LinearGradient colors={['#EAB308', '#F59E0B']} className="p-4">
+              <View className="flex-row items-center justify-center">
+                <Ionicons name="add-circle" size={24} color="black" />
+                <Text className="text-black text-lg font-bold ml-2">{t('addToBalance')}</Text>
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
@@ -698,19 +784,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         transparent={true}
         animationType="fade"
       >
-        <View className="flex-1 bg-black/70 justify-center items-center">
-          <View className="bg-white rounded-3xl p-8 items-center shadow-2xl">
-            <ActivityIndicator size="large" color="#3b82f6" />
-            <Text className="text-gray-900 text-lg font-semibold mt-4">
+        <View className="flex-1 bg-black/80 justify-center items-center">
+          <View className="bg-gray-900/90 backdrop-blur-sm rounded-3xl p-8 items-center shadow-2xl border border-gray-700">
+            <ActivityIndicator size="large" color="#FFD700" />
+            <Text className="text-white text-lg font-bold mt-4">
               {t('processingReceipt')}
             </Text>
-            <Text className="text-gray-600 text-sm mt-2 text-center">
+            <Text className="text-gray-300 text-sm mt-2 text-center">
               {t('pleaseWait')}
             </Text>
           </View>
         </View>
       </Modal>
-    </>
+    </View>
   );
 };
 
