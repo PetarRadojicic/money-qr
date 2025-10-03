@@ -525,7 +525,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     <>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Overall Balance Section */}
-        <View className="mx-6 mt-8">
+        <View className="mx-8 mt-8">
           <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('overallBalance')}</Text>
           <View className="bg-blue-600 rounded-2xl p-6 shadow-lg items-center">
             <Text className="text-white text-sm opacity-90 text-center">{t('totalBalance')}</Text>
@@ -566,7 +566,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         {/* Monthly Overview */}
-        <View className="mx-6 mt-6">
+        <View className="mx-8 mt-6">
           <Text className="text-lg font-semibold text-gray-900 mb-3 text-center">{t('thisMonth')}</Text>
           <View className="flex-row justify-center">
             <View className="bg-white rounded-xl p-4 mr-2 shadow-sm w-32">
@@ -585,7 +585,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
          {/* QR Scanner Button */}
-         <View className="mx-6 mt-6">
+         <View className="mx-8 mt-6">
            <TouchableOpacity 
              className="bg-purple-600 rounded-2xl p-4 shadow-lg flex-row items-center justify-center"
              onPress={handleOpenQRScanner}
@@ -596,7 +596,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
          </View>
 
         {/* Expense Categories */}
-        <View className="mx-6 mt-6">
+        <View className="mx-8 mt-6">
           <View className="flex-row items-center justify-center mb-3">
             <Text className="text-lg font-semibold text-gray-900">{t('spendingCategories')}</Text>
             <TouchableOpacity 
@@ -631,7 +631,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         {/* Add to Balance Button */}
-        <View className="mx-6 mt-6">
+        <View className="mx-8 mt-6">
           <TouchableOpacity className="bg-blue-600 rounded-2xl p-4 shadow-lg" onPress={handleAddToBalance}>
             <View className="flex-row items-center justify-center">
               <Ionicons name="add-circle" size={24} color="white" />

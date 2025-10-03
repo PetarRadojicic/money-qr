@@ -51,10 +51,10 @@ const ExpenseCategory: React.FC<ExpenseCategoryProps> = ({
   };
 
   const containerStyle = category.isAddButton
-    ? "bg-gray-100 rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center justify-center border-2 border-dashed border-gray-300"
+    ? "bg-gray-100 rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center justify-center border-2 border-dashed border-gray-300"
     : isEditMode 
-      ? "bg-blue-50 rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center border-2 border-blue-200"
-      : "bg-white rounded-xl p-4 mb-3 w-[48%] shadow-sm items-center";
+      ? "bg-blue-50 rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center border-2 border-blue-200"
+      : "bg-white rounded-xl p-4 mb-3 mx-1 w-[47%] shadow-sm items-center";
 
   const iconContainerStyle = category.isAddButton
     ? "bg-gray-200 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3"
