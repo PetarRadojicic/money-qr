@@ -1,25 +1,22 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Dimensions, RefreshControl, Modal, Animated, PanResponder } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ScrollView, View, Text, RefreshControl } from 'react-native';
 import {
   loadData,
   loadTransactionHistory,
   getSelectedCurrency,
-  getCurrentMonthKey,
-  getMonthName,
-  getAdjacentMonthKey,
-  calculateBalance,
-  getVisitedMonths,
 } from '../utils/dataManager';
-import { AppData, MonthlyData, Transaction, HistoryData } from '../types';
-import { formatCurrency } from '../constants/currencies';
-import { 
-  analyzeCategoryTrends, 
-  calculateYearOverYearComparison 
-} from '../utils/analyticsUtils';
+import { AppData, HistoryData } from '../types';
+import { calculateAnalytics, AnalyticsData } from '../utils/analyticsCalculator';
 import { useTranslation } from '../contexts/TranslationContext';
-import { getTranslatedMonthName } from '../utils/translationUtils';
+
+// Import components
+import {
+  AnalyticsHeader,
+  SummaryCards,
+  KeyInsights,
+  MonthPickerModal,
+  LoadingSkeleton,
+} from '../components/analytics';
 
 interface GlobalData {
   appData: any;
@@ -36,39 +33,6 @@ interface AnalyticsScreenProps {
   skipInitialLoading?: boolean;
 }
 
-interface MonthlyAnalytics {
-  monthKey: string;
-  monthName: string;
-  income: number;
-  expenses: number;
-  balance: number;
-  topCategory: { name: string; amount: number; percentage: number } | null;
-  categoryCount: number;
-}
-
-interface CategoryAnalytics {
-  id: string;
-  name: string;
-  totalAmount: number;
-  percentage: number;
-  monthlyAverage: number;
-  transactionCount: number;
-}
-
-interface AnalyticsData {
-  totalIncome: number;
-  totalExpenses: number;
-  totalBalance: number;
-  monthlyAnalytics: MonthlyAnalytics[];
-  categoryAnalytics: CategoryAnalytics[];
-  recentMonths: number;
-  averageMonthlyIncome: number;
-  averageMonthlyExpenses: number;
-  savingsRate: number;
-  topSpendingCategory: CategoryAnalytics | null;
-  mostActiveMonth: MonthlyAnalytics | null;
-}
-
 const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   onNavigateHome,
   onNavigateHistory,
@@ -77,6 +41,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   skipInitialLoading = false,
 }) => {
   const { t, translations } = useTranslation();
+  
+  // State
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isLoading, setIsLoading] = useState(!skipInitialLoading);
@@ -85,11 +51,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [currentChartPage, setCurrentChartPage] = useState(0);
 
-  const screenWidth = Dimensions.get('window').width;
-
-  // Load currency immediately on mount
+  // Load currency on mount
   useEffect(() => {
     const loadCurrency = async () => {
       try {
@@ -102,36 +65,38 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
     loadCurrency();
   }, []);
 
-  // Fast loading from preloaded cache
+  // Load analytics data from cache (fast path)
   const loadAnalyticsDataFromCache = useCallback(async () => {
     try {
       if (globalData?.isDataReady && globalData.appData && globalData.transactionHistory) {
-        // Always get fresh currency to ensure consistency
         const currentCurrency = await getSelectedCurrency();
         setSelectedCurrency(currentCurrency);
         
-        // Get available months from preloaded data
         const months = Object.keys(globalData.appData).sort();
         setAvailableMonths(months);
 
-        // If no months selected and we have data, select all months
         if (selectedMonths.length === 0 && months.length > 0) {
           setSelectedMonths(months);
         }
 
-        const analytics = await calculateAnalytics(globalData.appData, globalData.transactionHistory, timeRange, selectedMonths);
+        const analytics = await calculateAnalytics(
+          globalData.appData, 
+          globalData.transactionHistory, 
+          timeRange, 
+          selectedMonths,
+          translations
+        );
         setAnalyticsData(analytics);
-        return; // Exit early - we're done!
+        return;
       }
       
-      // Fallback: Load data normally
       await loadAnalyticsData(false);
     } catch (error) {
       console.error('Error loading analytics data from cache:', error);
     }
-  }, [globalData, timeRange, selectedMonths]);
+  }, [globalData, timeRange, selectedMonths, translations]);
 
-  // Load analytics data
+  // Load analytics data (fallback)
   const loadAnalyticsData = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
@@ -148,16 +113,14 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
 
       setSelectedCurrency(currency);
 
-      // Get available months from data
       const months = Object.keys(appData).sort();
       setAvailableMonths(months);
 
-      // If no months selected and we have data, select all months
       if (selectedMonths.length === 0 && months.length > 0) {
         setSelectedMonths(months);
       }
 
-      const analytics = await calculateAnalytics(appData, historyData, timeRange, selectedMonths);
+      const analytics = await calculateAnalytics(appData, historyData, timeRange, selectedMonths, translations);
       setAnalyticsData(analytics);
     } catch (error) {
       console.error('Error loading analytics data:', error);
@@ -165,29 +128,28 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       setIsLoading(false);
       setRefreshing(false);
     }
-  }, [timeRange, selectedMonths]);
+  }, [timeRange, selectedMonths, translations]);
 
   // Handle pull to refresh
   const onRefresh = useCallback(() => {
     loadAnalyticsData(true);
   }, [loadAnalyticsData]);
 
-  // Load all data in coordinated manner
+  // Load data on mount and when dependencies change
   useEffect(() => {
     if (skipInitialLoading && globalData?.isDataReady) {
-      // Use preloaded data
       loadAnalyticsDataFromCache();
     } else {
       loadAnalyticsData();
     }
   }, [timeRange, selectedMonths, skipInitialLoading, globalData?.isDataReady]);
 
-  // Recompute when selected currency changes via global data
+  // Refresh when currency changes
   useEffect(() => {
     if (!globalData?.isDataReady) return;
+    
     const refreshOnCurrency = async () => {
       try {
-        // Always get fresh currency to ensure consistency
         const currentCurrency = await getSelectedCurrency();
         setSelectedCurrency(currentCurrency);
         
@@ -196,7 +158,8 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
             globalData.appData,
             globalData.transactionHistory,
             timeRange,
-            selectedMonths
+            selectedMonths,
+            translations
           );
           setAnalyticsData(analytics);
         } else {
@@ -207,364 +170,26 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       }
     };
     refreshOnCurrency();
-  }, [globalData?.selectedCurrency]);
+  }, [globalData?.selectedCurrency, timeRange, selectedMonths, translations]);
 
-  // Reset chart page when data changes
-  useEffect(() => {
-    setCurrentChartPage(0);
-  }, [analyticsData]);
+  // Event handlers
+  const handleTimeRangeChange = useCallback((range: 'all') => {
+    setTimeRange(range);
+    setSelectedMonths(availableMonths);
+  }, [availableMonths]);
 
-  // Calculate analytics from data
-  const calculateAnalytics = async (
-    appData: AppData,
-    historyData: HistoryData,
-    range: 'specific' | 'all',
-    monthsToInclude: string[] = []
-  ): Promise<AnalyticsData> => {
-    const currentMonthKey = getCurrentMonthKey();
-    const existingMonthKeys = Object.keys(appData).sort();
-    
-    // Get visited months to ensure we include months that have been accessed
-    const visitedMonths = await getVisitedMonths();
-    
-    // Create a comprehensive list of months to include
-    // This ensures we include months that have been accessed but might not have data
-    let allMonthKeys = [...existingMonthKeys];
-    
-    // Add months from transaction history that might not be in appData
-    const historyMonthKeys = historyData.transactions
-      .map(t => t.monthKey)
-      .filter((monthKey, index, arr) => arr.indexOf(monthKey) === index) // Remove duplicates
-      .sort();
-    
-    // Add visited months
-    const visitedMonthKeys = visitedMonths.sort();
-    
-    // Merge and deduplicate month keys
-    allMonthKeys = [...new Set([...allMonthKeys, ...historyMonthKeys, ...visitedMonthKeys])].sort();
-    
-    // If we have no months at all, just include the current month
-    if (allMonthKeys.length === 0) {
-      const currentMonthKey = getCurrentMonthKey();
-      allMonthKeys.push(currentMonthKey);
-    }
-    
-    // Filter months based on selection
-    let filteredMonthKeys = allMonthKeys;
-    if (range === 'specific' && monthsToInclude.length > 0) {
-      filteredMonthKeys = monthsToInclude.filter(month => allMonthKeys.includes(month)).sort();
-    } else if (range === 'all') {
-      filteredMonthKeys = allMonthKeys;
-    }
+  const handleMonthPickerApply = useCallback((months: string[]) => {
+    setSelectedMonths(months);
+    setTimeRange('specific');
+    setShowMonthPicker(false);
+  }, []);
 
-    // Calculate monthly analytics
-    const monthlyAnalytics: MonthlyAnalytics[] = filteredMonthKeys.map(monthKey => {
-      const monthData = appData[monthKey] || { income: 0, expenses: 0, categories: {} };
-      const balance = calculateBalance(monthData);
-      
-      // Find top category
-      const categories = Object.entries(monthData.categories);
-      const topCategory = categories.length > 0 
-        ? categories.reduce((top, [id, amount]) => amount > top.amount ? { id, amount } : top, { id: '', amount: 0 })
-        : null;
-
-      return {
-        monthKey,
-        monthName: getTranslatedMonthName(monthKey, translations),
-        income: monthData.income,
-        expenses: monthData.expenses,
-        balance,
-        topCategory: topCategory && topCategory.amount > 0 ? {
-          name: getCategoryNameFromTransactions(topCategory.id, historyData.transactions),
-          amount: topCategory.amount,
-          percentage: monthData.expenses > 0 ? (topCategory.amount / monthData.expenses) * 100 : 0
-        } : null,
-        categoryCount: Object.keys(monthData.categories).length
-      };
-    });
-
-    // Calculate category analytics
-    const categoryTotals: { [categoryId: string]: { amount: number; transactions: number; name: string } } = {};
-    
-    filteredMonthKeys.forEach(monthKey => {
-      const monthData = appData[monthKey] || { income: 0, expenses: 0, categories: {} };
-      Object.entries(monthData.categories).forEach(([categoryId, amount]) => {
-        if (!categoryTotals[categoryId]) {
-          categoryTotals[categoryId] = { 
-            amount: 0, 
-            transactions: 0, 
-            name: getCategoryNameFromTransactions(categoryId, historyData.transactions) 
-          };
-        }
-        categoryTotals[categoryId].amount += amount;
-        
-        // Count transactions for this category in this month
-        const categoryTransactions = historyData.transactions.filter(
-          t => t.categoryId === categoryId && t.monthKey === monthKey && t.type === 'expense' && !t.isReverted
-        );
-        categoryTotals[categoryId].transactions += categoryTransactions.length;
-      });
-    });
-
-    const totalExpenses = Object.values(categoryTotals).reduce((sum, cat) => sum + cat.amount, 0);
-    
-    const categoryAnalytics: CategoryAnalytics[] = Object.entries(categoryTotals)
-      .map(([id, data]) => ({
-        id,
-        name: data.name,
-        totalAmount: data.amount,
-        percentage: totalExpenses > 0 ? (data.amount / totalExpenses) * 100 : 0,
-        monthlyAverage: data.amount / filteredMonthKeys.length,
-        transactionCount: data.transactions
-      }))
-      .sort((a, b) => b.totalAmount - a.totalAmount);
-
-    // Calculate totals
-    const totalIncome = monthlyAnalytics.reduce((sum, month) => sum + month.income, 0);
-    const totalExpensesCalc = monthlyAnalytics.reduce((sum, month) => sum + month.expenses, 0);
-    const totalBalance = monthlyAnalytics.reduce((sum, month) => sum + month.balance, 0);
-
-    const averageMonthlyIncome = totalIncome / filteredMonthKeys.length;
-    const averageMonthlyExpenses = totalExpensesCalc / filteredMonthKeys.length;
-    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpensesCalc) / totalIncome) * 100 : 0;
-
-    const topSpendingCategory = categoryAnalytics.length > 0 ? categoryAnalytics[0] : null;
-    const mostActiveMonth = monthlyAnalytics.reduce((most, month) => 
-      month.expenses > most.expenses ? month : most, monthlyAnalytics[0] || null
-    );
-
-    return {
-      totalIncome,
-      totalExpenses: totalExpensesCalc,
-      totalBalance,
-      monthlyAnalytics,
-      categoryAnalytics,
-      recentMonths: filteredMonthKeys.length,
-      averageMonthlyIncome,
-      averageMonthlyExpenses,
-      savingsRate,
-      topSpendingCategory,
-      mostActiveMonth
-    };
-  };
-
-  // Helper function to get category name from transactions
-  const getCategoryNameFromTransactions = (categoryId: string, transactions: Transaction[]): string => {
-    const transaction = transactions.find(t => t.categoryId === categoryId);
-    return transaction?.categoryName || categoryId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  // (Removed) financial health score UI
-
-  // Render swipeable bar chart for monthly data (3 months per view)
-  const renderMonthlyChart = () => {
-    if (!analyticsData || analyticsData.monthlyAnalytics.length === 0) return null;
-
-    const monthsPerPage = 3;
-    const totalPages = Math.ceil(analyticsData.monthlyAnalytics.length / monthsPerPage);
-    const startIndex = currentChartPage * monthsPerPage;
-    const endIndex = Math.min(startIndex + monthsPerPage, analyticsData.monthlyAnalytics.length);
-    const currentPageMonths = analyticsData.monthlyAnalytics.slice(startIndex, endIndex);
-
-    const maxAmount = Math.max(
-      ...currentPageMonths.map(m => Math.max(m.income, m.expenses))
-    );
-
-    const chartWidth = screenWidth - 48; // Account for padding
-    const barWidth = (chartWidth - 40) / monthsPerPage;
-
-    const goToPreviousPage = () => {
-      if (currentChartPage > 0) {
-        setCurrentChartPage(currentChartPage - 1);
-      }
-    };
-
-    const goToNextPage = () => {
-      if (currentChartPage < totalPages - 1) {
-        setCurrentChartPage(currentChartPage + 1);
-      }
-    };
-
-    // Pan responder for swipe gestures
-    const panResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dx > 50) {
-          // Swipe right - go to previous page
-          goToPreviousPage();
-        } else if (gestureState.dx < -50) {
-          // Swipe left - go to next page
-          goToNextPage();
-        }
-      },
-    });
-
-    return (
-      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-bold text-white">
-            {t('monthlyIncomeVsExpenses')}
-          </Text>
-          
-          {/* Navigation Controls */}
-          <View className="flex-row items-center space-x-2">
-            <TouchableOpacity
-              onPress={goToPreviousPage}
-              disabled={currentChartPage === 0}
-              className={`p-2 rounded-full ${
-                currentChartPage === 0 ? 'bg-gray-700' : 'bg-yellow-500/20'
-              }`}
-            >
-              <Ionicons 
-                name="chevron-back" 
-                size={20} 
-                color={currentChartPage === 0 ? '#6b7280' : '#FFD700'} 
-              />
-            </TouchableOpacity>
-            
-            <Text className="text-sm text-gray-300 px-2">
-              {currentChartPage + 1} / {totalPages}
-            </Text>
-            
-            <TouchableOpacity
-              onPress={goToNextPage}
-              disabled={currentChartPage === totalPages - 1}
-              className={`p-2 rounded-full ${
-                currentChartPage === totalPages - 1 ? 'bg-gray-700' : 'bg-yellow-500/20'
-              }`}
-            >
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={currentChartPage === totalPages - 1 ? '#6b7280' : '#FFD700'} 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        <View 
-          className="flex-row items-end justify-between h-40 mb-2"
-          {...panResponder.panHandlers}
-        >
-          {currentPageMonths.map((month, index) => {
-            const incomeHeight = maxAmount > 0 ? (month.income / maxAmount) * 120 : 0;
-            const expenseHeight = maxAmount > 0 ? (month.expenses / maxAmount) * 120 : 0;
-
-            return (
-              <View key={month.monthKey} className="items-center" style={{ width: barWidth }}>
-                <View className="flex-row items-end space-x-1" style={{ height: 120 }}>
-                  <View 
-                    className="bg-green-500 rounded-t w-4"
-                    style={{ height: incomeHeight }}
-                  />
-                  <View 
-                    className="bg-red-500 rounded-t w-4"
-                    style={{ height: expenseHeight }}
-                  />
-                </View>
-                <Text className="text-xs text-gray-300 mt-1 text-center">
-                  {month.monthName.split(' ')[0].slice(0, 3)}
-                </Text>
-                <Text className="text-xs text-gray-400 mt-1 text-center">
-                  {month.monthName.split(' ')[1]}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-        
-        {/* Page Indicators */}
-        <View className="flex-row justify-center space-x-2 mb-3">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <View
-              key={index}
-              className={`w-2 h-2 rounded-full ${
-                index === currentChartPage ? 'bg-yellow-500' : 'bg-gray-600'
-              }`}
-            />
-          ))}
-        </View>
-        
-        <View className="flex-row justify-center space-x-4">
-          <View className="flex-row items-center">
-            <View className="w-3 h-3 bg-green-500 rounded mr-1" />
-            <Text className="text-xs text-gray-300">{t('income')}</Text>
-          </View>
-          <View className="flex-row items-center">
-            <View className="w-3 h-3 bg-red-500 rounded mr-1" />
-            <Text className="text-xs text-gray-300">{t('expenses')}</Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  // Render category breakdown
-  const renderCategoryBreakdown = () => {
-    if (!analyticsData || analyticsData.categoryAnalytics.length === 0) return null;
-
-    const topCategories = analyticsData.categoryAnalytics.slice(0, 5);
-
-    return (
-      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
-        <Text className="text-lg font-bold text-white mb-4 text-center">
-          {t('topSpendingCategories')}
-        </Text>
-        
-        {topCategories.map((category, index) => {
-          const colors = ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500'];
-          const color = colors[index % colors.length];
-
-          return (
-            <View key={category.id} className="mb-3">
-              <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-sm font-bold text-white">{category.name}</Text>
-                <Text className="text-sm text-gray-300">
-                  {formatCurrency(category.totalAmount, selectedCurrency)}
-                </Text>
-              </View>
-              
-              <View className="bg-gray-700 rounded-full h-2 mb-1">
-                <View 
-                  className={`${color} h-2 rounded-full`}
-                  style={{ width: `${category.percentage}%` }}
-                />
-              </View>
-              
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-gray-400">
-                  {category.percentage.toFixed(1)}% {t('ofTotal')}
-                </Text>
-                <Text className="text-xs text-gray-400">
-                  {category.transactionCount} {t('transactions')}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-    );
-  };
-
-  // Loading skeleton
-  const LoadingSkeleton = () => (
-    <View className="flex-1 bg-black">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="mx-6 mt-8">
-          {[...Array(6)].map((_, index) => (
-            <View key={index} className="bg-gray-800 rounded-xl p-4 mb-4 h-32" />
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
-
+  // Render loading state
   if (isLoading) {
     return <LoadingSkeleton />;
   }
 
+  // Render no data state
   if (!analyticsData) {
     return (
       <View className="flex-1 bg-black justify-center items-center">
@@ -583,192 +208,24 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
         }
       >
       {/* Header */}
-      <View className="mx-6 mt-8 mb-4">
-        <Text className="text-2xl font-bold text-white text-center mb-2">{t('analytics')}</Text>
-        
-        {/* Time Range Selector */}
-        <View className="flex-row justify-center space-x-3">
-          <TouchableOpacity
-            className={`px-4 py-2 rounded-full ${
-              timeRange === 'all' ? 'bg-yellow-500' : 'bg-gray-800'
-            }`}
-            onPress={() => {
-              setTimeRange('all');
-              setSelectedMonths(availableMonths);
-            }}
-          >
-            <Text className={`text-sm ${
-              timeRange === 'all' ? 'text-black font-bold' : 'text-gray-300'
-            }`}>
-              {t('allTime')}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            className={`px-4 py-2 rounded-full ${
-              timeRange === 'specific' ? 'bg-yellow-500' : 'bg-gray-800'
-            }`}
-            onPress={() => setShowMonthPicker(true)}
-          >
-            <View className="flex-row items-center">
-              <Text className={`text-sm ${
-                timeRange === 'specific' ? 'text-black font-bold' : 'text-gray-300'
-              }`}>
-                {timeRange === 'specific' && selectedMonths.length > 0 
-                  ? `${selectedMonths.length} ${selectedMonths.length !== 1 ? t('selectMonths').toLowerCase() : t('selectMonths').toLowerCase().slice(0, -1)}`
-                  : t('selectMonths')
-                }
-              </Text>
-              <Ionicons 
-                name="chevron-down" 
-                size={16} 
-                color={timeRange === 'specific' ? '#000000' : '#9CA3AF'} 
-                style={{ marginLeft: 4 }}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
+        <AnalyticsHeader
+          timeRange={timeRange}
+          selectedMonthsCount={selectedMonths.length}
+          onTimeRangeChange={handleTimeRangeChange}
+          onShowMonthPicker={() => setShowMonthPicker(true)}
+        />
 
       {/* Summary Cards */}
-      <View className="mx-6 mb-4">
-        <View className="flex-row space-x-3">
-          <View className="flex-1 bg-green-100 rounded-xl p-4">
-            <Text className="text-green-600 text-sm font-medium">{t('totalIncome')}</Text>
-            <Text className="text-green-800 text-xl font-bold">
-              {formatCurrency(analyticsData.totalIncome, selectedCurrency)}
-            </Text>
-            <Text className="text-green-600 text-xs">
-              {t('avg')}: {formatCurrency(analyticsData.averageMonthlyIncome, selectedCurrency)}/mo
-            </Text>
-          </View>
-          
-          <View className="flex-1 bg-red-100 rounded-xl p-4">
-            <Text className="text-red-600 text-sm font-medium">{t('totalExpenses')}</Text>
-            <Text className="text-red-800 text-xl font-bold">
-              {formatCurrency(analyticsData.totalExpenses, selectedCurrency)}
-            </Text>
-            <Text className="text-red-600 text-xs">
-              {t('avg')}: {formatCurrency(analyticsData.averageMonthlyExpenses, selectedCurrency)}/mo
-            </Text>
-          </View>
-        </View>
-        
-        <View className="flex-row space-x-3 mt-3">
-          <View className="flex-1 bg-blue-100 rounded-xl p-4">
-            <Text className="text-blue-600 text-sm font-medium">{t('netSavings')}</Text>
-            <Text className="text-blue-800 text-xl font-bold">
-              {formatCurrency(analyticsData.totalBalance, selectedCurrency)}
-            </Text>
-            <Text className="text-blue-600 text-xs">
-              {t('rate')}: {analyticsData.savingsRate.toFixed(1)}%
-            </Text>
-          </View>
-          
-          <View className="flex-1 bg-purple-100 rounded-xl p-4">
-            <Text className="text-purple-600 text-sm font-medium">{t('monthsTracked')}</Text>
-            <Text className="text-purple-800 text-xl font-bold">
-              {analyticsData.recentMonths}
-            </Text>
-            <Text className="text-purple-600 text-xs">
-              {t('categories')}: {analyticsData.categoryAnalytics.length}
-            </Text>
-          </View>
-        </View>
-      </View>
+        <SummaryCards
+          analyticsData={analyticsData}
+          selectedCurrency={selectedCurrency}
+        />
 
-      {/* Financial Health Score removed */}
-
-      {/* Monthly Chart */}
-      {renderMonthlyChart()}
-
-      {/* Category Breakdown */}
-      {renderCategoryBreakdown()}
-
-
-      {/* Insights */}
-      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
-        <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          {t('keyInsights')}
-        </Text>
-        
-        {analyticsData.topSpendingCategory && (
-          <View className="mb-3 p-3 bg-orange-50 rounded-lg">
-            <View className="flex-row items-center mb-1">
-              <Ionicons name="trending-up" size={16} color="#ea580c" />
-              <Text className="text-orange-700 font-medium ml-2">{t('topSpendingCategory')}</Text>
-            </View>
-            <Text className="text-gray-700">
-              {t('youSpent')} {formatCurrency(analyticsData.topSpendingCategory.totalAmount, selectedCurrency)} {t('on')}{' '}
-              <Text className="font-semibold">{analyticsData.topSpendingCategory.name}</Text>
-              {' '}({analyticsData.topSpendingCategory.percentage.toFixed(1)}% {t('ofTotal')} {t('expenses').toLowerCase()})
-            </Text>
-          </View>
-        )}
-        
-        {analyticsData.mostActiveMonth && (
-          <View className="mb-3 p-3 bg-blue-50 rounded-lg">
-            <View className="flex-row items-center mb-1">
-              <Ionicons name="calendar" size={16} color="#2563eb" />
-              <Text className="text-blue-700 font-medium ml-2">{t('mostActiveMonth')}</Text>
-            </View>
-            <Text className="text-gray-700">
-              <Text className="font-semibold">{analyticsData.mostActiveMonth.monthName}</Text> {t('wasYourMostExpensive')}{' '}
-              {formatCurrency(analyticsData.mostActiveMonth.expenses, selectedCurrency)} {t('inExpenses')}
-            </Text>
-          </View>
-        )}
-        
-        <View className="p-3 bg-green-50 rounded-lg">
-          <View className="flex-row items-center mb-1">
-            <Ionicons name="wallet" size={16} color="#059669" />
-            <Text className="text-green-700 font-medium ml-2">{t('savingsPerformance')}</Text>
-          </View>
-          <Text className="text-gray-700">
-            {t('yourSavingsRateIs')} {analyticsData.savingsRate.toFixed(1)}%
-            {analyticsData.savingsRate > 20 ? ' - Excellent!' : 
-             analyticsData.savingsRate > 10 ? ' - Good work!' : 
-             ' - Consider reducing expenses'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Quick Tips */}
-      <View className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-6 mb-4 border border-gray-700 shadow-lg">
-        <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          {t('quickTips')}
-        </Text>
-        
-        <View>
-          <View className="flex-row items-start mb-3">
-            <View className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3" />
-            <Text className="text-gray-700 flex-1">
-              {t('trackExpensesDaily')}
-            </Text>
-          </View>
-          
-          <View className="flex-row items-start mb-3">
-            <View className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3" />
-            <Text className="text-gray-700 flex-1">
-              {t('aimToSave')}
-            </Text>
-          </View>
-          
-          <View className="flex-row items-start mb-3">
-            <View className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3" />
-            <Text className="text-gray-700 flex-1">
-              {t('reviewSpending')}
-            </Text>
-          </View>
-          
-          <View className="flex-row items-start">
-            <View className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3" />
-            <Text className="text-gray-700 flex-1">
-              {t('useHistoryTab')}
-            </Text>
-          </View>
-        </View>
-      </View>
+        {/* Key Insights */}
+        <KeyInsights
+          analyticsData={analyticsData}
+          selectedCurrency={selectedCurrency}
+        />
 
       {/* Bottom padding */}
       <View className="h-6" />
@@ -780,156 +237,9 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
       availableMonths={availableMonths}
       selectedMonths={selectedMonths}
       onClose={() => setShowMonthPicker(false)}
-      onApply={(months) => {
-        setSelectedMonths(months);
-        setTimeRange('specific');
-        setShowMonthPicker(false);
-      }}
+        onApply={handleMonthPickerApply}
     />
     </View>
-  );
-};
-
-// Month Picker Modal Component
-interface MonthPickerModalProps {
-  visible: boolean;
-  availableMonths: string[];
-  selectedMonths: string[];
-  onClose: () => void;
-  onApply: (months: string[]) => void;
-}
-
-const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
-  visible,
-  availableMonths,
-  selectedMonths,
-  onClose,
-  onApply,
-}) => {
-  const { t, translations } = useTranslation();
-  const [tempSelectedMonths, setTempSelectedMonths] = useState<string[]>(selectedMonths);
-
-  useEffect(() => {
-    if (visible) {
-      setTempSelectedMonths(selectedMonths);
-    }
-  }, [visible, selectedMonths]);
-
-  const toggleMonth = (monthKey: string) => {
-    setTempSelectedMonths(prev => 
-      prev.includes(monthKey) 
-        ? prev.filter(m => m !== monthKey)
-        : [...prev, monthKey].sort()
-    );
-  };
-
-  const selectAll = () => {
-    setTempSelectedMonths(availableMonths);
-  };
-
-  const clearAll = () => {
-    setTempSelectedMonths([]);
-  };
-
-  const handleApply = () => {
-    onApply(tempSelectedMonths);
-  };
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-gray-900 rounded-t-3xl max-h-96 border-t border-gray-700">
-          {/* Header */}
-          <View className="flex-row items-center justify-between p-6 pb-4 border-b border-gray-700">
-            <Text className="text-xl font-bold text-white">{t('selectMonths')}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#FFD700" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Quick Actions */}
-          <View className="flex-row justify-between px-6 py-3 border-b border-gray-700">
-            <TouchableOpacity 
-              className="px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg"
-              onPress={selectAll}
-            >
-              <Text className="text-yellow-400 font-bold">{t('selectAll')}</Text>
-            </TouchableOpacity>
-            
-            <Text className="text-sm text-gray-300 self-center">
-              {tempSelectedMonths.length} {t('of')} {availableMonths.length} {t('selected')}
-            </Text>
-            
-            <TouchableOpacity 
-              className="px-4 py-2 bg-gray-700/60 border border-gray-600 rounded-lg"
-              onPress={clearAll}
-            >
-              <Text className="text-gray-300 font-bold">{t('clearAll')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Month List */}
-          <ScrollView className="max-h-64 px-6 py-2">
-            {availableMonths.map((monthKey) => {
-              const isSelected = tempSelectedMonths.includes(monthKey);
-              const monthName = getTranslatedMonthName(monthKey, translations);
-              
-              return (
-                <TouchableOpacity
-                  key={monthKey}
-                  className="flex-row items-center justify-between py-3 border-b border-gray-800"
-                  onPress={() => toggleMonth(monthKey)}
-                >
-                  <Text className="text-white font-bold">{monthName}</Text>
-                  <View className={`w-6 h-6 rounded-full border-2 ${
-                    isSelected 
-                      ? 'bg-yellow-500 border-yellow-500' 
-                      : 'border-gray-600'
-                  } items-center justify-center`}>
-                    {isSelected && (
-                      <Ionicons name="checkmark" size={16} color="black" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* Footer */}
-          <View className="flex-row space-x-3 p-6 pt-4">
-            <TouchableOpacity 
-              className="flex-1 py-3 border border-gray-600 rounded-xl bg-gray-800/60"
-              onPress={onClose}
-            >
-              <Text className="text-gray-300 font-bold text-center">{t('cancel')}</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className={`flex-1 py-3 rounded-xl ${
-                tempSelectedMonths.length > 0 
-                  ? 'bg-yellow-500' 
-                  : 'bg-gray-700'
-              }`}
-              onPress={handleApply}
-              disabled={tempSelectedMonths.length === 0}
-            >
-              <Text className={`font-bold text-center ${
-                tempSelectedMonths.length > 0 
-                  ? 'text-black' 
-                  : 'text-gray-400'
-              }`}>
-                {t('apply')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
   );
 };
 
