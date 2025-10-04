@@ -88,7 +88,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
 
   const getStatusColor = () => {
     const fresh = areRatesFresh();
-    return fresh ? 'text-green-600' : 'text-orange-600';
+    return fresh ? 'text-green-400' : 'text-orange-400';
   };
 
   const getStatusIcon = () => {
@@ -97,29 +97,35 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
   };
 
   return (
-    <View className="bg-white rounded-xl p-4 mb-3 shadow-sm">
+    <View className="bg-gray-800/50 rounded-xl p-4 mb-3 border border-gray-700/50" style={{
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    }}>
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center flex-1">
-          <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-4">
-            <Ionicons name="trending-up" size={20} color="#2563eb" />
+          <View className="w-10 h-10 bg-blue-500/20 rounded-full items-center justify-center mr-4">
+            <Ionicons name="trending-up" size={20} color="#60a5fa" />
           </View>
           
           <View className="flex-1">
-            <Text className="font-semibold text-gray-900 text-base">
+            <Text className="font-semibold text-white text-base">
               {t('exchangeRates')}
             </Text>
             <View className="flex-row items-center mt-1">
               <Ionicons 
                 name={getStatusIcon()} 
                 size={16} 
-                color={areRatesFresh() ? "#16a34a" : "#ea580c"} 
+                color={areRatesFresh() ? "#4ade80" : "#fb923c"} 
               />
               <Text className={`text-sm ml-1 ${getStatusColor()}`}>
                 {lastUpdated}
               </Text>
             </View>
             {ratesCount > 0 && (
-              <Text className="text-gray-500 text-xs mt-1">
+              <Text className="text-gray-400 text-xs mt-1">
                 {t('currenciesAvailableCount', { count: String(ratesCount) })}
               </Text>
             )}
@@ -127,14 +133,14 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
         </View>
         
         <TouchableOpacity
-          className="bg-blue-100 rounded-full p-2"
+          className="bg-blue-500/20 rounded-full p-2"
           onPress={handleRefreshRates}
           disabled={isRefreshing}
         >
           <Ionicons 
             name={isRefreshing ? "sync" : "refresh"} 
             size={20} 
-            color="#2563eb" 
+            color="#60a5fa" 
             style={isRefreshing ? { transform: [{ rotate: '180deg' }] } : {}}
           />
         </TouchableOpacity>

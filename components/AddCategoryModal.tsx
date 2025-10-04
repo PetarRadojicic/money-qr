@@ -105,31 +105,30 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-black/70 justify-center items-center px-6">
-        <View className="bg-gray-900/90 rounded-2xl p-6 w-full max-w-lg max-h-[90%] border border-gray-700/50" style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
-          elevation: 8,
-        }}>
+      <View className="flex-1 bg-black/80 justify-center items-center px-6">
+        <View className="bg-gray-900/95 backdrop-blur-sm rounded-3xl p-6 w-full max-w-lg max-h-[90%] border border-gray-700 shadow-2xl">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-white">
-              {t('addNewCategory')}
-            </Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close" size={24} color="#fbbf24" />
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-white">
+                {t('addNewCategory')}
+              </Text>
+            </View>
+            <TouchableOpacity 
+              onPress={handleClose}
+              className="bg-gray-800/60 border border-gray-600 rounded-xl p-2"
+            >
+              <Ionicons name="close" size={20} color="#FFD700" />
             </TouchableOpacity>
           </View>
 
           {/* Category Name Input */}
           <View className="mb-6">
-            <Text className="text-gray-300 font-medium mb-2">{t('categoryName')}</Text>
+            <Text className="text-gray-300 font-medium mb-3">{t('categoryName')}</Text>
             <TextInput
-              className="border border-gray-600/50 rounded-xl px-4 py-3 text-lg text-white bg-gray-800/50"
+              className="bg-gray-800/60 border border-gray-600 rounded-2xl px-4 py-4 text-xl text-white font-semibold"
               placeholder={t('pleaseEnterCategoryName')}
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor="#9CA3AF"
               value={categoryName}
               onChangeText={setCategoryName}
               autoFocus={true}
@@ -138,12 +137,12 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 
           {/* Category Filter */}
           <View className="mb-4">
-            <Text className="text-gray-300 font-medium mb-2">Icon Category</Text>
+            <Text className="text-gray-300 font-medium mb-3">Icon Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row space-x-2">
+              <View className="flex-row gap-2">
                 <TouchableOpacity
                   className={`px-4 py-2 rounded-full ${
-                    selectedCategory === 'All' ? 'bg-yellow-500/20' : 'bg-gray-700/50'
+                    selectedCategory === 'All' ? 'bg-yellow-500/20' : 'bg-gray-800/60'
                   }`}
                   onPress={() => setSelectedCategory('All')}
                 >
@@ -157,7 +156,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                   <TouchableOpacity
                     key={category}
                     className={`px-4 py-2 rounded-full ${
-                      selectedCategory === category ? 'bg-yellow-500/20' : 'bg-gray-700/50'
+                      selectedCategory === category ? 'bg-yellow-500/20' : 'bg-gray-800/60'
                     }`}
                     onPress={() => setSelectedCategory(category)}
                   >
@@ -174,7 +173,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 
           {/* Icon Selection */}
           <View className="mb-6">
-            <Text className="text-gray-300 font-medium mb-2">Choose Icon</Text>
+            <Text className="text-gray-300 font-medium mb-3">Choose Icon</Text>
             <ScrollView className="max-h-48" showsVerticalScrollIndicator={false}>
               <View className="flex-row flex-wrap justify-center">
                 {filteredIcons.map((icon, index) => (
@@ -183,7 +182,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                     className={`w-16 h-16 items-center justify-center rounded-xl mb-2 mx-1 border-2 ${
                       selectedIcon.name === icon.name 
                         ? 'border-yellow-500/50 bg-yellow-500/10' 
-                        : 'border-gray-600/50 bg-gray-800/50'
+                        : 'border-gray-600 bg-gray-800/60'
                     }`}
                     onPress={() => setSelectedIcon(icon)}
                   >
@@ -195,25 +194,21 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
           </View>
 
           {/* Buttons */}
-          <View className="flex-row space-x-3">
+          <View className="flex-row gap-3">
             <TouchableOpacity
-              className="flex-1 bg-gray-700/50 rounded-xl py-4 border border-gray-600/50"
+              className="flex-1 bg-gray-800/60 border border-gray-600 rounded-2xl py-4"
               onPress={handleClose}
             >
-              <Text className="text-gray-300 font-semibold text-center">Cancel</Text>
+              <Text className="text-gray-300 font-bold text-center">Cancel</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1"
+              className="flex-1 rounded-2xl overflow-hidden"
               onPress={handleConfirm}
+              activeOpacity={0.8}
             >
-              <LinearGradient
-                colors={['#3b82f6', '#1d4ed8']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="rounded-xl py-4 justify-center items-center"
-              >
-                <Text className="text-white font-semibold">Add Category</Text>
+              <LinearGradient colors={['#EAB308', '#F59E0B']} className="py-4">
+                <Text className="text-black font-bold text-center">Add Category</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>

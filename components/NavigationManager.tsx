@@ -378,7 +378,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       
       {/* Main Content Area */}
       <Animated.View 

@@ -68,61 +68,60 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-black/70 justify-center items-center px-6">
-        <View className="bg-gray-900/90 rounded-2xl p-6 w-full max-w-sm border border-gray-700/50" style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
-          elevation: 8,
-        }}>
+      <View className="flex-1 bg-black/80 justify-center items-center px-6">
+        <View className="bg-gray-900/95 backdrop-blur-sm rounded-3xl p-6 w-full max-w-sm border border-gray-700 shadow-2xl">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-white">
-              {t('addToBalance')}
-            </Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close" size={24} color="#fbbf24" />
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-white">
+                {t('addToBalance')}
+              </Text>
+            </View>
+            <TouchableOpacity 
+              onPress={handleClose}
+              className="bg-gray-800/60 border border-gray-600 rounded-xl p-2"
+            >
+              <Ionicons name="close" size={20} color="#FFD700" />
             </TouchableOpacity>
           </View>
 
           {/* Amount Input */}
           <View className="mb-6">
-            <Text className="text-gray-300 font-medium mb-2">{t('amount')}</Text>
-            <View className="flex-row items-center border border-gray-600/50 rounded-xl px-4 py-3 bg-gray-800/50">
-              <Text className="text-yellow-400 text-lg mr-2">{currencySymbol}</Text>
-              <TextInput
-                className="flex-1 text-lg text-white"
-                placeholder="0.00"
-                placeholderTextColor="#9ca3af"
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
-                autoFocus={true}
-              />
+            <Text className="text-gray-300 font-medium mb-3">{t('amount')}</Text>
+            <View className="bg-gray-800/60 border border-gray-600 rounded-2xl px-4 py-4">
+              <View className="flex-row items-center">
+                <View className="bg-yellow-500/20 rounded-xl px-3 py-2 mr-3">
+                  <Text className="text-yellow-400 text-lg font-bold">{currencySymbol}</Text>
+                </View>
+                <TextInput
+                  className="flex-1 text-xl text-white font-semibold"
+                  placeholder="0.00"
+                  placeholderTextColor="#9CA3AF"
+                  value={amount}
+                  onChangeText={setAmount}
+                  keyboardType="decimal-pad"
+                  autoFocus={true}
+                />
+              </View>
             </View>
           </View>
 
           {/* Buttons */}
-          <View className="flex-row space-x-3">
+          <View className="flex-row gap-3">
             <TouchableOpacity
-              className="flex-1 bg-gray-700/50 rounded-xl py-4 border border-gray-600/50"
+              className="flex-1 bg-gray-800/60 border border-gray-600 rounded-2xl py-4"
               onPress={handleClose}
             >
-              <Text className="text-gray-300 font-semibold text-center">{t('cancel')}</Text>
+              <Text className="text-gray-300 font-bold text-center">{t('cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1"
+              className="flex-1 rounded-2xl overflow-hidden"
               onPress={handleConfirm}
+              activeOpacity={0.8}
             >
-              <LinearGradient
-                colors={['#10b981', '#059669']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="rounded-xl py-4 justify-center items-center"
-              >
-                <Text className="text-white font-semibold">{t('add')}</Text>
+              <LinearGradient colors={['#EAB308', '#F59E0B']} className="py-4">
+                <Text className="text-black font-bold text-center">{t('add')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
