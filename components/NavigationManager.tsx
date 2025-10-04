@@ -112,7 +112,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
     if (globalData.isDataReady) {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 450,
+        duration: 600,
         useNativeDriver: true,
       }).start();
     }
@@ -124,23 +124,23 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
       fadeAnim.setValue(1);
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 350,
+        duration: 600,
         useNativeDriver: true,
       }).start();
     }
   }, [showWelcome, fadeAnim]);
 
   const handleWelcomeComplete = useCallback(() => {
-    // Show overlay, wait 100ms (preload-like), then reveal app
+    // Show overlay, wait 150ms for smooth transition, then reveal app
     fadeAnim.setValue(1);
     setTimeout(() => {
       setShowWelcome(false);
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 350,
+        duration: 500,
         useNativeDriver: true,
       }).start();
-    }, 100);
+    }, 150);
   }, [fadeAnim]);
 
   // Update global data when currency changes
@@ -240,7 +240,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
         // Fade overlay out after content is ready
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 350, // Slightly faster since screen is preloaded
+          duration: 500, // Consistent with welcome screen fade
           useNativeDriver: true,
         }).start();
       }
@@ -265,7 +265,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
       // Fade overlay out after content is ready
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 450,
+        duration: 500,
         useNativeDriver: true,
       }).start();
     }
@@ -356,10 +356,10 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
   // Render only the welcome screen while onboarding
   if (showWelcome) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-black">
         <StatusBar style="dark" />
         <WelcomeScreen onComplete={handleWelcomeComplete} />
-        {/* White overlay to match navbar transition behavior */}
+        {/* Black overlay to match main app background */}
         <Animated.View 
           pointerEvents="none"
           style={{
@@ -368,7 +368,7 @@ const NavigationManager: React.FC<NavigationManagerProps> = ({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: '#ffffff',
+            backgroundColor: '#000000',
             opacity: fadeAnim,
           }}
         />

@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { categoryIcons, getAllCategories } from '../constants/categoryIcons';
 import { CustomCategory } from '../types';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useAlert } from './AlertProvider';
 
 interface EditCategoryModalProps {
   isVisible: boolean;
@@ -30,6 +30,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   category,
 }) => {
   const { t } = useTranslation();
+  const { error } = useAlert();
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(categoryIcons[0]);
   const [selectedCategory, setSelectedCategory] = useState('Food');
@@ -48,7 +49,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
   const handleConfirm = () => {
     if (!categoryName.trim() || !category) {
-      Alert.alert(t('invalidName'), t('invalidNameMessage'));
+      error(t('invalidName'), t('invalidNameMessage'));
       return;
     }
 

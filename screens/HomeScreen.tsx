@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Alert, ActivityIndicator, Modal, Dimensions } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator, Modal, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import ExpenseCategory from '../components/ExpenseCategory';
@@ -36,6 +36,7 @@ import { updateCurrencyRates, areRatesFresh, convertAmount } from '../utils/curr
 import { parseReceiptFromRawData } from '../utils/receiptService';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getTranslatedMonthName } from '../utils/translationUtils';
+import { useAlert } from '../components/AlertProvider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -51,6 +52,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   onDataChange
 }) => {
   const { t, translations } = useTranslation();
+  const { alert, error } = useAlert();
   // State management
   const [currentMonthKey, setCurrentMonthKey] = useState(getCurrentMonthKey());
   const [monthlyData, setMonthlyData] = useState<MonthlyData | null>(null);
@@ -226,7 +228,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
     const categoryAmount = monthlyData?.categories[categoryId] || 0;
 
-    Alert.alert(
+    alert(
       t('deleteCategory'),
       t('deleteCategoryMessage', { 
         categoryName: category.name, 
@@ -269,7 +271,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             await loadAllData();
           },
         },
-      ]
+      ],
+      'warning'
     );
   }, [expenseCategories, monthlyData, selectedCurrency, t]);
 
@@ -383,7 +386,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleQRScanned = useCallback(async (qrData: string) => {
     if (!qrData || qrData.trim().length === 0) {
-      Alert.alert(t('emptyQRCode'), t('emptyQRMessage'), [{ text: t('ok') }]);
+      error(t('emptyQRCode'), t('emptyQRMessage'));
       return;
     }
 
@@ -410,7 +413,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       setIsReceiptModalVisible(true);
     } catch (error: any) {
       console.error('Failed to parse receipt:', error);
-      Alert.alert(t('error'), error?.message || 'Unable to parse receipt.');
+      error(t('error'), error?.message || 'Unable to parse receipt.');
     } finally {
       setIsFetchingReceipt(false);
     }
@@ -433,7 +436,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const handleReceiptCategorySelect = useCallback(async (categoryId: string) => {
     const amountToApply = typeof receiptConvertedAmount === 'number' ? receiptConvertedAmount : receiptAmount;
     if (!amountToApply || amountToApply <= 0 || !monthlyData) {
-      Alert.alert(t('amountNotFound'), t('amountNotFoundMessage'));
+      error(t('amountNotFound'), t('amountNotFoundMessage'));
       handleReceiptModalClose();
       return;
     }

@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  Alert,
   Dimensions,
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -13,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { formatCurrency } from '../constants/currencies';
 import { ExpenseCategoryData } from './ExpenseCategory';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useAlert } from './AlertProvider';
 
 interface ReceiptModalProps {
   isVisible: boolean;
@@ -43,6 +43,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
   currency,
 }) => {
   const { t } = useTranslation();
+  const { error } = useAlert();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const modalMaxHeight = Math.round(Dimensions.get('window').height * 0.8);
   const headerHeight = 72; // approx header + border
@@ -57,7 +58,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   const handleConfirm = () => {
     if (!selectedCategoryId) {
-      Alert.alert(t('selectCategory'), t('selectCategoryMessage'));
+      error(t('selectCategory'), t('selectCategoryMessage'));
       return;
     }
 

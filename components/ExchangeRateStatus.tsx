@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { 
   updateCurrencyRates, 
@@ -8,6 +8,7 @@ import {
   getExchangeRateStatus 
 } from '../utils/currencyService';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useAlert } from './AlertProvider';
 
 interface ExchangeRateStatusProps {
   onRatesUpdated?: () => void;
@@ -15,6 +16,7 @@ interface ExchangeRateStatusProps {
 
 const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated }) => {
   const { t } = useTranslation();
+  const { success, error } = useAlert();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [ratesCount, setRatesCount] = useState(0);
@@ -45,7 +47,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
       
       if (success) {
         const status = getExchangeRateStatus();
-        Alert.alert(
+        success(
           t('ratesUpdatedSuccessfully'),
           `Currency exchange rates have been updated successfully!\n\n📊 ${status.ratesCount} currencies loaded\n⏰ Fresh for 60 minutes`,
           [
@@ -59,7 +61,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
           ]
         );
       } else {
-        Alert.alert(
+        error(
           t('failedToUpdateRates'),
           'Failed to update exchange rates. Using cached or fallback rates.\n\nThis might be due to:\n• Network connectivity issues\n• API rate limits\n• Server maintenance',
           [
@@ -71,7 +73,7 @@ const ExchangeRateStatus: React.FC<ExchangeRateStatusProps> = ({ onRatesUpdated 
         );
       }
     } catch (error) {
-      Alert.alert(
+      error(
         t('error'),
         'An error occurred while updating exchange rates.',
         [

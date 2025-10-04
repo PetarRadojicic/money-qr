@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import CurrencyModal from '../components/CurrencyModal';
 import LanguageModal from '../components/LanguageModal';
 import ExchangeRateStatus from '../components/ExchangeRateStatus';
 import { useTranslation, Language } from '../contexts/TranslationContext';
+import { useAlert } from '../components/AlertProvider';
 
 interface SettingsScreenProps {
   onNavigateHome: () => void;
@@ -30,6 +30,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onCurrencyChange
 }) => {
   const { t, language, setLanguage } = useTranslation();
+  const { alert, success, error } = useAlert();
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
@@ -68,7 +69,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const handleResetApp = () => {
-    Alert.alert(
+    alert(
       t('resetApp'),
       t('resetAppMessage'),
       [
@@ -82,7 +83,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           onPress: async () => {
             try {
               await resetAppData();
-              Alert.alert(
+              success(
                 'App Reset Complete',
                 t('resetAppCompleteMessage'),
                 [
@@ -95,13 +96,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   },
                 ]
               );
-            } catch (error) {
-              Alert.alert(t('error'), 'Failed to reset the app. Please try again.');
-              console.error('Reset error:', error);
+            } catch (err) {
+              error(t('error'), 'Failed to reset the app. Please try again.');
+              console.error('Reset error:', err);
             }
           },
         },
-      ]
+      ],
+      'warning'
     );
   };
 

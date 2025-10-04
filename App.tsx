@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import NavigationManager from './components/NavigationManager';
 import { TranslationProvider } from './contexts/TranslationContext';
+import { AlertProvider } from './components/AlertProvider';
 import './global.css';
 
 export default function App() {
@@ -27,14 +28,16 @@ export default function App() {
 
   return (
     <TranslationProvider>
-      <NavigationManager
-        onDataChange={handleDataChange}
-        onCurrencyChange={handleCurrencyChange}
-        onDataReset={handleDataReset}
-        dataChangeCounter={dataChangeCounter}
-        resetCounter={resetCounter}
-        currencyChangeCounter={currencyChangeCounter}
-      />
+      <AlertProvider>
+        <NavigationManager
+          onDataChange={handleDataChange}
+          onCurrencyChange={handleCurrencyChange}
+          onDataReset={handleDataReset}
+          dataChangeCounter={dataChangeCounter}
+          resetCounter={resetCounter}
+          currencyChangeCounter={currencyChangeCounter}
+        />
+      </AlertProvider>
     </TranslationProvider>
   );
 }

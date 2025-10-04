@@ -5,13 +5,13 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CURRENCIES, Currency, getCurrencyByCode, formatCurrency } from '../constants/currencies';
 import { getSelectedCurrency, convertAllDataToCurrency } from '../utils/dataManager';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useAlert } from './AlertProvider';
 
 interface CurrencyModalProps {
   isVisible: boolean;
@@ -21,6 +21,7 @@ interface CurrencyModalProps {
 
 const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCurrencyChange }) => {
   const { t } = useTranslation();
+  const { success, error } = useAlert();
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isConverting, setIsConverting] = useState(false);
 
@@ -46,7 +47,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
     try {
       await convertAllDataToCurrency(currency.code);
       
-      Alert.alert(
+      success(
         t('currencyChanged'),
         t('currencyConvertedMessage')
           .replace('{currencyName}', currency.name)
@@ -63,7 +64,7 @@ const CurrencyModal: React.FC<CurrencyModalProps> = ({ isVisible, onClose, onCur
         ]
       );
     } catch (error) {
-      Alert.alert(t('error'), 'Failed to convert currency. Please try again.');
+      error(t('error'), 'Failed to convert currency. Please try again.');
       console.error('Currency conversion error:', error);
     } finally {
       setIsConverting(false);

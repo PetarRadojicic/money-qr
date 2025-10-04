@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
@@ -13,6 +12,7 @@ import { Transaction } from '../types';
 import { loadTransactionHistory, revertTransaction } from '../utils/dataManager';
 import { formatCurrency } from '../constants/currencies';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useAlert } from '../components/AlertProvider';
 
 interface HistoryScreenProps {
   onNavigateHome: () => void;
@@ -28,6 +28,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
   currency = 'USD'
 }) => {
   const { t } = useTranslation();
+  const { alert, success, error } = useAlert();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,14 +53,14 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
 
   const handleRevertTransaction = async (transaction: Transaction) => {
     if (transaction.isReverted) {
-      Alert.alert(t('alreadyReverted'), t('alreadyRevertedMessage'));
+      error(t('alreadyReverted'), t('alreadyRevertedMessage'));
       return;
     }
 
     const transactionType = transaction.type === 'income' ? 'income' : 'expense';
     const actionText = transactionType === 'income' ? t('removeThisIncome') : t('removeThisExpense');
 
-    Alert.alert(
+    alert(
       t('revertTransaction'),
       `${t('areYouSureRevert')} ${actionText}?\n\n${transaction.categoryName}: ${formatCurrency(transaction.amount, currency)}\nDate: ${formatDate(transaction.date)}`,
       [
@@ -73,15 +74,16 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
           onPress: async () => {
             const success = await revertTransaction(transaction.id);
             if (success) {
-              Alert.alert(t('success'), t('transactionReverted'));
+              success(t('success'), t('transactionReverted'));
               await loadTransactions();
               onDataChange(); // Refresh home screen data
             } else {
-              Alert.alert(t('error'), t('failedToRevert'));
+              error(t('error'), t('failedToRevert'));
             }
           },
         },
-      ]
+      ],
+      'warning'
     );
   };
 

@@ -5,13 +5,13 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../contexts/TranslationContext';
 import { getSelectedCurrency } from '../utils/dataManager';
 import { getCurrencyByCode } from '../constants/currencies';
+import { useAlert } from './AlertProvider';
 
 interface AddBalanceModalProps {
   isVisible: boolean;
@@ -25,6 +25,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
   onConfirm,
 }) => {
   const { t } = useTranslation();
+  const { error } = useAlert();
   const [amount, setAmount] = useState('');
   const [currencySymbol, setCurrencySymbol] = useState<string>('$');
 
@@ -47,7 +48,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({
     const numericAmount = parseFloat(amount);
     
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert(t('invalidAmount'), t('invalidAmountMessage'));
+      error(t('invalidAmount'), t('invalidAmountMessage'));
       return;
     }
 
