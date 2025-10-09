@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable, useColorScheme } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useTranslation } from "../../hooks/useTranslation";
@@ -10,63 +10,108 @@ type Category = {
   icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   color: string;
   amountLabel?: string;
+  customName?: string;
 };
 
 type CategoriesGridProps = {
   categories?: Category[];
+  onSelectCategory?: (key: TranslationKey) => void;
+  onAddCategory?: () => void;
 };
 
-const defaultCategories: Category[] = [
-  {
-    key: "categoryEssentials",
-    icon: "shield-check",
-    color: "#38bdf8",
-  },
-  {
-    key: "categoryFood",
-    icon: "silverware-fork-knife",
-    color: "#f97316",
-  },
-  {
-    key: "categoryTransport",
-    icon: "transit-connection-variant",
-    color: "#22c55e",
-  },
-  {
-    key: "categoryEntertainment",
-    icon: "controller-classic",
-    color: "#a855f7",
-  },
-  {
-    key: "categorySavings",
-    icon: "piggy-bank",
-    color: "#facc15",
-  },
-];
-
-const CategoriesGrid = ({ categories = defaultCategories }: CategoriesGridProps) => {
+const CategoriesGrid = ({ categories = [], onSelectCategory, onAddCategory }: CategoriesGridProps) => {
   const { t } = useTranslation();
+  const colorScheme = useColorScheme();
 
   return (
     <View className="mt-8">
-      <Text className="text-base font-semibold text-slate-800 dark:text-slate-100">{t("categories")}</Text>
-      <View className="mt-4 flex-row flex-wrap gap-3">
-        {categories.map(({ key, icon, color, amountLabel }) => (
-          <View
+      <View className="flex-row items-center justify-between mb-6 px-1">
+        <Text className="text-xl font-bold text-slate-900 dark:text-white">
+          {t("categories")}
+        </Text>
+        <Text className="text-sm text-slate-500 dark:text-slate-400">
+          {categories.length} {categories.length === 1 ? 'category' : 'categories'}
+        </Text>
+      </View>
+      
+      <View className="gap-3">
+        {categories.map(({ key, icon, color, amountLabel, customName }) => (
+          <Pressable
             key={key}
-            className="w-[47%] rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+            className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden active:scale-[0.98]"
+            style={{ 
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
+              elevation: 3,
+            }}
+            onPress={() => onSelectCategory?.(key)}
           >
-            <View className="flex-row items-center gap-3">
-              <View className="rounded-2xl bg-slate-100 p-3 dark:bg-slate-800">
-                <MaterialCommunityIcons name={icon} size={22} color={color} />
+            <View className="flex-row items-center p-5">
+              {/* Icon Section */}
+              <View 
+                className="rounded-2xl p-4 mr-4"
+                style={{ backgroundColor: `${color}20` }}
+              >
+                <MaterialCommunityIcons name={icon} size={28} color={color} />
               </View>
-              <Text className="text-sm font-medium text-slate-700 dark:text-slate-100">{t(key)}</Text>
+              
+              {/* Content Section */}
+              <View className="flex-1">
+                <Text 
+                  className="text-base font-bold text-slate-900 dark:text-white mb-1"
+                  numberOfLines={1}
+                >
+                  {customName || t(key)}
+                </Text>
+                
+                {amountLabel ? (
+                  <Text className="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                    {amountLabel}
+                  </Text>
+                ) : (
+                  <Text className="text-sm text-slate-400 dark:text-slate-500">
+                    No expenses yet
+                  </Text>
+                )}
+              </View>
+              
+              {/* Arrow Indicator */}
+              <MaterialCommunityIcons 
+                name="chevron-right" 
+                size={24} 
+                color="#94a3b8" 
+                style={{ opacity: 0.5 }}
+              />
             </View>
-            {amountLabel ? (
-              <Text className="mt-3 text-xs text-slate-400 dark:text-slate-500">{amountLabel}</Text>
-            ) : null}
-          </View>
+            
+            {/* Accent bar at bottom */}
+            <View 
+              className="h-1.5"
+              style={{ backgroundColor: color }}
+            />
+          </Pressable>
         ))}
+        
+        {/* Add Category Button */}
+        <Pressable
+          className="bg-slate-50 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 rounded-3xl overflow-hidden active:scale-[0.98]"
+          onPress={onAddCategory}
+        >
+          <View className="flex-row items-center justify-center p-6">
+            <View className="bg-slate-900 dark:bg-slate-200 rounded-full p-2 mr-3">
+              <MaterialCommunityIcons 
+                name="plus" 
+                size={20} 
+                color={colorScheme === 'dark' ? '#1e293b' : '#ffffff'}
+              />
+            </View>
+            <Text className="text-base font-bold text-slate-900 dark:text-white">
+              {t("addCategory")}
+            </Text>
+          </View>
+        </Pressable>
       </View>
     </View>
   );

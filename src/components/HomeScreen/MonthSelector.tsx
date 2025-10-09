@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -25,12 +25,12 @@ const MonthSelector = ({ onChange }: MonthSelectorProps = {}) => {
   const arrowColor = theme === "dark" ? "#cbd5f5" : "#475569";
   const monthLabel = months[activeDate.month];
 
+  useEffect(() => {
+    onChange?.(activeDate);
+  }, [activeDate, onChange]);
+
   const updateDate = (updater: (date: { month: number; year: number }) => { month: number; year: number }) => {
-    setActiveDate((prev) => {
-      const nextDate = updater(prev);
-      onChange?.(nextDate);
-      return nextDate;
-    });
+    setActiveDate((prev) => updater(prev));
   };
 
   const handlePreviousMonth = () => {
