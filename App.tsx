@@ -1,16 +1,30 @@
-import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
+import { useColorScheme } from "nativewind";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { enableScreens } from "react-native-screens";
+
+import RootNavigator from "./src/navigation/RootNavigator";
+import { usePreferencesStore } from "./src/store/preferences";
+
+enableScreens();
 
 export default function App() {
+  const theme = usePreferencesStore((state) => state.theme);
+  const { setColorScheme } = useColorScheme();
+  const navigationTheme = theme === "dark" ? DarkTheme : DefaultTheme;
+
+  useEffect(() => {
+    setColorScheme(theme);
+  }, [setColorScheme, theme]);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-lg font-semibold text-slate-900">
-          NativeWind is ready to go! 🎉
-        </Text>
-        <StatusBar style="auto" />
-      </View>
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <NavigationContainer theme={navigationTheme}>
+        <StatusBar style={theme === "dark" ? "light" : "dark"} />
+        <RootNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
