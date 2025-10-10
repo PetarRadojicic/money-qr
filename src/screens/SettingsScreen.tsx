@@ -3,6 +3,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppearanceSection from "../components/SettingsScreen/AppearanceSection";
 import LanguageSection from "../components/SettingsScreen/LanguageSection";
+import CurrencySection from "../components/SettingsScreen/CurrencySection";
+import ResetSection from "../components/SettingsScreen/ResetSection";
 
 const SettingsScreen = () => {
   return (
@@ -14,6 +16,10 @@ const SettingsScreen = () => {
         <AppearanceSection />
 
         <LanguageSection />
+
+        <CurrencySection />
+
+        <ResetSection />
       </View>
     </SafeAreaView>
   );

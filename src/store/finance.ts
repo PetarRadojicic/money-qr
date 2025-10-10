@@ -3,6 +3,8 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ComponentProps } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { dinero, add, subtract, toSnapshot } from "dinero.js";
+import { USD } from "@dinero.js/currencies";
 
 import { CATEGORY_KEYS, type CategoryKey } from "../constants/categories";
 
@@ -34,6 +36,29 @@ const getMonthKey = ({ month, year }: { month: number; year: number }): MonthKey
   return `${year}-${monthLabel}` as MonthKey;
 };
 
+// Helper functions for safe money arithmetic using Dinero.js
+const toMinorUnits = (amount: number): number => {
+  return Math.round(amount * Math.pow(10, USD.exponent));
+};
+
+const toDecimal = (minorUnits: number): number => {
+  return minorUnits / Math.pow(10, USD.exponent);
+};
+
+const safeAdd = (a: number, b: number): number => {
+  const dineroA = dinero({ amount: toMinorUnits(a), currency: USD });
+  const dineroB = dinero({ amount: toMinorUnits(b), currency: USD });
+  const result = add(dineroA, dineroB);
+  return toDecimal(toSnapshot(result).amount);
+};
+
+const safeSubtract = (a: number, b: number): number => {
+  const dineroA = dinero({ amount: toMinorUnits(a), currency: USD });
+  const dineroB = dinero({ amount: toMinorUnits(b), currency: USD });
+  const result = subtract(dineroA, dineroB);
+  return toDecimal(toSnapshot(result).amount);
+};
+
 export type FinanceState = {
   totalBalance: number;
   monthlyData: Record<MonthKey, MonthlyFinance>;
@@ -41,6 +66,8 @@ export type FinanceState = {
   addIncome: (payload: { amount: number; month: number; year: number }) => void;
   addExpense: (payload: { amount: number; category: CategoryKey | string; month: number; year: number }) => void;
   addCustomCategory: (category: Omit<CustomCategory, "id">) => void;
+  updateFinancialData: (payload: { totalBalance: number; monthlyData: Record<MonthKey, MonthlyFinance> }) => void;
+  resetFinanceData: () => void;
 };
 
 export const useFinanceStore = create<FinanceState>()(
@@ -59,12 +86,12 @@ export const useFinanceStore = create<FinanceState>()(
           const monthData = state.monthlyData[key] ?? createEmptyMonth();
 
           return {
-            totalBalance: state.totalBalance + amount,
+            totalBalance: safeAdd(state.totalBalance, amount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
-                income: monthData.income + amount,
+                income: safeAdd(monthData.income, amount),
               },
             },
           } satisfies Partial<FinanceState>;
@@ -87,14 +114,14 @@ export const useFinanceStore = create<FinanceState>()(
           const currentCategoryTotal = monthData.expenses[category] ?? 0;
 
           return {
-            totalBalance: state.totalBalance - amount,
+            totalBalance: safeSubtract(state.totalBalance, amount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
                 expenses: {
                   ...monthData.expenses,
-                  [category]: currentCategoryTotal + amount,
+                  [category]: safeAdd(currentCategoryTotal, amount),
                 },
               },
             },
@@ -110,6 +137,17 @@ export const useFinanceStore = create<FinanceState>()(
             },
           ],
         })),
+      updateFinancialData: ({ totalBalance, monthlyData }) =>
+        set({
+          totalBalance,
+          monthlyData,
+        }),
+      resetFinanceData: () =>
+        set({
+          totalBalance: 0,
+          monthlyData: {},
+          customCategories: [],
+        }),
     }),
     {
       name: "finance",

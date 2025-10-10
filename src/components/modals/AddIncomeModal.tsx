@@ -3,6 +3,8 @@ import { View, Text, TextInput, Pressable, Modal } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useTranslation } from "../../hooks/useTranslation";
+import { usePreferencesStore } from "../../store/preferences";
+import { getCurrencySymbol } from "../../constants/currencies";
 
 type AddIncomeModalProps = {
   visible: boolean;
@@ -12,6 +14,7 @@ type AddIncomeModalProps = {
 
 const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => {
   const { t } = useTranslation();
+  const currency = usePreferencesStore((state) => state.currency);
   const [amount, setAmount] = useState("");
 
   const handleSubmit = () => {
@@ -30,6 +33,7 @@ const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => 
   };
 
   const isValid = amount && Number.isFinite(Number.parseFloat(amount)) && Number.parseFloat(amount) > 0;
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <Modal transparent visible={visible} animationType="slide" onRequestClose={handleClose}>
@@ -65,7 +69,7 @@ const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => 
               </Text>
               <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden">
                 <View className="flex-row items-center px-5 py-2">
-                  <Text className="text-3xl font-bold text-slate-400 dark:text-slate-500 mr-2">$</Text>
+                  <Text className="text-3xl font-bold text-slate-400 dark:text-slate-500 mr-2">{currencySymbol}</Text>
                   <TextInput
                     value={amount}
                     onChangeText={setAmount}
