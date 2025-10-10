@@ -55,10 +55,8 @@ export async function fetchExchangeRates(baseCurrency: CurrencyType = 'USD'): Pr
     return convertedRates;
   } catch (error) {
     console.error("Error fetching exchange rates:", error);
-    // Return a fallback with just the base currency
-    return {
-      [baseCurrency]: 1,
-    };
+    // Throw error so it can be caught and shown to the user
+    throw new Error(`Failed to fetch exchange rates. Please check your internet connection and try again.`);
   }
 }
 
@@ -88,8 +86,8 @@ export function convertCurrency(
   const rate = exchangeRates[toCurrency];
   
   if (!rate) {
-    console.warn(`No exchange rate found for ${toCurrency}, returning original amount`);
-    return amount;
+    console.warn(`No exchange rate found for ${toCurrency}`);
+    throw new Error(`Exchange rate not available for ${toCurrency}. Please try again later.`);
   }
 
   // If both currencies are supported by Dinero.js, use it for precision

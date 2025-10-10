@@ -7,6 +7,7 @@ import { usePreferencesStore, type Currency } from "../../store/preferences";
 import { useFinanceStore } from "../../store/finance";
 import { convertAllFinancialData } from "../../services/currencyConversion";
 import { getCurrencySymbol } from "../../constants/currencies";
+import ErrorModal from "./ErrorModal";
 
 type CurrencyModalProps = {
   visible: boolean;
@@ -44,6 +45,8 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [isConverting, setIsConverting] = useState(false);
+  const [showConversionError, setShowConversionError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleCurrencySelect = async (newCurrency: Currency) => {
     if (newCurrency === currency) {
@@ -69,9 +72,11 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
       setCurrency(newCurrency);
     } catch (error) {
       console.error("Error converting currency:", error);
-      // If conversion fails, still update the currency preference
-      // but keep the same numerical values
-      setCurrency(newCurrency);
+      // Show the specific error message to the user
+      const message = error instanceof Error ? error.message : 'Failed to convert currency data. Please try again.';
+      setErrorMessage(message);
+      setShowConversionError(true);
+      // Don't change currency if conversion fails - keep current currency
     } finally {
       setIsConverting(false);
       onClose();
@@ -229,6 +234,15 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
           </View>
         </View>
       </View>
+
+      {/* Error Modal */}
+      <ErrorModal
+        visible={showConversionError}
+        onClose={() => setShowConversionError(false)}
+        title="Conversion Error"
+        message={errorMessage}
+        icon="currency-usd-off"
+      />
     </Modal>
   );
 };

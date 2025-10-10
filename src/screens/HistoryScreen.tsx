@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -9,6 +9,7 @@ import { usePreferencesStore } from "../store/preferences";
 import { CATEGORY_CONFIG, type CategoryKey, isCategoryKey } from "../constants/categories";
 import { formatCurrency } from "../utils/format";
 import { monthsByLanguage } from "../i18n/translations";
+import { WarnModal, AlertModal } from "../components/modals";
 
 const HistoryScreen = () => {
   const { t } = useTranslation();
@@ -18,6 +19,10 @@ const HistoryScreen = () => {
   const transactions = useFinanceStore((state) => state.transactions);
   const customCategories = useFinanceStore((state) => state.customCategories);
   const revertTransaction = useFinanceStore((state) => state.revertTransaction);
+
+  const [showRevertConfirm, setShowRevertConfirm] = useState(false);
+  const [showRevertSuccess, setShowRevertSuccess] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const isDark = theme === "dark";
 
@@ -72,24 +77,15 @@ const HistoryScreen = () => {
   };
 
   const handleRevertTransaction = (transaction: Transaction) => {
-    Alert.alert(
-      t("revertConfirmTitle"),
-      t("revertConfirmMessage"),
-      [
-        {
-          text: t("cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("revertConfirmButton"),
-          style: "destructive",
-          onPress: () => {
-            revertTransaction(transaction.id);
-            Alert.alert("", t("transactionReverted"));
-          },
-        },
-      ]
-    );
+    setSelectedTransaction(transaction);
+    setShowRevertConfirm(true);
+  };
+
+  const confirmRevert = () => {
+    if (selectedTransaction) {
+      revertTransaction(selectedTransaction.id);
+      setShowRevertSuccess(true);
+    }
   };
 
   const renderTransaction = ({ item }: { item: Transaction }) => {
@@ -243,6 +239,27 @@ const HistoryScreen = () => {
         }}
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
+      />
+
+      {/* Modals */}
+      <WarnModal
+        visible={showRevertConfirm}
+        onClose={() => setShowRevertConfirm(false)}
+        title={t("revertConfirmTitle")}
+        message={t("revertConfirmMessage")}
+        confirmText={t("revertConfirmButton")}
+        cancelText={t("cancel")}
+        onConfirm={confirmRevert}
+        icon="undo-variant"
+      />
+
+      <AlertModal
+        visible={showRevertSuccess}
+        onClose={() => setShowRevertSuccess(false)}
+        title=""
+        message={t("transactionReverted")}
+        confirmText="OK"
+        icon="check-circle-outline"
       />
     </SafeAreaView>
   );

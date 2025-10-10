@@ -3,6 +3,16 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useTranslation } from "../../hooks/useTranslation";
 
+// Helper function to determine responsive font size based on text length
+const getResponsiveFontSize = (text: string, baseSize: number = 32): number => {
+  const length = text.length;
+  if (length <= 6) return baseSize;
+  if (length <= 10) return baseSize * 0.85;
+  if (length <= 14) return baseSize * 0.7;
+  if (length <= 18) return baseSize * 0.55;
+  return baseSize * 0.4; // More aggressive scaling for very long numbers
+};
+
 type BalanceSummaryProps = {
   totalBalance: string;
   income: string;
@@ -64,7 +74,20 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
               {t("totalBalance")}
             </Text>
           </View>
-          <Text className="text-5xl font-extrabold text-white tracking-tight">
+          <Text 
+            className="font-extrabold text-white tracking-tight"
+            style={{ 
+              fontSize: getResponsiveFontSize(totalBalance, 36), // Slightly smaller base
+              lineHeight: getResponsiveFontSize(totalBalance, 36) * 1.1,
+              textAlign: 'center',
+              numberOfLines: 1,
+              adjustsFontSizeToFit: true,
+              minimumFontScale: 0.3, // Allow even smaller scaling
+              maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
+            }}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+          >
             {totalBalance}
           </Text>
         </View>
@@ -90,7 +113,20 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
                 {t("income")}
               </Text>
             </View>
-            <Text className="text-2xl font-extrabold text-green-300">
+            <Text 
+              className="font-extrabold text-green-300"
+              style={{ 
+                fontSize: getResponsiveFontSize(income, 20), // Smaller base size
+                lineHeight: getResponsiveFontSize(income, 20) * 1.1,
+                textAlign: 'center',
+                numberOfLines: 1,
+                adjustsFontSizeToFit: true,
+                minimumFontScale: 0.3, // Allow even smaller scaling
+                maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
+              }}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
               {income}
             </Text>
           </View>
@@ -114,7 +150,20 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
                 {t("expenses")}
               </Text>
             </View>
-            <Text className="text-2xl font-extrabold text-red-300">
+            <Text 
+              className="font-extrabold text-red-300"
+              style={{ 
+                fontSize: getResponsiveFontSize(expenses, 20), // Smaller base size
+                lineHeight: getResponsiveFontSize(expenses, 20) * 1.1,
+                textAlign: 'center',
+                numberOfLines: 1,
+                adjustsFontSizeToFit: true,
+                minimumFontScale: 0.3, // Allow even smaller scaling
+                maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
+              }}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
               {expenses}
             </Text>
           </View>
