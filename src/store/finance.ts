@@ -17,6 +17,17 @@ export type CustomCategory = {
   color: string;
 };
 
+export type Transaction = {
+  id: string;
+  type: "income" | "expense";
+  amount: number;
+  category?: CategoryKey | string;
+  date: string; // ISO date string
+  month: number;
+  year: number;
+  monthKey: MonthKey;
+};
+
 type MonthlyFinance = {
   income: number;
   expenses: Record<CategoryKey | string, number>;
@@ -63,9 +74,11 @@ export type FinanceState = {
   totalBalance: number;
   monthlyData: Record<MonthKey, MonthlyFinance>;
   customCategories: CustomCategory[];
+  transactions: Transaction[];
   addIncome: (payload: { amount: number; month: number; year: number }) => void;
   addExpense: (payload: { amount: number; category: CategoryKey | string; month: number; year: number }) => void;
   addCustomCategory: (category: Omit<CustomCategory, "id">) => void;
+  revertTransaction: (transactionId: string) => void;
   updateFinancialData: (payload: { totalBalance: number; monthlyData: Record<MonthKey, MonthlyFinance> }) => void;
   resetFinanceData: () => void;
 };
@@ -76,6 +89,7 @@ export const useFinanceStore = create<FinanceState>()(
       totalBalance: 0,
       monthlyData: {},
       customCategories: [],
+      transactions: [],
       addIncome: ({ amount, month, year }) =>
         set((state) => {
           if (!Number.isFinite(amount) || amount <= 0) {
@@ -84,6 +98,16 @@ export const useFinanceStore = create<FinanceState>()(
 
           const key = getMonthKey({ month, year });
           const monthData = state.monthlyData[key] ?? createEmptyMonth();
+
+          const transaction: Transaction = {
+            id: `income_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: "income",
+            amount,
+            date: new Date().toISOString(),
+            month,
+            year,
+            monthKey: key,
+          };
 
           return {
             totalBalance: safeAdd(state.totalBalance, amount),
@@ -94,6 +118,7 @@ export const useFinanceStore = create<FinanceState>()(
                 income: safeAdd(monthData.income, amount),
               },
             },
+            transactions: [transaction, ...state.transactions],
           } satisfies Partial<FinanceState>;
         }),
       addExpense: ({ amount, category, month, year }) =>
@@ -113,6 +138,17 @@ export const useFinanceStore = create<FinanceState>()(
           const monthData = state.monthlyData[key] ?? createEmptyMonth();
           const currentCategoryTotal = monthData.expenses[category] ?? 0;
 
+          const transaction: Transaction = {
+            id: `expense_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: "expense",
+            amount,
+            category,
+            date: new Date().toISOString(),
+            month,
+            year,
+            monthKey: key,
+          };
+
           return {
             totalBalance: safeSubtract(state.totalBalance, amount),
             monthlyData: {
@@ -125,6 +161,7 @@ export const useFinanceStore = create<FinanceState>()(
                 },
               },
             },
+            transactions: [transaction, ...state.transactions],
           } satisfies Partial<FinanceState>;
         }),
       addCustomCategory: (category) =>
@@ -137,6 +174,49 @@ export const useFinanceStore = create<FinanceState>()(
             },
           ],
         })),
+      revertTransaction: (transactionId) =>
+        set((state) => {
+          const transaction = state.transactions.find((t) => t.id === transactionId);
+          if (!transaction) {
+            return state;
+          }
+
+          const key = transaction.monthKey;
+          const monthData = state.monthlyData[key] ?? createEmptyMonth();
+
+          if (transaction.type === "income") {
+            return {
+              totalBalance: safeSubtract(state.totalBalance, transaction.amount),
+              monthlyData: {
+                ...state.monthlyData,
+                [key]: {
+                  ...monthData,
+                  income: safeSubtract(monthData.income, transaction.amount),
+                },
+              },
+              transactions: state.transactions.filter((t) => t.id !== transactionId),
+            } satisfies Partial<FinanceState>;
+          } else {
+            // expense
+            const category = transaction.category!;
+            const currentCategoryTotal = monthData.expenses[category] ?? 0;
+
+            return {
+              totalBalance: safeAdd(state.totalBalance, transaction.amount),
+              monthlyData: {
+                ...state.monthlyData,
+                [key]: {
+                  ...monthData,
+                  expenses: {
+                    ...monthData.expenses,
+                    [category]: safeSubtract(currentCategoryTotal, transaction.amount),
+                  },
+                },
+              },
+              transactions: state.transactions.filter((t) => t.id !== transactionId),
+            } satisfies Partial<FinanceState>;
+          }
+        }),
       updateFinancialData: ({ totalBalance, monthlyData }) =>
         set({
           totalBalance,
@@ -147,15 +227,17 @@ export const useFinanceStore = create<FinanceState>()(
           totalBalance: 0,
           monthlyData: {},
           customCategories: [],
+          transactions: [],
         }),
     }),
     {
       name: "finance",
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ totalBalance, monthlyData, customCategories }) => ({
+      partialize: ({ totalBalance, monthlyData, customCategories, transactions }) => ({
         totalBalance,
         monthlyData,
         customCategories,
+        transactions,
       }),
     }
   )
