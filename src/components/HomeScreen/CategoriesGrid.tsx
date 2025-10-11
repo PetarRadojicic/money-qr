@@ -16,10 +16,11 @@ type Category = {
 type CategoriesGridProps = {
   categories?: Category[];
   onSelectCategory?: (key: TranslationKey) => void;
+  onEditCategory?: (key: TranslationKey) => void;
   onAddCategory?: () => void;
 };
 
-const CategoriesGrid = ({ categories = [], onSelectCategory, onAddCategory }: CategoriesGridProps) => {
+const CategoriesGrid = ({ categories = [], onSelectCategory, onEditCategory, onAddCategory }: CategoriesGridProps) => {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
 
@@ -36,9 +37,9 @@ const CategoriesGrid = ({ categories = [], onSelectCategory, onAddCategory }: Ca
       
       <View className="gap-3">
         {categories.map(({ key, icon, color, amountLabel, customName }) => (
-          <Pressable
+          <View 
             key={key}
-            className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden active:scale-[0.98]"
+            className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden"
             style={{ 
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
@@ -46,52 +47,72 @@ const CategoriesGrid = ({ categories = [], onSelectCategory, onAddCategory }: Ca
               shadowRadius: 12,
               elevation: 3,
             }}
-            onPress={() => onSelectCategory?.(key)}
           >
-            <View className="flex-row items-center p-5">
-              {/* Icon Section */}
-              <View 
-                className="rounded-2xl p-4 mr-4"
-                style={{ backgroundColor: `${color}20` }}
-              >
-                <MaterialCommunityIcons name={icon} size={28} color={color} />
-              </View>
-              
-              {/* Content Section */}
-              <View className="flex-1">
-                <Text 
-                  className="text-base font-bold text-slate-900 dark:text-white mb-1"
-                  numberOfLines={1}
+            <Pressable
+              className="active:scale-[0.98]"
+              onPress={() => onSelectCategory?.(key)}
+            >
+              <View className="flex-row items-center p-5">
+                {/* Icon Section */}
+                <View 
+                  className="rounded-2xl p-4 mr-4"
+                  style={{ backgroundColor: `${color}20` }}
                 >
-                  {customName || t(key)}
-                </Text>
+                  <MaterialCommunityIcons name={icon} size={28} color={color} />
+                </View>
                 
-                {amountLabel ? (
-                  <Text className="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                    {amountLabel}
+                {/* Content Section */}
+                <View className="flex-1">
+                  <Text 
+                    className="text-base font-bold text-slate-900 dark:text-white mb-1"
+                    numberOfLines={1}
+                  >
+                    {customName || t(key)}
                   </Text>
-                ) : (
-                  <Text className="text-sm text-slate-400 dark:text-slate-500">
-                    No expenses yet
-                  </Text>
-                )}
+                  
+                  {amountLabel ? (
+                    <Text className="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                      {amountLabel}
+                    </Text>
+                  ) : (
+                    <Text className="text-sm text-slate-400 dark:text-slate-500">
+                      No expenses yet
+                    </Text>
+                  )}
+                </View>
+                
+                {/* Edit Button */}
+                <Pressable
+                  className="rounded-full p-2.5 mr-1 active:scale-90"
+                  style={{ backgroundColor: `${color}15` }}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onEditCategory?.(key);
+                  }}
+                >
+                  <MaterialCommunityIcons 
+                    name="pencil" 
+                    size={20} 
+                    color={color}
+                  />
+                </Pressable>
+                
+                {/* Arrow Indicator */}
+                <MaterialCommunityIcons 
+                  name="chevron-right" 
+                  size={24} 
+                  color="#94a3b8" 
+                  style={{ opacity: 0.5 }}
+                />
               </View>
-              
-              {/* Arrow Indicator */}
-              <MaterialCommunityIcons 
-                name="chevron-right" 
-                size={24} 
-                color="#94a3b8" 
-                style={{ opacity: 0.5 }}
-              />
-            </View>
+            </Pressable>
             
             {/* Accent bar at bottom */}
             <View 
               className="h-1.5"
               style={{ backgroundColor: color }}
             />
-          </Pressable>
+          </View>
         ))}
         
         {/* Add Category Button */}

@@ -63,6 +63,12 @@ export const translations = {
     transactionReverted: "Transaction reverted successfully",
     today: "Today",
     yesterday: "Yesterday",
+    editCategory: "Edit Category",
+    deleteCategory: "Delete Category",
+    deleteCategoryConfirmTitle: "Delete Category?",
+    deleteCategoryConfirmMessage: "This category has {{count}} transaction(s). Deleting it will remove the category, but transactions will remain in history. This action cannot be undone.",
+    deleteCategoryConfirmMessageNoTransactions: "Are you sure you want to delete this category? This action cannot be undone.",
+    deleteCategoryButton: "Delete",
   },
   sr: {
     homeTitle: "Početna",
@@ -126,6 +132,12 @@ export const translations = {
     transactionReverted: "Transakcija uspešno vraćena",
     today: "Danas",
     yesterday: "Juče",
+    editCategory: "Izmeni Kategoriju",
+    deleteCategory: "Obriši Kategoriju",
+    deleteCategoryConfirmTitle: "Obrisati Kategoriju?",
+    deleteCategoryConfirmMessage: "Ova kategorija ima {{count}} transakcija. Brisanje će ukloniti kategoriju, ali transakcije će ostati u istoriji. Ova radnja se ne može poništiti.",
+    deleteCategoryConfirmMessageNoTransactions: "Da li ste sigurni da želite da obrišete ovu kategoriju? Ova radnja se ne može poništiti.",
+    deleteCategoryButton: "Obriši",
   },
 } as const satisfies Record<Language, Record<string, string>>;
 

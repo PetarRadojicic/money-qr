@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { dinero, add, subtract, toSnapshot } from "dinero.js";
 import { USD } from "@dinero.js/currencies";
 
-import { CATEGORY_KEYS, type CategoryKey } from "../constants/categories";
+import { CATEGORY_KEYS, CATEGORY_CONFIG, type CategoryKey } from "../constants/categories";
 
 export type MonthKey = `${number}-${string}`;
 
@@ -78,17 +78,29 @@ export type FinanceState = {
   addIncome: (payload: { amount: number; month: number; year: number }) => void;
   addExpense: (payload: { amount: number; category: CategoryKey | string; month: number; year: number }) => void;
   addCustomCategory: (category: Omit<CustomCategory, "id">) => void;
+  updateCustomCategory: (categoryId: string, updates: Omit<CustomCategory, "id">) => void;
+  deleteCustomCategory: (categoryId: string) => void;
   revertTransaction: (transactionId: string) => void;
   updateFinancialData: (payload: { totalBalance: number; monthlyData: Record<MonthKey, MonthlyFinance> }) => void;
   resetFinanceData: () => void;
 };
 
+// Initialize default categories as regular categories on first load
+const initializeDefaultCategories = (): CustomCategory[] => {
+  return CATEGORY_CONFIG.map(({ key, icon, color }) => ({
+    id: key, // Use the category key as the ID for default categories
+    name: key, // Store the translation key as the name
+    icon,
+    color,
+  }));
+};
+
 export const useFinanceStore = create<FinanceState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       totalBalance: 0,
       monthlyData: {},
-      customCategories: [],
+      customCategories: initializeDefaultCategories(),
       transactions: [],
       addIncome: ({ amount, month, year }) =>
         set((state) => {
@@ -127,10 +139,9 @@ export const useFinanceStore = create<FinanceState>()(
             return state;
           }
 
-          const isDefaultCategory = CATEGORY_KEYS.includes(category as CategoryKey);
-          const isCustomCategory = state.customCategories.some((c) => c.id === category);
+          const categoryExists = state.customCategories.some((c) => c.id === category);
 
-          if (!isDefaultCategory && !isCustomCategory) {
+          if (!categoryExists) {
             return state;
           }
 
@@ -173,6 +184,16 @@ export const useFinanceStore = create<FinanceState>()(
               id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             },
           ],
+        })),
+      updateCustomCategory: (categoryId, updates) =>
+        set((state) => ({
+          customCategories: state.customCategories.map((cat) =>
+            cat.id === categoryId ? { id: categoryId, ...updates } : cat
+          ),
+        })),
+      deleteCustomCategory: (categoryId) =>
+        set((state) => ({
+          customCategories: state.customCategories.filter((cat) => cat.id !== categoryId),
         })),
       revertTransaction: (transactionId) =>
         set((state) => {
@@ -226,7 +247,7 @@ export const useFinanceStore = create<FinanceState>()(
         set({
           totalBalance: 0,
           monthlyData: {},
-          customCategories: [],
+          customCategories: initializeDefaultCategories(),
           transactions: [],
         }),
     }),
