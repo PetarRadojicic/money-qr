@@ -7,4 +7,5 @@ export { default as AddExpenseModal } from './AddExpenseModal';
 export { default as AddIncomeModal } from './AddIncomeModal';
 export { default as CurrencyModal } from './CurrencyModal';
 export { default as LanguageModal } from './LanguageModal';
+export { default as SelectCategoryModal } from './SelectCategoryModal';
 

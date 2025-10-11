@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ScrollView } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, ActivityIndicator, View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -12,13 +12,18 @@ import AddIncomeModal from "../components/modals/AddIncomeModal";
 import AddExpenseModal from "../components/modals/AddExpenseModal";
 import AddCategoryModal from "../components/modals/AddCategoryModal";
 import EditCategoryModal from "../components/modals/EditCategoryModal";
-import { AlertModal } from "../components/modals";
+import { AlertModal, SelectCategoryModal, ErrorModal } from "../components/modals";
+import QRScanner from "../components/QRScanner";
 import { type CategoryKey, isCategoryKey } from "../constants/categories";
 import { useTranslation } from "../hooks/useTranslation";
 import { useMonthlyFinanceData } from "../hooks/useMonthlyFinanceData";
 import { useCategories } from "../hooks/useCategories";
 import { useFinanceStore } from "../store/finance";
 import type { TranslationKey } from "../i18n/translations";
+import { parseReceipt } from "../services/receiptParser";
+import { usePreferencesStore } from "../store/preferences";
+import { fetchExchangeRates, convertCurrency } from "../services/currencyConversion";
+import type { Currency } from "../store/preferences";
 
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState<{ month: number; year: number }>(() => {
@@ -51,8 +56,20 @@ const HomeScreen = () => {
       }
     | null
   >(null);
+  const [qrScannerVisible, setQrScannerVisible] = useState(false);
+  const [isParsingReceipt, setIsParsingReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<{
+    total: number;
+    currency: string;
+    date: string;
+    vendor: string;
+    originalTotal?: number;
+    originalCurrency?: string;
+  } | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const { t } = useTranslation();
+  const userCurrency = usePreferencesStore((state) => state.currency);
 
   // Custom hooks for data management
   const {
@@ -73,6 +90,68 @@ const HomeScreen = () => {
   const addCustomCategory = useFinanceStore((state) => state.addCustomCategory);
   const updateCustomCategory = useFinanceStore((state) => state.updateCustomCategory);
   const deleteCustomCategory = useFinanceStore((state) => state.deleteCustomCategory);
+
+  // QR Scanning handler
+  const handleQRScan = async (rawData: string) => {
+    setQrScannerVisible(false);
+    setIsParsingReceipt(true);
+
+    try {
+      const data = await parseReceipt(rawData);
+
+      if ("error" in data) {
+        // Handle error responses
+        let errorMessage = t("scanFailed");
+        if (data.error === "raw_data_required") {
+          errorMessage = "Raw data is required";
+        } else if (data.error === "raw_data_empty") {
+          errorMessage = "Raw data is empty";
+        }
+        setScanError(errorMessage);
+      } else {
+        // Success - convert currency if needed
+        const receiptCurrency = data.currency as Currency;
+        let convertedAmount = data.total;
+        let needsConversion = receiptCurrency !== userCurrency;
+
+        if (needsConversion) {
+          try {
+            const rates = await fetchExchangeRates(receiptCurrency);
+            convertedAmount = convertCurrency(data.total, receiptCurrency, userCurrency, rates);
+          } catch (error) {
+            console.error("Currency conversion failed:", error);
+            // Continue with original amount if conversion fails
+            needsConversion = false;
+          }
+        }
+
+        setReceiptData({
+          total: convertedAmount,
+          currency: userCurrency,
+          date: data.date,
+          vendor: data.vendor,
+          originalTotal: needsConversion ? data.total : undefined,
+          originalCurrency: needsConversion ? receiptCurrency : undefined,
+        });
+      }
+    } catch (error) {
+      console.error("Error parsing receipt:", error);
+      setScanError(t("scanFailed"));
+    } finally {
+      setIsParsingReceipt(false);
+    }
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    if (receiptData) {
+      addExpense({
+        amount: receiptData.total,
+        category: categoryId,
+        ...selectedDate,
+      });
+      setReceiptData(null);
+    }
+  };
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-slate-50 dark:bg-slate-950">
@@ -113,8 +192,24 @@ const HomeScreen = () => {
           onAddCategory={() => setAddCategoryModalVisible(true)}
         />
 
-        <QuickActions onAddIncome={() => setIncomeModalVisible(true)} />
+        <QuickActions 
+          onAddIncome={() => setIncomeModalVisible(true)} 
+          onScanQR={() => setQrScannerVisible(true)}
+        />
       </ScrollView>
+
+      {/* Loading overlay for receipt parsing */}
+      {isParsingReceipt && (
+        <View className="absolute inset-0 bg-black/60 items-center justify-center">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl p-8 items-center">
+            <ActivityIndicator size="large" color="#3b82f6" />
+            <View className="h-4" />
+            <Text className="text-slate-900 dark:text-white font-semibold text-base">
+              {t("parsingReceipt")}
+            </Text>
+          </View>
+        </View>
+      )}
 
       <AddIncomeModal
         visible={incomeModalVisible}
@@ -194,7 +289,31 @@ const HomeScreen = () => {
           setDeleteConfirmState(null);
           setEditCategoryState(null);
         }}
-        onCancel={() => setDeleteConfirmState(null)}
+        onClose={() => setDeleteConfirmState(null)}
+      />
+
+      {/* QR Scanner */}
+      <QRScanner
+        visible={qrScannerVisible}
+        onClose={() => setQrScannerVisible(false)}
+        onScan={handleQRScan}
+      />
+
+      {/* Category Selection Modal */}
+      <SelectCategoryModal
+        visible={Boolean(receiptData)}
+        onClose={() => setReceiptData(null)}
+        onSelect={handleCategorySelect}
+        categories={customCategories}
+        receiptData={receiptData}
+      />
+
+      {/* Scan Error Modal */}
+      <ErrorModal
+        visible={Boolean(scanError)}
+        title={t("scanError")}
+        message={scanError ?? ""}
+        onClose={() => setScanError(null)}
       />
     </SafeAreaView>
   );
