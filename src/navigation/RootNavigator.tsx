@@ -5,12 +5,14 @@ import { useMemo } from "react";
 
 import { useTranslation } from "../hooks/useTranslation";
 import HomeScreen from "../screens/HomeScreen";
+import AnalyticsScreen from "../screens/AnalyticsScreen";
 import HistoryScreen from "../screens/HistoryScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import { usePreferencesStore } from "../store/preferences";
 
 export type RootTabParamList = {
   Home: undefined;
+  Analytics: undefined;
   History: undefined;
   Settings: undefined;
 };
@@ -26,6 +28,10 @@ const TAB_ICONS: Record<keyof RootTabParamList, IconConfig> = {
   Home: {
     focused: "home",
     unfocused: "home-outline",
+  },
+  Analytics: {
+    focused: "stats-chart",
+    unfocused: "stats-chart",
   },
   History: {
     focused: "time",
@@ -82,6 +88,11 @@ const RootNavigator = () => {
         name="Home"
         component={HomeScreen}
         options={{ title: t("homeTitle") }}
+      />
+      <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ title: t("analyticsTitle") }}
       />
       <Tab.Screen
         name="History"

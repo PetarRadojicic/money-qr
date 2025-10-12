@@ -83,6 +83,12 @@ export const translations = {
     parsingReceipt: "Parsing receipt...",
     permissionDenied: "Camera permission denied",
     permissionDeniedMessage: "Please enable camera permission in settings to scan QR codes",
+    goToCurrentMonth: "Go to Current Month",
+    analyticsTitle: "Analytics",
+    totalIncome: "Total Income",
+    totalExpenses: "Total Expenses",
+    allTime: "All Time",
+    months: "{{count}}M",
   },
   sr: {
     homeTitle: "Početna",
@@ -166,6 +172,12 @@ export const translations = {
     parsingReceipt: "Obrada računa...",
     permissionDenied: "Dozvola za kameru odbijena",
     permissionDeniedMessage: "Molimo omogućite dozvolu za kameru u podešavanjima da biste skenirali QR kodove",
+    goToCurrentMonth: "Idi na Trenutni Mesec",
+    analyticsTitle: "Analitika",
+    totalIncome: "Ukupni Prihodi",
+    totalExpenses: "Ukupni Rashodi",
+    allTime: "Sve Vreme",
+    months: "{{count}}M",
   },
 } as const satisfies Record<Language, Record<string, string>>;
 
