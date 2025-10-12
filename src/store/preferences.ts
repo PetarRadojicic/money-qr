@@ -28,10 +28,12 @@ interface PreferencesState {
   theme: ThemePreference;
   language: Language;
   currency: Currency;
+  hasCompletedOnboarding: boolean;
   setTheme: (theme: ThemePreference) => void;
   toggleTheme: () => void;
   setLanguage: (language: Language) => void;
   setCurrency: (currency: Currency) => void;
+  setHasCompletedOnboarding: (completed: boolean) => void;
   resetPreferences: () => void;
 }
 
@@ -41,22 +43,25 @@ export const usePreferencesStore = create<PreferencesState>()(
       theme: Appearance.getColorScheme() === "dark" ? "dark" : "light",
       language: "en",
       currency: "USD",
+      hasCompletedOnboarding: false,
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
         set(({ theme }) => ({ theme: theme === "light" ? "dark" : "light" })),
       setLanguage: (language) => set({ language }),
       setCurrency: (currency) => set({ currency }),
+      setHasCompletedOnboarding: (completed) => set({ hasCompletedOnboarding: completed }),
       resetPreferences: () =>
         set({
           theme: Appearance.getColorScheme() === "dark" ? "dark" : "light",
           language: "en",
           currency: "USD",
+          hasCompletedOnboarding: false,
         }),
     }),
     {
       name: "preferences",
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ theme, language, currency }) => ({ theme, language, currency }),
+      partialize: ({ theme, language, currency, hasCompletedOnboarding }) => ({ theme, language, currency, hasCompletedOnboarding }),
     }
   )
 );
