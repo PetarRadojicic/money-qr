@@ -181,9 +181,11 @@ const HomeScreen = () => {
           onEditCategory={(key) => {
             const category = customCategories.find((c) => c.id === key);
             if (category) {
+              // If the name is a translation key, translate it; otherwise use the name directly
+              const translatedName = isCategoryKey(category.name as any) ? t(category.name as TranslationKey) : category.name;
               setEditCategoryState({
                 categoryId: category.id,
-                name: category.name,
+                name: translatedName,
                 icon: category.icon,
                 color: category.color,
               });
