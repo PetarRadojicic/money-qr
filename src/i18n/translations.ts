@@ -89,6 +89,10 @@ export const translations = {
     totalExpenses: "Total Expenses",
     allTime: "All Time",
     months: "{{count}}M",
+    expensesByCategory: "Expenses by Category",
+    noExpensesData: "No expense data available",
+    incomeVsExpenses: "Income vs Expenses",
+    noTransactionsData: "No transaction data available",
   },
   sr: {
     homeTitle: "Početna",
@@ -178,6 +182,10 @@ export const translations = {
     totalExpenses: "Ukupni Rashodi",
     allTime: "Sve Vreme",
     months: "{{count}}M",
+    expensesByCategory: "Rashodi po Kategorijama",
+    noExpensesData: "Nema dostupnih podataka o rashodima",
+    incomeVsExpenses: "Prihodi vs Rashodi",
+    noTransactionsData: "Nema dostupnih podataka o transakcijama",
   },
 } as const satisfies Record<Language, Record<string, string>>;
 

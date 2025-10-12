@@ -3,6 +3,8 @@ import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TimePeriodSelector, { type TimePeriod } from "../components/AnalyticsScreen/TimePeriodSelector";
 import TotalsSummary from "../components/AnalyticsScreen/TotalsSummary";
+import ExpensesByCategoryChart from "../components/AnalyticsScreen/ExpensesByCategoryChart";
+import IncomeVsExpensesChart from "../components/AnalyticsScreen/IncomeVsExpensesChart";
 import { useFinanceStore } from "../store/finance";
 import { usePreferencesStore } from "../store/preferences";
 import { useTranslation } from "../hooks/useTranslation";
@@ -17,7 +19,7 @@ const AnalyticsScreen = () => {
   const isDark = theme === "dark";
 
   // Calculate totals based on selected period
-  const { totalIncome, totalExpenses, filteredCount, totalCount } = useMemo(() => {
+  const { totalIncome, totalExpenses, filteredCount, totalCount, filteredTransactions } = useMemo(() => {
     const now = new Date();
     let cutoffDate: Date;
 
@@ -50,6 +52,7 @@ const AnalyticsScreen = () => {
       totalExpenses: expenses,
       filteredCount: filteredTransactions.length,
       totalCount: transactions.length,
+      filteredTransactions,
     };
   }, [selectedPeriod, transactions]);
 
@@ -108,6 +111,18 @@ const AnalyticsScreen = () => {
           totalIncome={formatCurrency(totalIncome, currency)}
           totalExpenses={formatCurrency(totalExpenses, currency)}
         />
+
+        {/* Charts */}
+        <View className="gap-4 mt-2">
+          {/* Income vs Expenses Chart */}
+          <IncomeVsExpensesChart
+            filteredTransactions={filteredTransactions}
+            selectedPeriod={selectedPeriod}
+          />
+
+          {/* Expenses by Category Chart */}
+          <ExpensesByCategoryChart filteredTransactions={filteredTransactions} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
