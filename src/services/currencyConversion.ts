@@ -1,6 +1,7 @@
 import { dinero, convert, toSnapshot } from "dinero.js";
 import * as DineroCurrencies from "@dinero.js/currencies";
 import type { Currency as CurrencyType } from "../store/preferences";
+import type { Transaction } from "../store/finance";
 import { API_BASE_URL } from "@env";
 
 // Map currency codes to Dinero currency objects
@@ -131,16 +132,22 @@ export function convertCurrency(
  * @param newCurrency The new currency
  * @param totalBalance The total balance to convert
  * @param monthlyData The monthly data to convert
+ * @param transactions The transactions array to convert
  * @param exchangeRates The exchange rates object
- * @returns Converted financial data
+ * @returns Converted financial data including transactions
  */
 export async function convertAllFinancialData(
   oldCurrency: CurrencyType,
   newCurrency: CurrencyType,
   totalBalance: number,
   monthlyData: Record<string, { income: number; expenses: Record<string, number> }>,
+  transactions: Transaction[],
   exchangeRates?: ExchangeRates
-) {
+): Promise<{
+  totalBalance: number;
+  monthlyData: Record<string, { income: number; expenses: Record<string, number> }>;
+  transactions: Transaction[];
+}> {
   // Fetch rates if not provided
   const rates = exchangeRates || await fetchExchangeRates(oldCurrency);
 
@@ -164,9 +171,20 @@ export async function convertAllFinancialData(
     };
   }
 
+  // Convert all transaction amounts
+  const convertedTransactions: Transaction[] = transactions.map((transaction): Transaction => ({
+    ...transaction,
+    amount: convertCurrency(transaction.amount, oldCurrency, newCurrency, rates),
+  }));
+
   return {
     totalBalance: convertedBalance,
     monthlyData: convertedMonthlyData,
+    transactions: convertedTransactions,
+  } as {
+    totalBalance: number;
+    monthlyData: Record<string, { income: number; expenses: Record<string, number> }>;
+    transactions: Transaction[];
   };
 }
 

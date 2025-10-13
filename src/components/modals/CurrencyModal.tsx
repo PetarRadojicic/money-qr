@@ -41,6 +41,7 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
   const setCurrency = usePreferencesStore((state) => state.setCurrency);
   const totalBalance = useFinanceStore((state) => state.totalBalance);
   const monthlyData = useFinanceStore((state) => state.monthlyData);
+  const transactions = useFinanceStore((state) => state.transactions);
   const updateFinancialData = useFinanceStore((state) => state.updateFinancialData);
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +51,7 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
 
   const handleCurrencySelect = async (newCurrency: Currency) => {
     if (newCurrency === currency) {
+      setSearchQuery("");
       onClose();
       return;
     }
@@ -62,7 +64,8 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
         currency,
         newCurrency,
         totalBalance,
-        monthlyData
+        monthlyData,
+        transactions
       );
 
       // Update the finance store with converted data
@@ -79,6 +82,7 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
       // Don't change currency if conversion fails - keep current currency
     } finally {
       setIsConverting(false);
+      setSearchQuery("");
       onClose();
     }
   };
@@ -168,6 +172,7 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
               showsVerticalScrollIndicator={false}
               className="max-h-[400px]"
               contentContainerStyle={{ gap: 8 }}
+              keyboardShouldPersistTaps="handled"
               ListEmptyComponent={() => (
                 <View className="py-8 items-center">
                   <MaterialCommunityIcons name="currency-usd-off" size={48} color="#94a3b8" />

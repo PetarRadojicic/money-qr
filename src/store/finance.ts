@@ -81,7 +81,7 @@ export type FinanceState = {
   updateCustomCategory: (categoryId: string, updates: Omit<CustomCategory, "id">) => void;
   deleteCustomCategory: (categoryId: string) => void;
   revertTransaction: (transactionId: string) => void;
-  updateFinancialData: (payload: { totalBalance: number; monthlyData: Record<MonthKey, MonthlyFinance> }) => void;
+  updateFinancialData: (payload: { totalBalance: number; monthlyData: Record<MonthKey, MonthlyFinance>; transactions?: Transaction[] }) => void;
   resetFinanceData: () => void;
 };
 
@@ -238,11 +238,12 @@ export const useFinanceStore = create<FinanceState>()(
             } satisfies Partial<FinanceState>;
           }
         }),
-      updateFinancialData: ({ totalBalance, monthlyData }) =>
-        set({
+      updateFinancialData: ({ totalBalance, monthlyData, transactions }) =>
+        set((state) => ({
           totalBalance,
           monthlyData,
-        }),
+          transactions: transactions ?? state.transactions,
+        })),
       resetFinanceData: () =>
         set({
           totalBalance: 0,
