@@ -35,25 +35,6 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
       }}
     >
       <View className="p-6 relative">
-        {/* Decorative circles */}
-        <View 
-          className="absolute -top-12 -right-12 opacity-10"
-          style={{
-            width: 140,
-            height: 140,
-            borderRadius: 70,
-            backgroundColor: '#ffffff',
-          }}
-        />
-        <View 
-          className="absolute -bottom-8 -left-8 opacity-10"
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: '#ffffff',
-          }}
-        />
 
         {/* Total Balance Card - Full Width */}
         <View 
@@ -77,13 +58,9 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
           <Text 
             className="font-extrabold text-white tracking-tight"
             style={{ 
-              fontSize: getResponsiveFontSize(totalBalance, 36), // Slightly smaller base
+              fontSize: getResponsiveFontSize(totalBalance, 36),
               lineHeight: getResponsiveFontSize(totalBalance, 36) * 1.1,
               textAlign: 'center',
-              numberOfLines: 1,
-              adjustsFontSizeToFit: true,
-              minimumFontScale: 0.3, // Allow even smaller scaling
-              maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
             }}
             numberOfLines={1}
             adjustsFontSizeToFit={true}
@@ -116,13 +93,9 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
             <Text 
               className="font-extrabold text-green-300"
               style={{ 
-                fontSize: getResponsiveFontSize(income, 20), // Smaller base size
+                fontSize: getResponsiveFontSize(income, 20),
                 lineHeight: getResponsiveFontSize(income, 20) * 1.1,
                 textAlign: 'center',
-                numberOfLines: 1,
-                adjustsFontSizeToFit: true,
-                minimumFontScale: 0.3, // Allow even smaller scaling
-                maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
               }}
               numberOfLines={1}
               adjustsFontSizeToFit={true}
@@ -153,13 +126,9 @@ const BalanceSummary = ({ totalBalance, income, expenses }: BalanceSummaryProps)
             <Text 
               className="font-extrabold text-red-300"
               style={{ 
-                fontSize: getResponsiveFontSize(expenses, 20), // Smaller base size
+                fontSize: getResponsiveFontSize(expenses, 20),
                 lineHeight: getResponsiveFontSize(expenses, 20) * 1.1,
                 textAlign: 'center',
-                numberOfLines: 1,
-                adjustsFontSizeToFit: true,
-                minimumFontScale: 0.3, // Allow even smaller scaling
-                maxFontSizeMultiplier: 1.0 // Prevent text from getting too large
               }}
               numberOfLines={1}
               adjustsFontSizeToFit={true}
