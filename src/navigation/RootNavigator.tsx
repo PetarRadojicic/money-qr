@@ -90,14 +90,14 @@ const RootNavigator = () => {
         options={{ title: t("homeTitle") }}
       />
       <Tab.Screen
-        name="Analytics"
-        component={AnalyticsScreen}
-        options={{ title: t("analyticsTitle") }}
-      />
-      <Tab.Screen
         name="History"
         component={HistoryScreen}
         options={{ title: t("historyTitle") }}
+      />
+      <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ title: t("analyticsTitle") }}
       />
       <Tab.Screen
         name="Settings"

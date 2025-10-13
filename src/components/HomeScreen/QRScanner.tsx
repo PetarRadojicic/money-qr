@@ -3,8 +3,8 @@ import { View, Text, Pressable, Modal, ActivityIndicator, StyleSheet } from "rea
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { useTranslation } from "../hooks/useTranslation";
-import { ErrorModal } from "./modals";
+import { useTranslation } from "../../hooks/useTranslation";
+import { ErrorModal } from "../modals";
 
 type QRScannerProps = {
   visible: boolean;

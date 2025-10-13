@@ -13,7 +13,7 @@ import AddExpenseModal from "../components/modals/AddExpenseModal";
 import AddCategoryModal from "../components/modals/AddCategoryModal";
 import EditCategoryModal from "../components/modals/EditCategoryModal";
 import { AlertModal, SelectCategoryModal, ErrorModal } from "../components/modals";
-import QRScanner from "../components/QRScanner";
+import QRScanner from "../components/HomeScreen/QRScanner";
 import { type CategoryKey, isCategoryKey } from "../constants/categories";
 import { useTranslation } from "../hooks/useTranslation";
 import { useMonthlyFinanceData } from "../hooks/useMonthlyFinanceData";
