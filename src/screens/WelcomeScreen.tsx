@@ -228,7 +228,7 @@ const WelcomeScreen = () => {
     >
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -333,17 +333,6 @@ const WelcomeScreen = () => {
               {renderThemeOption("light", t("light"), "sunny")}
               {renderThemeOption("dark", t("dark"), "moon")}
             </View>
-
-            <TouchableOpacity
-              onPress={() => setCurrentStep(2)}
-              className={`mt-4 rounded-2xl py-4 ${
-                isDark ? "bg-sky-400" : "bg-blue-600"
-              }`}
-            >
-              <Text className="text-center text-lg font-bold text-white">
-                Continue
-              </Text>
-            </TouchableOpacity>
           </View>
         )}
 
@@ -489,35 +478,6 @@ const WelcomeScreen = () => {
                 </Text>
               </View>
             </View>
-
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                onPress={() => setCurrentStep(1)}
-                className={`flex-1 rounded-2xl border-2 py-4 ${
-                  isDark
-                    ? "border-slate-700 bg-slate-800"
-                    : "border-slate-300 bg-white"
-                }`}
-              >
-                <Text
-                  className={`text-center text-lg font-bold ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  Back
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setCurrentStep(3)}
-                className={`flex-1 rounded-2xl py-4 ${
-                  isDark ? "bg-sky-400" : "bg-blue-600"
-                }`}
-              >
-                <Text className="text-center text-lg font-bold text-white">
-                  Continue
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         )}
 
@@ -577,46 +537,100 @@ const WelcomeScreen = () => {
 
             {/* Currency List */}
             <ScrollView
-              className="mb-4 max-h-96"
-              showsVerticalScrollIndicator={false}
+              className="mb-4 max-h-[420px]"
+              showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="always"
+              nestedScrollEnabled={true}
             >
               {filteredCurrencies.map((curr) =>
                 renderCurrencyOption(curr.code, curr.name)
               )}
             </ScrollView>
-
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                onPress={() => setCurrentStep(2)}
-                className={`flex-1 rounded-2xl border-2 py-4 ${
-                  isDark
-                    ? "border-slate-700 bg-slate-800"
-                    : "border-slate-300 bg-white"
-                }`}
-              >
-                <Text
-                  className={`text-center text-lg font-bold ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  Back
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleComplete}
-                className={`flex-1 rounded-2xl py-4 ${
-                  isDark ? "bg-sky-400" : "bg-blue-600"
-                }`}
-              >
-                <Text className="text-center text-lg font-bold text-white">
-                  {t("getStarted")}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         )}
       </ScrollView>
+
+      {/* Fixed Footer with Buttons */}
+      <View
+        className={`px-6 pb-6 pt-4 ${
+          isDark ? "bg-slate-950" : "bg-white"
+        }`}
+      >
+        {currentStep === 1 && (
+          <TouchableOpacity
+            onPress={() => setCurrentStep(2)}
+            className={`rounded-2xl py-4 ${
+              isDark ? "bg-sky-400" : "bg-blue-600"
+            }`}
+          >
+            <Text className="text-center text-lg font-bold text-white">
+              Continue
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {currentStep === 2 && (
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              onPress={() => setCurrentStep(1)}
+              className={`flex-1 rounded-2xl border-2 py-4 ${
+                isDark
+                  ? "border-slate-700 bg-slate-800"
+                  : "border-slate-300 bg-white"
+              }`}
+            >
+              <Text
+                className={`text-center text-lg font-bold ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
+                Back
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setCurrentStep(3)}
+              className={`flex-1 rounded-2xl py-4 ${
+                isDark ? "bg-sky-400" : "bg-blue-600"
+              }`}
+            >
+              <Text className="text-center text-lg font-bold text-white">
+                Continue
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentStep === 3 && (
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              onPress={() => setCurrentStep(2)}
+              className={`flex-1 rounded-2xl border-2 py-4 ${
+                isDark
+                  ? "border-slate-700 bg-slate-800"
+                  : "border-slate-300 bg-white"
+              }`}
+            >
+              <Text
+                className={`text-center text-lg font-bold ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
+                Back
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleComplete}
+              className={`flex-1 rounded-2xl py-4 ${
+                isDark ? "bg-sky-400" : "bg-blue-600"
+              }`}
+            >
+              <Text className="text-center text-lg font-bold text-white">
+                {t("getStarted")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   );
 };
