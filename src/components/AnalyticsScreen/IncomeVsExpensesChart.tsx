@@ -42,10 +42,10 @@ const IncomeVsExpensesChart = ({
     return acc;
   }, {} as Record<string, MonthData>);
 
-  // Sort by month and get last N months based on period
+  // Sort by month and show last 6 months max for readability
   const sortedData = (Object.values(dataByMonth) as MonthData[])
     .sort((a, b) => a.monthKey.localeCompare(b.monthKey))
-    .slice(selectedPeriod === "all" ? -6 : -6); // Show last 6 months max for readability
+    .slice(-6);
 
   if (sortedData.length === 0) {
     return (

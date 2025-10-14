@@ -4,6 +4,8 @@ import { usePreferencesStore } from "../../store/preferences";
 import { useFinanceStore } from "../../store/finance";
 import { useTranslation } from "../../hooks/useTranslation";
 import { formatCurrency } from "../../utils/format";
+import { shouldTranslateCategoryName } from "../../constants/categories";
+import type { TranslationKey } from "../../i18n/translations";
 
 interface ExpensesByCategoryChartProps {
   filteredTransactions: any[];
@@ -33,12 +35,12 @@ const ExpensesByCategoryChart = ({ filteredTransactions }: ExpensesByCategoryCha
   const chartData = Object.entries(expensesByCategory)
     .map(([categoryId, amount]) => {
       const category = customCategories.find((c) => c.id === categoryId);
-      // Try to translate if it's a known category key, otherwise use the name as-is
+      // Translate if it's a known category key, otherwise use the name as-is
       let displayName = categoryId;
       if (category) {
-        try {
-          displayName = t(category.name as any);
-        } catch {
+        if (shouldTranslateCategoryName(category.name)) {
+          displayName = t(category.name as TranslationKey);
+        } else {
           displayName = category.name;
         }
       }

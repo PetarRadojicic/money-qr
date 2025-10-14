@@ -18,14 +18,14 @@ const generateId = (prefix: string): string => {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(8);
       crypto.getRandomValues(array);
-      randomPart = Array.from(array, byte => byte.toString(36)).join('').substr(0, 8);
+      randomPart = Array.from(array, byte => byte.toString(36)).join('').slice(0, 8);
     } else {
       // Fallback for environments without crypto
-      randomPart = Math.random().toString(36).substr(2, 8);
+      randomPart = Math.random().toString(36).slice(2, 10);
     }
   } catch {
     // Final fallback
-    randomPart = Math.random().toString(36).substr(2, 8);
+    randomPart = Math.random().toString(36).slice(2, 10);
   }
 
   return `${prefix}_${timestamp}_${randomPart}`;
@@ -243,7 +243,12 @@ export const useFinanceStore = create<FinanceState>()(
             } satisfies Partial<FinanceState>;
           } else {
             // expense
-            const category = transaction.category!;
+            const category = transaction.category;
+            if (!category) {
+              console.warn(`Transaction ${transactionId} has no category, cannot revert`);
+              return state;
+            }
+            
             const currentCategoryTotal = monthData.expenses[category] ?? 0;
 
             return {

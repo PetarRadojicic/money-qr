@@ -73,6 +73,10 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
 
       // Update the currency preference
       setCurrency(newCurrency);
+      
+      // Only close and clear on success
+      setSearchQuery("");
+      onClose();
     } catch (error) {
       console.error("Error converting currency:", error);
       // Show the specific error message to the user
@@ -80,10 +84,9 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
       setErrorMessage(message);
       setShowConversionError(true);
       // Don't change currency if conversion fails - keep current currency
+      // Don't close the modal - let user retry or manually close
     } finally {
       setIsConverting(false);
-      setSearchQuery("");
-      onClose();
     }
   };
 
