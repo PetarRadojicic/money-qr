@@ -7,6 +7,7 @@ import { dinero, add, subtract, toSnapshot } from "dinero.js";
 import { USD } from "@dinero.js/currencies";
 
 import { CATEGORY_KEYS, CATEGORY_CONFIG, type CategoryKey } from "../constants/categories";
+import { formatCurrency } from "../utils/format";
 
 // Generate unique IDs using crypto.getRandomValues if available, fallback to Date + random
 const generateId = (prefix: string): string => {
@@ -296,4 +297,56 @@ export const useFinanceStore = create<FinanceState>()(
 
 export const buildMonthKey = getMonthKey;
 
+// Debug logger - logs balance to console with every change
+if (__DEV__) {
+  // Function to get current currency from preferences store
+  const getCurrency = () => {
+    try {
+      // Dynamically import to avoid circular dependencies
+      const { usePreferencesStore } = require("./preferences");
+      return usePreferencesStore.getState().currency;
+    } catch (error) {
+      return "USD"; // Fallback to USD if preferences store not available
+    }
+  };
+
+  // Track previous balance to only log when it changes
+  let previousBalance: number | null = null;
+
+  // Subscribe to all state changes
+  useFinanceStore.subscribe((state) => {
+    const currentBalance = state.totalBalance;
+    
+    // Only log if balance has changed
+    if (previousBalance !== currentBalance) {
+      const currency = getCurrency();
+      const formattedBalance = formatCurrency(currentBalance, currency);
+      
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("💰 BALANCE UPDATE");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log(`   Balance: ${formattedBalance}`);
+      console.log(`   Raw Amount: ${currentBalance}`);
+      console.log(`   Currency: ${currency}`);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      
+      previousBalance = currentBalance;
+    }
+  });
+
+  // Log initial balance
+  const initialState = useFinanceStore.getState();
+  const currency = getCurrency();
+  const formattedBalance = formatCurrency(initialState.totalBalance, currency);
+  
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("💰 INITIAL BALANCE");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(`   Balance: ${formattedBalance}`);
+  console.log(`   Raw Amount: ${initialState.totalBalance}`);
+  console.log(`   Currency: ${currency}`);
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  
+  previousBalance = initialState.totalBalance;
+}
 
