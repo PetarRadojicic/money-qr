@@ -5,7 +5,7 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "../../hooks/useTranslation";
 import { usePreferencesStore } from "../../store/preferences";
 import { getCurrencySymbol } from "../../constants/currencies";
-import { isCategoryKey } from "../../constants/categories";
+import { shouldTranslateCategoryName } from "../../constants/categories";
 import type { TranslationKey } from "../../i18n/translations";
 
 type ReceiptData = {
@@ -137,7 +137,7 @@ const SelectCategoryModal = ({
                 ) : (
                   <View style={{ gap: 12 }}>
                     {categories.map((category) => {
-                      const label = isCategoryKey(category.name as any)
+                      const label = shouldTranslateCategoryName(category.name)
                         ? t(category.name as TranslationKey)
                         : category.name;
 

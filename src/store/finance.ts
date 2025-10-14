@@ -8,11 +8,34 @@ import { USD } from "@dinero.js/currencies";
 
 import { CATEGORY_KEYS, CATEGORY_CONFIG, type CategoryKey } from "../constants/categories";
 
+// Generate unique IDs using crypto.getRandomValues if available, fallback to Date + random
+const generateId = (prefix: string): string => {
+  const timestamp = Date.now().toString(36);
+  let randomPart: string;
+
+  try {
+    // Use crypto.getRandomValues if available (React Native doesn't have crypto in all environments)
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint8Array(8);
+      crypto.getRandomValues(array);
+      randomPart = Array.from(array, byte => byte.toString(36)).join('').substr(0, 8);
+    } else {
+      // Fallback for environments without crypto
+      randomPart = Math.random().toString(36).substr(2, 8);
+    }
+  } catch {
+    // Final fallback
+    randomPart = Math.random().toString(36).substr(2, 8);
+  }
+
+  return `${prefix}_${timestamp}_${randomPart}`;
+};
+
 export type MonthKey = `${number}-${string}`;
 
 export type CustomCategory = {
   id: string;
-  name: string;
+  name: string; // Can be a translation key for default categories or custom name for user categories
   icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   color: string;
 };
@@ -89,7 +112,7 @@ export type FinanceState = {
 const initializeDefaultCategories = (): CustomCategory[] => {
   return CATEGORY_CONFIG.map(({ key, icon, color }) => ({
     id: key, // Use the category key as the ID for default categories
-    name: key, // Store the translation key as the name
+    name: key, // Store the translation key as the name (will be translated in UI)
     icon,
     color,
   }));
@@ -112,7 +135,7 @@ export const useFinanceStore = create<FinanceState>()(
           const monthData = state.monthlyData[key] ?? createEmptyMonth();
 
           const transaction: Transaction = {
-            id: `income_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: generateId("income"),
             type: "income",
             amount,
             date: new Date().toISOString(),
@@ -139,7 +162,8 @@ export const useFinanceStore = create<FinanceState>()(
             return state;
           }
 
-          const categoryExists = state.customCategories.some((c) => c.id === category);
+          const categoryExists = state.customCategories.some((c) => c.id === category) ||
+                                 CATEGORY_KEYS.includes(category as CategoryKey);
 
           if (!categoryExists) {
             return state;
@@ -150,7 +174,7 @@ export const useFinanceStore = create<FinanceState>()(
           const currentCategoryTotal = monthData.expenses[category] ?? 0;
 
           const transaction: Transaction = {
-            id: `expense_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: generateId("expense"),
             type: "expense",
             amount,
             category,
@@ -181,7 +205,7 @@ export const useFinanceStore = create<FinanceState>()(
             ...state.customCategories,
             {
               ...category,
-              id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              id: generateId("custom"),
             },
           ],
         })),

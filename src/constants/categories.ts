@@ -4,11 +4,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { TranslationKey } from "../i18n/translations";
 
 export type CategoryKey =
-  | "categoryEssentials"
-  | "categoryFood"
+  | "categoryGroceries"
+  | "categoryBills"
   | "categoryTransport"
-  | "categoryEntertainment"
-  | "categorySavings";
+  | "categoryShopping"
+  | "categoryDiningOut";
 
 export type CategoryConfig = {
   key: CategoryKey;
@@ -18,34 +18,38 @@ export type CategoryConfig = {
 
 export const CATEGORY_CONFIG: CategoryConfig[] = [
   {
-    key: "categoryEssentials",
-    icon: "shield-check",
-    color: "#38bdf8",
-  },
-  {
-    key: "categoryFood",
-    icon: "silverware-fork-knife",
-    color: "#f97316",
-  },
-  {
-    key: "categoryTransport",
-    icon: "transit-connection-variant",
+    key: "categoryGroceries",
+    icon: "cart",
     color: "#22c55e",
   },
   {
-    key: "categoryEntertainment",
-    icon: "controller-classic",
+    key: "categoryBills",
+    icon: "receipt",
+    color: "#ef4444",
+  },
+  {
+    key: "categoryTransport",
+    icon: "car",
+    color: "#3b82f6",
+  },
+  {
+    key: "categoryShopping",
+    icon: "shopping",
     color: "#a855f7",
   },
   {
-    key: "categorySavings",
-    icon: "piggy-bank",
-    color: "#facc15",
+    key: "categoryDiningOut",
+    icon: "silverware-fork-knife",
+    color: "#f97316",
   },
 ];
 
 export const CATEGORY_KEYS: CategoryKey[] = CATEGORY_CONFIG.map(({ key }) => key);
 
-export const isCategoryKey = (key: TranslationKey): key is CategoryKey =>
+export const isCategoryKey = (key: string): key is CategoryKey =>
   CATEGORY_KEYS.includes(key as CategoryKey);
+
+// Helper function to check if a category name should be translated
+export const shouldTranslateCategoryName = (name: string): boolean =>
+  isCategoryKey(name);
 

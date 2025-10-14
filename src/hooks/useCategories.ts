@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isCategoryKey } from "../constants/categories";
+import { shouldTranslateCategoryName } from "../constants/categories";
 import { useFinanceStore } from "../store/finance";
 
 export const useCategories = (
@@ -10,13 +10,13 @@ export const useCategories = (
 
   return useMemo(() => {
     return customCategories.map((category) => ({
-      key: category.id as any,
+      key: category.id,
       icon: category.icon,
       color: category.color,
       amountLabel: formatAmount(expensesByCategory[category.id] ?? 0),
-      // If the name is a translation key, don't set customName (will be translated in component)
+      // If the name should be translated, don't set customName (will be translated in component)
       // Otherwise, use the custom name
-      customName: isCategoryKey(category.name as any) ? undefined : category.name,
+      customName: shouldTranslateCategoryName(category.name) ? undefined : category.name,
     }));
   }, [expensesByCategory, customCategories, formatAmount]);
 };

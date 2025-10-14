@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Linking,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -174,7 +175,10 @@ const WelcomeScreen = () => {
   const renderCurrencyOption = (curr: Currency, name: string) => (
     <TouchableOpacity
       key={curr}
-      onPress={() => setCurrency(curr)}
+      onPress={() => {
+        setCurrency(curr);
+        Keyboard.dismiss();
+      }}
       className={`mb-2 flex-row items-center rounded-xl border-2 p-3 ${
         currency === curr
           ? isDark
@@ -226,6 +230,7 @@ const WelcomeScreen = () => {
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Progress Indicator */}
         <View className="mb-8 flex-row items-center justify-center">
@@ -574,6 +579,7 @@ const WelcomeScreen = () => {
             <ScrollView
               className="mb-4 max-h-96"
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="always"
             >
               {filteredCurrencies.map((curr) =>
                 renderCurrencyOption(curr.code, curr.name)

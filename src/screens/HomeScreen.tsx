@@ -14,7 +14,7 @@ import AddCategoryModal from "../components/modals/AddCategoryModal";
 import EditCategoryModal from "../components/modals/EditCategoryModal";
 import { AlertModal, SelectCategoryModal, ErrorModal } from "../components/modals";
 import QRScanner from "../components/HomeScreen/QRScanner";
-import { type CategoryKey, isCategoryKey } from "../constants/categories";
+import { type CategoryKey, shouldTranslateCategoryName } from "../constants/categories";
 import { useTranslation } from "../hooks/useTranslation";
 import { useMonthlyFinanceData } from "../hooks/useMonthlyFinanceData";
 import { useCategories } from "../hooks/useCategories";
@@ -173,16 +173,16 @@ const HomeScreen = () => {
           onSelectCategory={(key) => {
             const category = customCategories.find((c) => c.id === key);
             if (category) {
-              // If the name is a translation key, translate it; otherwise use the name directly
-              const label = isCategoryKey(category.name as any) ? t(category.name as TranslationKey) : category.name;
+              // If the name should be translated, translate it; otherwise use the name directly
+              const label = shouldTranslateCategoryName(category.name) ? t(category.name as TranslationKey) : category.name;
               setExpenseModalState({ key: category.id, label });
             }
           }}
           onEditCategory={(key) => {
             const category = customCategories.find((c) => c.id === key);
             if (category) {
-              // If the name is a translation key, translate it; otherwise use the name directly
-              const translatedName = isCategoryKey(category.name as any) ? t(category.name as TranslationKey) : category.name;
+              // If the name should be translated, translate it; otherwise use the name directly
+              const translatedName = shouldTranslateCategoryName(category.name) ? t(category.name as TranslationKey) : category.name;
               setEditCategoryState({
                 categoryId: category.id,
                 name: translatedName,

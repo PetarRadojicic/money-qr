@@ -10,13 +10,22 @@ export const formatCurrency = (value: number, currencyCode: Currency = "USD"): s
   try {
     // Get the Dinero currency object
     const currency = CURRENCY_MAP[currencyCode];
-    
+
+    // If currency is not supported by Dinero.js, use fallback formatting
+    if (!currency || !currency.exponent) {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currencyCode,
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+
     // Convert decimal value to minor units (e.g., 10.50 -> 1050 cents for USD)
     const minorUnits = Math.round(value * Math.pow(10, currency.exponent));
-    
+
     // Create a Dinero object with the amount in minor units
     const money = dinero({ amount: minorUnits, currency });
-    
+
     // Format using a transformer that uses Intl.NumberFormat
     const formatted = toDecimal(money, ({ value: decimalValue }) => {
       return new Intl.NumberFormat(undefined, {
@@ -25,7 +34,7 @@ export const formatCurrency = (value: number, currencyCode: Currency = "USD"): s
         maximumFractionDigits: 2,
       }).format(Number(decimalValue));
     });
-    
+
     return formatted;
   } catch (error) {
     console.warn("Failed to format currency", error);

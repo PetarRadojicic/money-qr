@@ -26,7 +26,7 @@ export const useMonthlyFinanceData = (selectedDate: { month: number; year: numbe
     [selectedDate.month, selectedDate.year]
   );
 
-  const activeMonthData = monthlyData[monthKey as keyof typeof monthlyData];
+  const activeMonthData = monthlyData[monthKey as `${number}-${string}`];
 
   const incomeTotal = activeMonthData?.income ?? 0;
   const expensesByCategory = activeMonthData?.expenses ?? {};

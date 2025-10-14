@@ -17,7 +17,10 @@ type ParseReceiptResponse = {
  */
 export const parseReceipt = async (rawData: string): Promise<ParseReceiptResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/parse-receipt`, {
+    // Use fallback URL if API_BASE_URL is not configured
+    const baseUrl = API_BASE_URL || "http://localhost:3000";
+
+    const response = await fetch(`${baseUrl}/parse-receipt`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

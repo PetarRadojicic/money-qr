@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -19,14 +19,18 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
-  const theme = usePreferencesStore((state) => state.theme);
+  const theme = usePreferencesStore((state) => state.getEffectiveTheme());
   const hasCompletedOnboarding = usePreferencesStore((state) => state.hasCompletedOnboarding);
   const { setColorScheme } = useColorScheme();
   const navigationTheme = theme === "dark" ? DarkTheme : DefaultTheme;
 
-  useEffect(() => {
+  const updateColorScheme = useCallback(() => {
     setColorScheme(theme);
   }, [setColorScheme, theme]);
+
+  useEffect(() => {
+    updateColorScheme();
+  }, [updateColorScheme]);
 
   useEffect(() => {
     async function prepare() {

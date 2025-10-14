@@ -6,12 +6,12 @@ import { API_BASE_URL } from "@env";
 
 // Map currency codes to Dinero currency objects
 // We'll dynamically create this map from available Dinero currencies
-export const CURRENCY_MAP: Record<string, any> = {};
+export const CURRENCY_MAP: Record<string, { code: string; base: number; exponent: number }> = {};
 
 // Populate CURRENCY_MAP with all available Dinero currencies
 Object.entries(DineroCurrencies).forEach(([key, value]) => {
-  if (typeof value === 'object' && value !== null && 'code' in value) {
-    CURRENCY_MAP[key] = value;
+  if (typeof value === 'object' && value !== null && 'code' in value && 'base' in value && 'exponent' in value) {
+    CURRENCY_MAP[key] = value as { code: string; base: number; exponent: number };
   }
 });
 
@@ -24,12 +24,15 @@ export type ExchangeRates = Record<string, number>;
  */
 export async function fetchExchangeRates(baseCurrency: CurrencyType = 'USD'): Promise<ExchangeRates> {
   try {
-    const response = await fetch(`${API_BASE_URL}/exchange-rates`);
-    
+    // Use fallback URL if API_BASE_URL is not configured
+    const baseUrl = API_BASE_URL || "http://localhost:3000";
+
+    const response = await fetch(`${baseUrl}/exchange-rates`);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch exchange rates: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     
     // The API returns rates with USD as base
@@ -85,14 +88,14 @@ export function convertCurrency(
 
   // Get the exchange rate for the target currency
   const rate = exchangeRates[toCurrency];
-  
+
   if (!rate) {
     console.warn(`No exchange rate found for ${toCurrency}`);
     throw new Error(`Exchange rate not available for ${toCurrency}. Please try again later.`);
   }
 
-  // If both currencies are supported by Dinero.js, use it for precision
-  if (fromCurrencyObj && toCurrencyObj) {
+  // If both currencies are supported by Dinero.js and have valid objects, use it for precision
+  if (fromCurrencyObj && toCurrencyObj && fromCurrencyObj.exponent && toCurrencyObj.exponent) {
     try {
       // Convert decimal amount to minor units (cents) for Dinero
       const minorUnits = Math.round(amount * Math.pow(10, fromCurrencyObj.exponent));
@@ -113,8 +116,8 @@ export function convertCurrency(
 
       // Extract the amount from the converted Dinero object and convert back to decimal
       const snapshot = toSnapshot(convertedDinero);
-      const convertedDecimal = snapshot.amount / Math.pow(10, snapshot.scale);
-      
+      const convertedDecimal = snapshot.scale > 0 ? snapshot.amount / Math.pow(10, snapshot.scale) : snapshot.amount;
+
       return convertedDecimal;
     } catch (error) {
       console.warn(`Dinero conversion failed, using simple conversion:`, error);
