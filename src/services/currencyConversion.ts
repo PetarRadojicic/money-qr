@@ -3,6 +3,7 @@ import * as DineroCurrencies from "@dinero.js/currencies";
 import type { Currency as CurrencyType } from "../store/preferences";
 import type { Transaction } from "../store/finance";
 import { API_BASE_URL } from "@env";
+import { FALLBACK_EXCHANGE_RATES } from "../constants/exchangeRates";
 
 // Map currency codes to Dinero currency objects
 // We'll dynamically create this map from available Dinero currencies
@@ -19,6 +20,7 @@ export type ExchangeRates = Record<string, number>;
 
 /**
  * Fetches the latest exchange rates from custom API
+ * Falls back to hardcoded rates if the API fails
  * @param baseCurrency The base currency to get rates for (defaults to USD as the API base)
  * @returns Exchange rates object
  */
@@ -58,9 +60,30 @@ export async function fetchExchangeRates(baseCurrency: CurrencyType = 'USD'): Pr
     
     return convertedRates;
   } catch (error) {
-    console.error("Error fetching exchange rates:", error);
-    // Throw error so it can be caught and shown to the user
-    throw new Error(`Failed to fetch exchange rates. Please check your internet connection and try again.`);
+    console.warn("Error fetching exchange rates from API, using fallback data:", error);
+    
+    // Use hardcoded fallback rates
+    const usdRates = FALLBACK_EXCHANGE_RATES;
+    
+    // If the base currency is USD, return rates directly
+    if (baseCurrency === 'USD') {
+      return usdRates;
+    }
+    
+    // Otherwise, convert all rates to the requested base currency
+    const baseRate = usdRates[baseCurrency];
+    if (!baseRate) {
+      console.warn(`Base currency ${baseCurrency} not found in fallback data, using USD`);
+      return usdRates;
+    }
+    
+    // Convert all rates to the new base
+    const convertedRates: ExchangeRates = {};
+    Object.entries(usdRates).forEach(([currency, rate]) => {
+      convertedRates[currency] = (rate as number) / baseRate;
+    });
+    
+    return convertedRates;
   }
 }
 
