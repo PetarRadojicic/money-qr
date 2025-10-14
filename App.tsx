@@ -1,17 +1,24 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { enableScreens } from "react-native-screens";
+import * as SplashScreen from 'expo-splash-screen';
 
 import RootNavigator from "./src/navigation/RootNavigator";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
+import AnimatedSplashScreen from "./src/components/animations/AnimatedSplashScreen";
 import { usePreferencesStore } from "./src/store/preferences";
 
 enableScreens();
 
+// Keep the native splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
+  const [isReady, setIsReady] = useState(false);
+  const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
   const theme = usePreferencesStore((state) => state.theme);
   const hasCompletedOnboarding = usePreferencesStore((state) => state.hasCompletedOnboarding);
   const { setColorScheme } = useColorScheme();
@@ -20,6 +27,30 @@ export default function App() {
   useEffect(() => {
     setColorScheme(theme);
   }, [setColorScheme, theme]);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Simulate loading resources (you can add actual resource loading here)
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsReady(true);
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const handleAnimationFinish = () => {
+    setShowAnimatedSplash(false);
+  };
+
+  if (!isReady || showAnimatedSplash) {
+    return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
+  }
 
   // Show welcome screen if onboarding is not completed
   if (!hasCompletedOnboarding) {
