@@ -22,7 +22,8 @@ import { useFinanceStore } from "../store/finance";
 import type { TranslationKey } from "../i18n/translations";
 import { parseReceipt } from "../services/receiptParser";
 import { usePreferencesStore } from "../store/preferences";
-import { fetchExchangeRates, convertCurrency } from "../services/currencyConversion";
+import { fetchExchangeRates } from "../services/currencyConversion";
+import { convertCurrency } from "../utils/money";
 import type { Currency } from "../store/preferences";
 
 const HomeScreen = () => {
@@ -116,7 +117,7 @@ const HomeScreen = () => {
 
         if (needsConversion) {
           try {
-            const rates = await fetchExchangeRates(receiptCurrency);
+            const rates = await fetchExchangeRates();
             convertedAmount = convertCurrency(data.total, receiptCurrency, userCurrency, rates);
           } catch (error) {
             console.error("Currency conversion failed:", error);

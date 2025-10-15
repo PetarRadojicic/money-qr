@@ -77,10 +77,12 @@ const getScreenOptions = (
 };
 
 const RootNavigator = () => {
-  const theme = usePreferencesStore((state) => state.theme);
+  const themePreference = usePreferencesStore((state) => state.theme);
+  const getEffectiveTheme = usePreferencesStore((state) => state.getEffectiveTheme);
   const { t } = useTranslation();
 
-  const screenOptions = useMemo(() => getScreenOptions(theme), [theme]);
+  const effectiveTheme = getEffectiveTheme();
+  const screenOptions = useMemo(() => getScreenOptions(effectiveTheme), [effectiveTheme, themePreference]);
 
   return (
     <Tab.Navigator initialRouteName="Home" screenOptions={screenOptions}>

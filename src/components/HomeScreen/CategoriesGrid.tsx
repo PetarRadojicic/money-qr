@@ -6,7 +6,8 @@ import { useTranslation } from "../../hooks/useTranslation";
 import type { TranslationKey } from "../../i18n/translations";
 
 type Category = {
-  key: TranslationKey;
+  // Allow both translation keys (default categories) and string IDs (custom categories)
+  key: TranslationKey | string;
   icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   color: string;
   amountLabel?: string;
@@ -15,8 +16,8 @@ type Category = {
 
 type CategoriesGridProps = {
   categories?: Category[];
-  onSelectCategory?: (key: TranslationKey) => void;
-  onEditCategory?: (key: TranslationKey) => void;
+  onSelectCategory?: (key: TranslationKey | string) => void;
+  onEditCategory?: (key: TranslationKey | string) => void;
   onAddCategory?: () => void;
 };
 
@@ -67,7 +68,7 @@ const CategoriesGrid = ({ categories = [], onSelectCategory, onEditCategory, onA
                     className="text-base font-bold text-slate-900 dark:text-white mb-1"
                     numberOfLines={1}
                   >
-                    {customName || t(key)}
+                    {customName ?? t(key as TranslationKey)}
                   </Text>
                   
                   {amountLabel ? (
