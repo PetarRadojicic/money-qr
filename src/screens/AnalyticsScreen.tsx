@@ -16,8 +16,18 @@ const AnalyticsScreen = () => {
   const theme = usePreferencesStore((state) => state.theme);
   const currency = usePreferencesStore((state) => state.currency);
   const transactions = useFinanceStore((state) => state.transactions);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const isDark = theme === "dark";
+
+  // Helper function to get correct period form for Serbian
+  const getPeriodForm = (period: number) => {
+    if (language === 'sr') {
+      if (period === 1) return `${period} mesec`;
+      if (period >= 2 && period <= 4) return `${period} meseca`;
+      return `${period} meseci`;
+    }
+    return period === 1 ? `${period} month` : `${period} months`;
+  };
 
   // Calculate totals based on selected period
   const { totalIncome, totalExpenses, filteredCount, totalCount, filteredTransactions } = useMemo(() => {
@@ -99,7 +109,10 @@ const AnalyticsScreen = () => {
                   isDark ? "text-blue-300" : "text-blue-700"
                 }`}
               >
-                All {totalCount} transaction{totalCount !== 1 ? "s" : ""} are within the last {selectedPeriod} months
+                {t("allTransactionsInPeriod", {
+                  count: totalCount,
+                  period: getPeriodForm(selectedPeriod),
+                })}
               </Text>
             </View>
           </View>

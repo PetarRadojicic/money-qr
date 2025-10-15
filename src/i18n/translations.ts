@@ -103,6 +103,9 @@ export const translations = {
     searchCurrency: "Search currency...",
     getStarted: "Get Started",
     setupPreferences: "Set Up Your Preferences",
+    allTransactionsInPeriod: "All {{count}} transactions are within the last {{period}}",
+    allTransactionsInPeriod_one: "The {{count}} transaction is within the last {{period}}",
+    allTransactionsInPeriod_other: "All {{count}} transactions are within the last {{period}}",
   },
   sr: {
     homeTitle: "Početna",
@@ -206,6 +209,10 @@ export const translations = {
     searchCurrency: "Pretražite valutu...",
     getStarted: "Počnite",
     setupPreferences: "Podesite Vaše Preferencije",
+    allTransactionsInPeriod: "Sve {{count}} transakcija su u poslednjih {{period}}",
+    allTransactionsInPeriod_one: "Ta {{count}} transakcija je u poslednjih {{period}}",
+    allTransactionsInPeriod_few: "Sve {{count}} transakcije su u poslednjih {{period}}",
+    allTransactionsInPeriod_other: "Sve {{count}} transakcija su u poslednjih {{period}}",
   },
 } as const satisfies Record<Language, Record<string, string>>;
 
