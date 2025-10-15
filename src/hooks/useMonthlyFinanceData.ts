@@ -1,20 +1,7 @@
 import { useMemo } from "react";
-import { dinero, add, toSnapshot } from "dinero.js";
-import { USD } from "@dinero.js/currencies";
 import { useFinanceStore } from "../store/finance";
 import { usePreferencesStore } from "../store/preferences";
-import { formatCurrency } from "../utils/format";
-
-// Safe addition helper using Dinero.js
-const safeAdd = (a: number, b: number): number => {
-  const toMinorUnits = (amount: number) => Math.round(amount * Math.pow(10, USD.exponent));
-  const toDecimal = (minorUnits: number) => minorUnits / Math.pow(10, USD.exponent);
-  
-  const dineroA = dinero({ amount: toMinorUnits(a), currency: USD });
-  const dineroB = dinero({ amount: toMinorUnits(b), currency: USD });
-  const result = add(dineroA, dineroB);
-  return toDecimal(toSnapshot(result).amount);
-};
+import { formatMoney, sum } from "../utils/money";
 
 export const useMonthlyFinanceData = (selectedDate: { month: number; year: number }) => {
   const monthlyData = useFinanceStore((state) => state.monthlyData);
@@ -30,9 +17,11 @@ export const useMonthlyFinanceData = (selectedDate: { month: number; year: numbe
 
   const incomeTotal = activeMonthData?.income ?? 0;
   const expensesByCategory = activeMonthData?.expenses ?? {};
-  const expensesTotal = Object.values(expensesByCategory).reduce<number>((sum, value) => safeAdd(sum, value), 0);
+  
+  // Use dinero.js sum for safe addition
+  const expensesTotal = sum(Object.values(expensesByCategory), currency);
 
-  const formatAmount = (value: number) => formatCurrency(value, currency);
+  const formatAmount = (value: number) => formatMoney(value, currency);
 
   return {
     monthKey,
@@ -43,4 +32,3 @@ export const useMonthlyFinanceData = (selectedDate: { month: number; year: numbe
     formatAmount,
   };
 };
-

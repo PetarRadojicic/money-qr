@@ -9,6 +9,7 @@ import { useFinanceStore } from "../store/finance";
 import { usePreferencesStore } from "../store/preferences";
 import { useTranslation } from "../hooks/useTranslation";
 import { formatCurrency } from "../utils/format";
+import { sum } from "../utils/money";
 
 const AnalyticsScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(3);
@@ -38,14 +39,12 @@ const AnalyticsScreen = () => {
       return transactionDate >= cutoffDate && transactionDate <= now;
     });
 
-    // Calculate totals
-    const income = filteredTransactions
-      .filter((t) => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const expenses = filteredTransactions
-      .filter((t) => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
+    // Calculate totals using safe money operations
+    const incomeTransactions = filteredTransactions.filter((t) => t.type === "income");
+    const expenseTransactions = filteredTransactions.filter((t) => t.type === "expense");
+    
+    const income = sum(incomeTransactions.map(t => t.amount), currency);
+    const expenses = sum(expenseTransactions.map(t => t.amount), currency);
 
     return {
       totalIncome: income,

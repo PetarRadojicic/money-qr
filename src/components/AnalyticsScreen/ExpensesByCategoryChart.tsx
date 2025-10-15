@@ -4,6 +4,7 @@ import { usePreferencesStore } from "../../store/preferences";
 import { useFinanceStore } from "../../store/finance";
 import { useTranslation } from "../../hooks/useTranslation";
 import { formatCurrency } from "../../utils/format";
+import { sum } from "../../utils/money";
 import { shouldTranslateCategoryName } from "../../constants/categories";
 import type { TranslationKey } from "../../i18n/translations";
 
@@ -82,7 +83,7 @@ const ExpensesByCategoryChart = ({ filteredTransactions }: ExpensesByCategoryCha
     );
   }
 
-  const total = chartData.reduce((sum, item) => sum + item.amount, 0);
+  const total = sum(chartData.map(item => item.amount), currency);
 
   return (
     <View

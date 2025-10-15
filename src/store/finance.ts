@@ -3,11 +3,9 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ComponentProps } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { dinero, add, subtract, toSnapshot } from "dinero.js";
-import { USD } from "@dinero.js/currencies";
 
 import { CATEGORY_KEYS, CATEGORY_CONFIG, type CategoryKey } from "../constants/categories";
-import { formatCurrency } from "../utils/format";
+import { formatMoney, add, subtract } from "../utils/money";
 
 // Generate unique IDs using crypto.getRandomValues if available, fallback to Date + random
 const generateId = (prefix: string): string => {
@@ -71,28 +69,8 @@ const getMonthKey = ({ month, year }: { month: number; year: number }): MonthKey
   return `${year}-${monthLabel}` as MonthKey;
 };
 
-// Helper functions for safe money arithmetic using Dinero.js
-const toMinorUnits = (amount: number): number => {
-  return Math.round(amount * Math.pow(10, USD.exponent));
-};
-
-const toDecimal = (minorUnits: number): number => {
-  return minorUnits / Math.pow(10, USD.exponent);
-};
-
-const safeAdd = (a: number, b: number): number => {
-  const dineroA = dinero({ amount: toMinorUnits(a), currency: USD });
-  const dineroB = dinero({ amount: toMinorUnits(b), currency: USD });
-  const result = add(dineroA, dineroB);
-  return toDecimal(toSnapshot(result).amount);
-};
-
-const safeSubtract = (a: number, b: number): number => {
-  const dineroA = dinero({ amount: toMinorUnits(a), currency: USD });
-  const dineroB = dinero({ amount: toMinorUnits(b), currency: USD });
-  const result = subtract(dineroA, dineroB);
-  return toDecimal(toSnapshot(result).amount);
-};
+// Note: All monetary calculations use dinero.js through the money utils
+// Amounts are stored as decimals and converted to/from dinero for calculations
 
 export type FinanceState = {
   totalBalance: number;
@@ -146,12 +124,12 @@ export const useFinanceStore = create<FinanceState>()(
           };
 
           return {
-            totalBalance: safeAdd(state.totalBalance, amount),
+            totalBalance: add(state.totalBalance, amount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
-                income: safeAdd(monthData.income, amount),
+                income: add(monthData.income, amount),
               },
             },
             transactions: [transaction, ...state.transactions],
@@ -186,14 +164,14 @@ export const useFinanceStore = create<FinanceState>()(
           };
 
           return {
-            totalBalance: safeSubtract(state.totalBalance, amount),
+            totalBalance: subtract(state.totalBalance, amount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
                 expenses: {
                   ...monthData.expenses,
-                  [category]: safeAdd(currentCategoryTotal, amount),
+                  [category]: add(currentCategoryTotal, amount),
                 },
               },
             },
@@ -232,12 +210,12 @@ export const useFinanceStore = create<FinanceState>()(
 
           if (transaction.type === "income") {
             return {
-              totalBalance: safeSubtract(state.totalBalance, transaction.amount),
+              totalBalance: subtract(state.totalBalance, transaction.amount),
               monthlyData: {
                 ...state.monthlyData,
                 [key]: {
                   ...monthData,
-                  income: safeSubtract(monthData.income, transaction.amount),
+                  income: subtract(monthData.income, transaction.amount),
                 },
               },
               transactions: state.transactions.filter((t) => t.id !== transactionId),
@@ -253,14 +231,14 @@ export const useFinanceStore = create<FinanceState>()(
             const currentCategoryTotal = monthData.expenses[category] ?? 0;
 
             return {
-              totalBalance: safeAdd(state.totalBalance, transaction.amount),
+              totalBalance: add(state.totalBalance, transaction.amount),
               monthlyData: {
                 ...state.monthlyData,
                 [key]: {
                   ...monthData,
                   expenses: {
                     ...monthData.expenses,
-                    [category]: safeSubtract(currentCategoryTotal, transaction.amount),
+                    [category]: subtract(currentCategoryTotal, transaction.amount),
                   },
                 },
               },
@@ -296,57 +274,4 @@ export const useFinanceStore = create<FinanceState>()(
 );
 
 export const buildMonthKey = getMonthKey;
-
-// Debug logger - logs balance to console with every change
-if (__DEV__) {
-  // Function to get current currency from preferences store
-  const getCurrency = () => {
-    try {
-      // Dynamically import to avoid circular dependencies
-      const { usePreferencesStore } = require("./preferences");
-      return usePreferencesStore.getState().currency;
-    } catch (error) {
-      return "USD"; // Fallback to USD if preferences store not available
-    }
-  };
-
-  // Track previous balance to only log when it changes
-  let previousBalance: number | null = null;
-
-  // Subscribe to all state changes
-  useFinanceStore.subscribe((state) => {
-    const currentBalance = state.totalBalance;
-    
-    // Only log if balance has changed
-    if (previousBalance !== currentBalance) {
-      const currency = getCurrency();
-      const formattedBalance = formatCurrency(currentBalance, currency);
-      
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log("💰 BALANCE UPDATE");
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log(`   Balance: ${formattedBalance}`);
-      console.log(`   Raw Amount: ${currentBalance}`);
-      console.log(`   Currency: ${currency}`);
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      
-      previousBalance = currentBalance;
-    }
-  });
-
-  // Log initial balance
-  const initialState = useFinanceStore.getState();
-  const currency = getCurrency();
-  const formattedBalance = formatCurrency(initialState.totalBalance, currency);
-  
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("💰 INITIAL BALANCE");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`   Balance: ${formattedBalance}`);
-  console.log(`   Raw Amount: ${initialState.totalBalance}`);
-  console.log(`   Currency: ${currency}`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  
-  previousBalance = initialState.totalBalance;
-}
 

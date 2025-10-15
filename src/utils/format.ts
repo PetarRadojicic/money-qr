@@ -1,49 +1,17 @@
-import { dinero, toDecimal } from "dinero.js";
-import { CURRENCY_MAP } from "../services/currencyConversion";
+/**
+ * Formatting utilities
+ * Delegates to money utilities for currency formatting
+ */
+
+import { formatMoney } from "./money";
 import type { Currency } from "../store/preferences";
 
+/**
+ * Format a currency value
+ * @param value The amount to format
+ * @param currencyCode The currency code
+ * @returns Formatted currency string
+ */
 export const formatCurrency = (value: number, currencyCode: Currency = "USD"): string => {
-  if (!Number.isFinite(value)) {
-    value = 0;
-  }
-
-  try {
-    // Get the Dinero currency object
-    const currency = CURRENCY_MAP[currencyCode];
-
-    // If currency is not supported by Dinero.js, use fallback formatting
-    if (!currency || !currency.exponent) {
-      return new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 2,
-      }).format(value);
-    }
-
-    // Convert decimal value to minor units (e.g., 10.50 -> 1050 cents for USD)
-    const minorUnits = Math.round(value * Math.pow(10, currency.exponent));
-
-    // Create a Dinero object with the amount in minor units
-    const money = dinero({ amount: minorUnits, currency });
-
-    // Format using a transformer that uses Intl.NumberFormat
-    const formatted = toDecimal(money, ({ value: decimalValue }) => {
-      return new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 2,
-      }).format(Number(decimalValue));
-    });
-
-    return formatted;
-  } catch (error) {
-    console.warn("Failed to format currency", error);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currencyCode,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
+  return formatMoney(value, currencyCode);
 };
-
-
