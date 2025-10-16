@@ -191,10 +191,7 @@ export function convertCurrency(
         [toCurrency]: rateScaled,
       });
 
-      // Round the numeric result to the target currency's exponent to avoid residual fractions
-      const unrounded = fromDinero(convertedDinero);
-      const targetScale = Math.pow(10, toCurrencyObj.exponent);
-      return Math.round(unrounded * targetScale) / targetScale;
+      return fromDinero(convertedDinero);
     } catch (error) {
       console.warn(`Dinero conversion failed, using simple conversion:`, error);
       // Fall through to simple conversion
@@ -205,10 +202,8 @@ export function convertCurrency(
   const inBaseCurrency = amount / fromRate;
   const inTargetCurrency = inBaseCurrency * toRate;
   
-  // Round to the target currency's minor units
-  const targetExponent = toCurrencyObj?.exponent ?? 2;
-  const scale = Math.pow(10, targetExponent);
-  return Math.round(inTargetCurrency * scale) / scale;
+  // Round to reasonable precision to avoid floating point errors
+  return Math.round(inTargetCurrency * 100000000) / 100000000;
 }
 
 /**
@@ -255,4 +250,3 @@ export function formatMoney(amount: number, currencyCode: Currency = "USD"): str
     }).format(amount);
   }
 }
-

@@ -131,7 +131,7 @@ const SelectCategoryModal = ({
                   <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 items-center">
                     <MaterialCommunityIcons name="alert-circle" size={48} color="#94a3b8" />
                     <Text className="text-slate-600 dark:text-slate-400 mt-4 text-center">
-                      No categories available. Please add categories from the home screen first.
+                      {t("noCategoriesAvailable")}
                     </Text>
                   </View>
                 ) : (
