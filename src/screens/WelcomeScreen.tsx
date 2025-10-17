@@ -8,6 +8,7 @@ import {
   TextInput,
   Linking,
   Keyboard,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -281,17 +282,11 @@ const WelcomeScreen = () => {
           <View>
             {/* Hero Section */}
             <View className="mb-8 items-center">
-              <View
-                className={`mb-4 h-24 w-24 items-center justify-center rounded-3xl ${
-                  isDark ? "bg-sky-400/20" : "bg-blue-600/10"
-                }`}
-              >
-                <Ionicons
-                  name="qr-code"
-                  size={48}
-                  color={isDark ? "#38bdf8" : "#2563eb"}
+                <Image
+                  source={require("../../assets/icon.png")}
+                  style={{ width: 100, height: 100 }}
+                  resizeMode="contain"
                 />
-              </View>
               <Text
                 className={`mb-2 text-center text-4xl font-bold ${
                   isDark ? "text-white" : "text-slate-900"
