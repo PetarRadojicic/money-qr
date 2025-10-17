@@ -145,7 +145,7 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
                   <TextInput
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    placeholder="Search currency..."
+                    placeholder={t("searchCurrency")}
                     placeholderTextColor="#94a3b8"
                     className="flex-1 text-base text-slate-900 dark:text-white"
                   />

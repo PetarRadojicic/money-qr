@@ -429,7 +429,7 @@ const WelcomeScreen = () => {
                     isDark ? "text-slate-300" : "text-slate-700"
                   }`}
                 >
-                  Track income & expenses
+                  {t("featureTrackIncomeExpenses")}
                 </Text>
               </View>
               <View className="mb-3 flex-row items-center">
@@ -444,7 +444,7 @@ const WelcomeScreen = () => {
                     isDark ? "text-slate-300" : "text-slate-700"
                   }`}
                 >
-                  Scan QR codes on receipts
+                  {t("featureScanQRReceipts")}
                 </Text>
               </View>
               <View className="mb-3 flex-row items-center">
@@ -459,7 +459,7 @@ const WelcomeScreen = () => {
                     isDark ? "text-slate-300" : "text-slate-700"
                   }`}
                 >
-                  Visual analytics & reports
+                  {t("featureVisualAnalytics")}
                 </Text>
               </View>
               <View className="flex-row items-center">
@@ -474,7 +474,7 @@ const WelcomeScreen = () => {
                     isDark ? "text-slate-300" : "text-slate-700"
                   }`}
                 >
-                  Custom categories
+                  {t("featureCustomCategories")}
                 </Text>
               </View>
             </View>
@@ -497,7 +497,7 @@ const WelcomeScreen = () => {
                   isDark ? "text-slate-400" : "text-slate-600"
                 }`}
               >
-                Choose your preferred currency
+                {t("choosePreferredCurrency")}
               </Text>
             </View>
 
