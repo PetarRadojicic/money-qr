@@ -5,7 +5,7 @@ import type { ComponentProps } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { CATEGORY_KEYS, CATEGORY_CONFIG, type CategoryKey } from "../constants/categories";
-import { formatMoney, add, subtract } from "../utils/money";
+import { formatMoney, add, subtract, normalizeAmount } from "../utils/money";
 
 // Generate unique IDs using crypto.getRandomValues if available, fallback to Date + random
 const generateId = (prefix: string): string => {
@@ -110,13 +110,16 @@ export const useFinanceStore = create<FinanceState>()(
             return state;
           }
 
+          // Normalize the amount to ensure proper precision
+          const normalizedAmount = normalizeAmount(amount);
+          
           const key = getMonthKey({ month, year });
           const monthData = state.monthlyData[key] ?? createEmptyMonth();
 
           const transaction: Transaction = {
             id: generateId("income"),
             type: "income",
-            amount,
+            amount: normalizedAmount,
             date: new Date().toISOString(),
             month,
             year,
@@ -124,12 +127,12 @@ export const useFinanceStore = create<FinanceState>()(
           };
 
           return {
-            totalBalance: add(state.totalBalance, amount),
+            totalBalance: add(state.totalBalance, normalizedAmount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
-                income: add(monthData.income, amount),
+                income: add(monthData.income, normalizedAmount),
               },
             },
             transactions: [transaction, ...state.transactions],
@@ -140,6 +143,9 @@ export const useFinanceStore = create<FinanceState>()(
           if (!Number.isFinite(amount) || amount <= 0) {
             return state;
           }
+
+          // Normalize the amount to ensure proper precision
+          const normalizedAmount = normalizeAmount(amount);
 
           const categoryExists = state.customCategories.some((c) => c.id === category) ||
                                  CATEGORY_KEYS.includes(category as CategoryKey);
@@ -155,7 +161,7 @@ export const useFinanceStore = create<FinanceState>()(
           const transaction: Transaction = {
             id: generateId("expense"),
             type: "expense",
-            amount,
+            amount: normalizedAmount,
             category,
             date: new Date().toISOString(),
             month,
@@ -164,14 +170,14 @@ export const useFinanceStore = create<FinanceState>()(
           };
 
           return {
-            totalBalance: subtract(state.totalBalance, amount),
+            totalBalance: subtract(state.totalBalance, normalizedAmount),
             monthlyData: {
               ...state.monthlyData,
               [key]: {
                 ...monthData,
                 expenses: {
                   ...monthData.expenses,
-                  [category]: add(currentCategoryTotal, amount),
+                  [category]: add(currentCategoryTotal, normalizedAmount),
                 },
               },
             },

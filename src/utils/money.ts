@@ -163,22 +163,26 @@ export function convertCurrency(
   // If both currencies are supported by Dinero.js, use it for precision
   if (fromCurrencyObj && toCurrencyObj) {
     try {
-      // Use a high-precision scale (8 decimal places beyond the currency exponent)
-      // This helps maintain precision during conversions
-      const highPrecisionScale = fromCurrencyObj.exponent + 8;
-      const highPrecisionAmount = Math.round(amount * Math.pow(10, highPrecisionScale));
-      
-      const dineroAmount = dinero({ 
-        amount: highPrecisionAmount, 
-        currency: fromCurrencyObj,
-        scale: highPrecisionScale
-      });
-
       // Calculate the direct conversion rate: toRate / fromRate
       const directRate = toRate / fromRate;
 
-      // Use maximum precision (16 decimal places) for the rate to minimize rounding errors
-      const rateScale = 16;
+      // Use a more conservative precision approach to avoid compounding errors
+      // Use the maximum exponent of both currencies plus 4 decimal places for safety
+      const maxExponent = Math.max(fromCurrencyObj.exponent, toCurrencyObj.exponent);
+      const precisionScale = maxExponent + 4;
+      
+      // Convert amount to minor units with proper precision
+      const amountInMinorUnits = Math.round(amount * Math.pow(10, fromCurrencyObj.exponent));
+      
+      // Create Dinero object with proper scale
+      const dineroAmount = dinero({ 
+        amount: amountInMinorUnits, 
+        currency: fromCurrencyObj,
+        scale: fromCurrencyObj.exponent
+      });
+
+      // Create rate as scaled amount with high precision
+      const rateScale = precisionScale;
       const rateAmount = Math.round(directRate * Math.pow(10, rateScale));
 
       const rateScaled = {
@@ -199,11 +203,34 @@ export function convertCurrency(
   }
 
   // Simple conversion for currencies not supported by Dinero.js
-  const inBaseCurrency = amount / fromRate;
-  const inTargetCurrency = inBaseCurrency * toRate;
+  // Use more precise calculation to avoid floating point errors
+  const directRate = toRate / fromRate;
+  const convertedAmount = amount * directRate;
   
-  // Round to reasonable precision to avoid floating point errors
-  return Math.round(inTargetCurrency * 100000000) / 100000000;
+  // Round to the target currency's precision
+  const targetExponent = toCurrencyObj?.exponent || 2;
+  const precisionFactor = Math.pow(10, targetExponent);
+  
+  return Math.round(convertedAmount * precisionFactor) / precisionFactor;
+}
+
+/**
+ * Ensure proper precision for currency amounts to avoid floating point errors
+ * @param amount Amount to normalize
+ * @param currencyCode Currency code
+ * @returns Normalized amount with proper precision
+ */
+export function normalizeAmount(amount: number, currencyCode: Currency = "USD"): number {
+  if (!Number.isFinite(amount)) {
+    return 0;
+  }
+
+  const currency = CURRENCY_MAP[currencyCode];
+  const exponent = currency?.exponent || 2;
+  const precisionFactor = Math.pow(10, exponent);
+  
+  // Round to the currency's precision to eliminate floating point errors
+  return Math.round(amount * precisionFactor) / precisionFactor;
 }
 
 /**

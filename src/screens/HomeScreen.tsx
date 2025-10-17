@@ -23,7 +23,7 @@ import type { TranslationKey } from "../i18n/translations";
 import { parseReceipt } from "../services/receiptParser";
 import { usePreferencesStore } from "../store/preferences";
 import { fetchExchangeRates } from "../services/currencyConversion";
-import { convertCurrency } from "../utils/money";
+import { convertCurrency, normalizeAmount } from "../utils/money";
 import type { Currency } from "../store/preferences";
 
 const HomeScreen = () => {
@@ -119,6 +119,8 @@ const HomeScreen = () => {
           try {
             const rates = await fetchExchangeRates();
             convertedAmount = convertCurrency(data.total, receiptCurrency, userCurrency, rates);
+            // Normalize the converted amount to ensure proper precision
+            convertedAmount = normalizeAmount(convertedAmount, userCurrency);
           } catch (error) {
             console.error("Currency conversion failed:", error);
             // Continue with original amount if conversion fails
@@ -126,8 +128,11 @@ const HomeScreen = () => {
           }
         }
 
+        // Always normalize the amount to ensure proper precision
+        const normalizedAmount = normalizeAmount(convertedAmount, userCurrency);
+
         setReceiptData({
-          total: convertedAmount,
+          total: normalizedAmount,
           currency: userCurrency,
           date: data.date,
           vendor: data.vendor,
