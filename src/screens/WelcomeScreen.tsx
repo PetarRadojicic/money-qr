@@ -382,7 +382,7 @@ const WelcomeScreen = () => {
               </View>
 
               <TouchableOpacity
-                onPress={() => Linking.openURL("mailto:support@radojicic.co")}
+                onPress={() => Linking.openURL("mailto:petar@radojicic.co")}
                 className={`mt-4 flex-row items-center justify-center rounded-xl border-2 py-3 ${
                   isDark
                     ? "border-sky-400/30 bg-sky-400/10"
@@ -400,7 +400,7 @@ const WelcomeScreen = () => {
                     isDark ? "text-sky-400" : "text-blue-600"
                   }`}
                 >
-                  support@radojicic.co
+                  petar@radojicic.co
                 </Text>
               </TouchableOpacity>
             </View>

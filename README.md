@@ -286,27 +286,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-For support, email support@radojicic.co or create an issue in the repository.
-
-## 🔮 Future Roadmap
-
-### Planned Features
-- **📊 Advanced Analytics**: More detailed financial insights
-- **🔄 Data Export**: Export data to CSV/PDF formats
-- **☁️ Cloud Sync**: Optional cloud backup and sync
-- **📱 Widgets**: Home screen widgets for quick balance viewing
-- **🔔 Notifications**: Spending alerts and reminders
-- **👥 Multi-User**: Family/shared account support
-- **🏦 Bank Integration**: Direct bank account connections
-- **📈 Investment Tracking**: Portfolio and investment management
-
-### Technical Improvements
-- **⚡ Performance**: Optimize rendering and data processing
-- **🧪 Testing**: Comprehensive test coverage
-- **📱 Offline Support**: Enhanced offline functionality
-- **🔒 Security**: Enhanced data encryption and security
-- **🌐 More Languages**: Additional language support
-
----
+For support, email petar@radojicic.co or create an issue in the repository.
 
 **Note**: This is a beta version. Some features may change or be added in future updates. For the latest information and updates, please visit the project repository.
