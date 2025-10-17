@@ -21,7 +21,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.steropor.moneyqr"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -29,6 +34,11 @@
     },
     "plugins": [
       "expo-camera"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "364d0ca6-8c85-4122-9a9e-4d41e33c49b7"
+      }
+    }
   }
 }
