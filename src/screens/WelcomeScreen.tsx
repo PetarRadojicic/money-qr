@@ -283,7 +283,7 @@ const WelcomeScreen = () => {
             {/* Hero Section */}
             <View className="mb-8 items-center">
                 <Image
-                  source={require("../../assets/icon.png")}
+                  source={require("../../assets/icon-welcome.png")}
                   style={{ width: 100, height: 100 }}
                   resizeMode="contain"
                 />

@@ -1,65 +1,65 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import LottieView from 'lottie-react-native';
+import { View, Animated, Image } from 'react-native';
 
 interface AnimatedSplashScreenProps {
   onAnimationFinish?: () => void;
 }
 
 export default function AnimatedSplashScreen({ onAnimationFinish }: AnimatedSplashScreenProps) {
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const lottieRef = useRef<LottieView>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Start the Lottie animation
-    lottieRef.current?.play();
+    // Fade in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+
+    // Pulsing animation
+    const pulseSequence = Animated.sequence([
+      Animated.timing(pulseAnim, {
+        toValue: 1.15,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]);
+
+    // Loop the pulse animation twice, then fade out
+    Animated.loop(pulseSequence, { iterations: 2 }).start(() => {
+      // Fade out after animation completes
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        onAnimationFinish?.();
+      });
+    });
   }, []);
 
-  const handleAnimationFinish = () => {
-    // Fade out the splash screen
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      // Call the callback after fade out completes
-      onAnimationFinish?.();
-    });
-  };
-
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <View style={styles.animationContainer}>
-        <LottieView
-          ref={lottieRef}
-          source={require('../../../assets/splash-screen.json')}
-          autoPlay
-          loop={false}
-          style={styles.animation}
-          onAnimationFinish={handleAnimationFinish}
-          speed={1}
+    <View className="flex-1 bg-white items-center justify-center">
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          transform: [{ scale: pulseAnim }],
+        }}
+        className="items-center justify-center"
+      >
+        {/* Main icon */}
+        <Image
+          source={require('../../../assets/splash-icon.png')}
+          className="w-48 h-48"
+          resizeMode="contain"
         />
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  animationContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  animation: {
-    width: 300,
-    height: 300,
-  },
-});
-
