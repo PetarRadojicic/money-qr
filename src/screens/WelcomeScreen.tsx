@@ -10,7 +10,7 @@ import {
   Keyboard,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 
 import { useTranslation } from "../hooks/useTranslation";
 import { usePreferencesStore, type Currency, type Language, type ThemePreference } from "../store/preferences";
@@ -224,7 +224,7 @@ const WelcomeScreen = () => {
   );
 
   return (
-    <SafeAreaView
+    <SafeAreaViewWrapper
       className={`flex-1 ${isDark ? "bg-slate-950" : "bg-gradient-to-b from-blue-50 to-white"}`}
     >
       <ScrollView
@@ -626,7 +626,7 @@ const WelcomeScreen = () => {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 

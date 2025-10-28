@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { View, Text, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 import TimePeriodSelector, { type TimePeriod } from "../components/AnalyticsScreen/TimePeriodSelector";
 import TotalsSummary from "../components/AnalyticsScreen/TotalsSummary";
 import ExpensesByCategoryChart from "../components/AnalyticsScreen/ExpensesByCategoryChart";
@@ -66,7 +66,7 @@ const AnalyticsScreen = () => {
   }, [selectedPeriod, transactions]);
 
   return (
-    <SafeAreaView
+    <SafeAreaViewWrapper
       edges={["top", "left", "right"]}
       className={`flex-1 ${isDark ? "bg-slate-950" : "bg-slate-50"}`}
     >
@@ -136,7 +136,7 @@ const AnalyticsScreen = () => {
           <ExpensesByCategoryChart filteredTransactions={filteredTransactions} />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 

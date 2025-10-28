@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTranslation } from "../hooks/useTranslation";
@@ -16,7 +16,7 @@ const PrivacyPolicyScreen = ({ onBack }: PrivacyPolicyScreenProps) => {
   const isDark = theme === "dark";
 
   return (
-    <SafeAreaView
+    <SafeAreaViewWrapper
       edges={["top", "left", "right"]}
       className="flex-1 bg-slate-50 dark:bg-slate-950"
     >
@@ -362,7 +362,7 @@ const PrivacyPolicyScreen = ({ onBack }: PrivacyPolicyScreenProps) => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ScrollView, ActivityIndicator, View, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import BalanceSummary from "../components/HomeScreen/BalanceSummary";
@@ -160,7 +160,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-slate-50 dark:bg-slate-950">
+    <SafeAreaViewWrapper edges={["top", "left", "right"]} className="flex-1 bg-slate-50 dark:bg-slate-950">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
@@ -323,7 +323,7 @@ const HomeScreen = () => {
         message={scanError ?? ""}
         onClose={() => setScanError(null)}
       />
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 

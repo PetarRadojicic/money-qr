@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 
 import AppearanceSection from "../components/SettingsScreen/AppearanceSection";
 import LanguageSection from "../components/SettingsScreen/LanguageSection";
@@ -30,7 +30,7 @@ const SettingsScreen = () => {
   }
 
   return (
-    <SafeAreaView
+    <SafeAreaViewWrapper
       edges={["top", "left", "right"]}
       className="flex-1 bg-slate-50 dark:bg-slate-950"
     >
@@ -57,7 +57,7 @@ const SettingsScreen = () => {
 
         <ResetSection />
       </View>
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 

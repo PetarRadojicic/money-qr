@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useFinanceStore, type Transaction } from "../store/finance";
@@ -212,7 +212,7 @@ const HistoryScreen = () => {
   );
 
   return (
-    <SafeAreaView
+    <SafeAreaViewWrapper
       edges={["top", "left", "right"]}
       className={`flex-1 ${isDark ? "bg-slate-950" : "bg-slate-50"}`}
     >
@@ -261,7 +261,7 @@ const HistoryScreen = () => {
         confirmText="OK"
         icon="check-circle-outline"
       />
-    </SafeAreaView>
+    </SafeAreaViewWrapper>
   );
 };
 
