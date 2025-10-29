@@ -1,14 +1,14 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTranslation } from "../../hooks/useTranslation";
 
-interface PrivacyPolicySectionProps {
-  onPress: () => void;
-}
-
-const PrivacyPolicySection = ({ onPress }: PrivacyPolicySectionProps) => {
+const PrivacyPolicySection = () => {
   const { t } = useTranslation();
+
+  const handlePress = () => {
+    Linking.openURL("https://money-qr-privacy-policy.pages.dev/");
+  };
 
   return (
     <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
@@ -22,7 +22,7 @@ const PrivacyPolicySection = ({ onPress }: PrivacyPolicySectionProps) => {
           </Text>
         </View>
         <TouchableOpacity
-          onPress={onPress}
+          onPress={handlePress}
           className="flex-row items-center justify-between rounded-xl bg-slate-100 px-4 py-3 active:opacity-80 dark:bg-slate-800"
         >
           <Text className="text-base font-medium text-slate-700 dark:text-slate-300">

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View, Text } from "react-native";
 import SafeAreaViewWrapper from "../components/SafeAreaViewWrapper";
 
@@ -7,7 +6,6 @@ import LanguageSection from "../components/SettingsScreen/LanguageSection";
 import CurrencySection from "../components/SettingsScreen/CurrencySection";
 import ResetSection from "../components/SettingsScreen/ResetSection";
 import PrivacyPolicySection from "../components/SettingsScreen/PrivacyPolicySection";
-import PrivacyPolicyScreen from "./PrivacyPolicyScreen";
 import { useTranslation } from "../hooks/useTranslation";
 import { usePreferencesStore } from "../store/preferences";
 
@@ -15,19 +13,6 @@ const SettingsScreen = () => {
   const { t } = useTranslation();
   const theme = usePreferencesStore((state) => state.theme);
   const isDark = theme === "dark";
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-
-  const handlePrivacyPolicyPress = () => {
-    setShowPrivacyPolicy(true);
-  };
-
-  const handleBackFromPrivacyPolicy = () => {
-    setShowPrivacyPolicy(false);
-  };
-
-  if (showPrivacyPolicy) {
-    return <PrivacyPolicyScreen onBack={handleBackFromPrivacyPolicy} />;
-  }
 
   return (
     <SafeAreaViewWrapper
@@ -53,7 +38,7 @@ const SettingsScreen = () => {
 
         <CurrencySection />
 
-        <PrivacyPolicySection onPress={handlePrivacyPolicyPress} />
+        <PrivacyPolicySection />
 
         <ResetSection />
       </View>
