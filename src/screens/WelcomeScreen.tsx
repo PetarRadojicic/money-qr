@@ -61,6 +61,7 @@ const CURRENCIES: { code: Currency; name: string }[] = [
 
 const WelcomeScreen = () => {
   const { t } = useTranslation();
+  const effectiveTheme = usePreferencesStore((state) => state.getEffectiveTheme());
   const theme = usePreferencesStore((state) => state.theme);
   const language = usePreferencesStore((state) => state.language);
   const currency = usePreferencesStore((state) => state.currency);
@@ -74,7 +75,7 @@ const WelcomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
-  const isDark = theme === "dark";
+  const isDark = effectiveTheme === "dark";
 
   const filteredCurrencies = CURRENCIES.filter(
     (curr) =>
@@ -225,7 +226,7 @@ const WelcomeScreen = () => {
 
   return (
     <SafeAreaViewWrapper
-      className={`flex-1 ${isDark ? "bg-slate-950" : "bg-gradient-to-b from-blue-50 to-white"}`}
+      className={`flex-1 bg-slate-50 dark:bg-slate-950`}
     >
       <ScrollView
         className="flex-1"
