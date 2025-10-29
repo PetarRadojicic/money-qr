@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "../../hooks/useTranslation";
 import { usePreferencesStore, type Language } from "../../store/preferences";
@@ -22,6 +23,7 @@ const languageOptions: LanguageOption[] = [
 
 const LanguageModal = ({ visible, onClose }: LanguageModalProps) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const language = usePreferencesStore((state) => state.language);
   const setLanguage = usePreferencesStore((state) => state.setLanguage);
 
@@ -35,7 +37,10 @@ const LanguageModal = ({ visible, onClose }: LanguageModalProps) => {
       <View className="flex-1 bg-black/60 justify-end">
         <Pressable className="flex-1" onPress={onClose} />
         
-        <View className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden">
+        <View 
+          className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
+          style={{ paddingBottom: insets.bottom }}
+        >
           {/* Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />

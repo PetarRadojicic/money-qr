@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { View, Text, Modal, Pressable, TextInput, ScrollView, useColorScheme } from "react-native";
+import { View, Text, Modal, Pressable, TextInput, ScrollView, useColorScheme, KeyboardAvoidingView, Platform } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 
 import { useTranslation } from "../../hooks/useTranslation";
@@ -106,6 +107,7 @@ type AddCategoryModalProps = {
 const AddCategoryModal = ({ visible, onClose, onSave }: AddCategoryModalProps) => {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const [categoryName, setCategoryName] = useState("");
   const [selectedIcon, setSelectedIcon] = useState<IconName>("help-circle");
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[0]);
@@ -132,7 +134,14 @@ const AddCategoryModal = ({ visible, onClose, onSave }: AddCategoryModalProps) =
       <View className="flex-1 bg-black/60 justify-end">
         <Pressable className="flex-1" onPress={handleCancel} />
         
-        <View className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={0}
+        >
+          <View 
+            className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
+            style={{ paddingBottom: insets.bottom }}
+          >
           {/* Header with Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
@@ -270,7 +279,8 @@ const AddCategoryModal = ({ visible, onClose, onSave }: AddCategoryModalProps) =
               <Text className="text-base font-bold text-white">{t("save")}</Text>
             </Pressable>
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

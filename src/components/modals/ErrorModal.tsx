@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ErrorModalProps = {
   visible: boolean;
@@ -22,6 +23,8 @@ const ErrorModal = ({
   onConfirm,
   icon = "alert-circle-outline",
 }: ErrorModalProps) => {
+  const insets = useSafeAreaInsets();
+  
   const handleConfirm = () => {
     onConfirm?.();
     onClose();
@@ -33,7 +36,10 @@ const ErrorModal = ({
 
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={handleCancel}>
-      <View className="flex-1 bg-black/60 justify-center items-center px-6">
+      <View 
+        className="flex-1 bg-black/60 justify-center items-center px-6"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
         <Pressable className="absolute inset-0" onPress={handleCancel} />
         
         <View className="bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden w-full max-w-md">

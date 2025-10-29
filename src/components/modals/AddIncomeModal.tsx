@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, Modal } from "react-native";
+import { View, Text, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "../../hooks/useTranslation";
 import { usePreferencesStore } from "../../store/preferences";
@@ -15,6 +16,7 @@ type AddIncomeModalProps = {
 const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => {
   const { t } = useTranslation();
   const currency = usePreferencesStore((state) => state.currency);
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState("");
 
   const handleSubmit = () => {
@@ -40,7 +42,14 @@ const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => 
       <View className="flex-1 bg-black/60 justify-end">
         <Pressable className="flex-1" onPress={handleClose} />
         
-        <View className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={0}
+        >
+          <View 
+            className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
+            style={{ paddingBottom: insets.bottom }}
+          >
           {/* Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
@@ -112,7 +121,8 @@ const AddIncomeModal = ({ visible, onClose, onSubmit }: AddIncomeModalProps) => 
               </Pressable>
             </View>
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

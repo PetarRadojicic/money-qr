@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 
 import { useTranslation } from "../../hooks/useTranslation";
@@ -40,6 +41,7 @@ const SelectCategoryModal = ({
   receiptData,
 }: SelectCategoryModalProps) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const currency = usePreferencesStore((state) => state.currency);
   const currencySymbol = getCurrencySymbol(currency);
 
@@ -68,7 +70,10 @@ const SelectCategoryModal = ({
       <View className="flex-1 bg-black/60 justify-end">
         <Pressable className="flex-1" onPress={onClose} />
 
-        <View className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden">
+        <View 
+          className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
+          style={{ paddingBottom: insets.bottom }}
+        >
           {/* Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />

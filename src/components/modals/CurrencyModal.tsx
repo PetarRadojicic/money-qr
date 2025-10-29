@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { View, Text, TextInput, Pressable, Modal, FlatList, ActivityIndicator } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, TextInput, Pressable, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "../../hooks/useTranslation";
 import { usePreferencesStore, type Currency } from "../../store/preferences";
@@ -37,6 +38,7 @@ const allCurrencies: Currency[] = [
 
 const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const currency = usePreferencesStore((state) => state.currency);
   const setCurrency = usePreferencesStore((state) => state.setCurrency);
   const totalBalance = useFinanceStore((state) => state.totalBalance);
@@ -48,6 +50,22 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
   const [isConverting, setIsConverting] = useState(false);
   const [showConversionError, setShowConversionError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "android" ? "keyboardDidShow" : "keyboardWillShow",
+      (e) => setKeyboardHeight(e.endCoordinates?.height ?? 0)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "android" ? "keyboardDidHide" : "keyboardWillHide",
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleCurrencySelect = async (newCurrency: Currency) => {
     if (newCurrency === currency) {
@@ -110,7 +128,14 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
       <View className="flex-1 bg-black/60 justify-end">
         <Pressable className="flex-1" onPress={handleClose} />
         
-        <View className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={0}
+        >
+          <View 
+            className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
+            style={{ paddingBottom: insets.bottom }}
+          >
           {/* Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
@@ -174,8 +199,9 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
               keyExtractor={(item) => item}
               showsVerticalScrollIndicator={false}
               className="max-h-[400px]"
-              contentContainerStyle={{ gap: 8 }}
-              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ gap: 8, paddingBottom: keyboardHeight + insets.bottom + 16 }}
+              keyboardShouldPersistTaps="always"
+              keyboardDismissMode="on-drag"
               ListEmptyComponent={() => (
                 <View className="py-8 items-center">
                   <MaterialCommunityIcons name="currency-usd-off" size={48} color="#94a3b8" />
@@ -240,7 +266,8 @@ const CurrencyModal = ({ visible, onClose }: CurrencyModalProps) => {
               }}
             />
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
 
       {/* Error Modal */}
