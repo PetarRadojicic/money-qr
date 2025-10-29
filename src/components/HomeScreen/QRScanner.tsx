@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, Pressable, Modal, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, Pressable, Modal, ActivityIndicator, StyleSheet, Linking } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -23,10 +23,17 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
       // Reset scanned state when modal opens
       setScanned(false);
       
+      // First load: request immediately
       if (!permission) {
         requestPermission();
+        return;
       }
-      if (permission && !permission.granted) {
+      // If not granted and we can still ask, request again to trigger prompt
+      if (!permission.granted && permission.canAskAgain) {
+        requestPermission();
+      }
+      // If not granted and cannot ask again, show guidance modal
+      if (!permission.granted && !permission.canAskAgain) {
         setShowPermissionError(true);
       }
     }
@@ -64,11 +71,27 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
               <Text className="text-slate-400 text-base mt-2 text-center">
                 {t("permissionDeniedMessage")}
               </Text>
+              {/* Action buttons */}
+              {permission.canAskAgain ? (
+                <Pressable
+                  className="mt-8 bg-white rounded-2xl px-8 py-4"
+                  onPress={requestPermission}
+                >
+                  <Text className="text-black font-bold text-base">{t("allowCamera")}</Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  className="mt-8 bg-white rounded-2xl px-8 py-4"
+                  onPress={() => Linking.openSettings()}
+                >
+                  <Text className="text-black font-bold text-base">{t("openSettings")}</Text>
+                </Pressable>
+              )}
               <Pressable
-                className="mt-8 bg-white rounded-2xl px-8 py-4"
+                className="mt-4 bg-white/10 rounded-2xl px-8 py-4"
                 onPress={handleClose}
               >
-                <Text className="text-black font-bold text-base">{t("cancel")}</Text>
+                <Text className="text-white font-bold text-base">{t("back")}</Text>
               </Pressable>
             </View>
           ) : (

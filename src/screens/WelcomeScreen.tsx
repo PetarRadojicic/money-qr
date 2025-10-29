@@ -227,6 +227,7 @@ const WelcomeScreen = () => {
   return (
     <SafeAreaViewWrapper
       className={`flex-1 bg-slate-50 dark:bg-slate-950`}
+      edges={['top', 'left', 'right', 'bottom']}
     >
       <ScrollView
         className="flex-1"
