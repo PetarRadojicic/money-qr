@@ -36,7 +36,8 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-camera"
+      "expo-camera",
+      "expo-font"
     ],
     "extra": {
       "eas": {
