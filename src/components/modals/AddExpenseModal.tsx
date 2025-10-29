@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View, Text, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +19,22 @@ const AddExpenseModal = ({ visible, onClose, onSubmit, categoryLabel }: AddExpen
   const currency = usePreferencesStore((state) => state.currency);
   const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "android" ? "keyboardDidShow" : "keyboardWillShow",
+      (e) => setKeyboardHeight(e.endCoordinates?.height ?? 0)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "android" ? "keyboardDidHide" : "keyboardWillHide",
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleSubmit = () => {
     const parsed = Number.parseFloat(amount);
@@ -45,18 +61,17 @@ const AddExpenseModal = ({ visible, onClose, onSubmit, categoryLabel }: AddExpen
         
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={0}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         >
           <View 
             className="bg-white dark:bg-slate-900 rounded-t-[32px] overflow-hidden"
-            style={{ paddingBottom: insets.bottom }}
           >
           {/* Drag Indicator */}
           <View className="items-center pt-3 pb-4">
             <View className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
           </View>
 
-          <View className="px-6 pb-6">
+          <View className="px-6" style={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + insets.bottom + 16 : insets.bottom + 24 }}>
             {/* Header */}
             <View className="flex-row items-center mb-6">
               <View className="bg-red-100 dark:bg-red-900/30 rounded-2xl p-3 mr-4">
