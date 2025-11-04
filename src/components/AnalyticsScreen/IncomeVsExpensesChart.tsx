@@ -101,13 +101,20 @@ const IncomeVsExpensesChart = ({
       borderRadius: 16,
     },
     propsForLabels: {
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: "600",
     },
     propsForBackgroundLines: {
       strokeDasharray: "",
       stroke: isDark ? "#334155" : "#e2e8f0",
       strokeWidth: 1,
+    },
+    formatYLabel: (value: string) => {
+      const num = parseFloat(value);
+      if (num >= 1000) {
+        return `${(num / 1000).toFixed(1)}k`;
+      }
+      return value;
     },
   };
 
@@ -152,19 +159,21 @@ const IncomeVsExpensesChart = ({
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
-        className="-mx-3"
-        contentContainerStyle={{ paddingHorizontal: 12 }}
+        contentContainerStyle={{ paddingLeft: 0, paddingRight: 12 }}
       >
         <StackedBarChart
           data={chartData}
-          width={Math.max(screenWidth - 80, sortedData.length * 80)}
+          width={Math.max(screenWidth - 40, sortedData.length * 80)}
           height={220}
           chartConfig={chartConfig}
           style={{
             borderRadius: 16,
+            paddingRight: 0,
           }}
           hideLegend={true}
           segments={4}
+          yAxisLabel=""
+          yAxisSuffix=""
         />
       </ScrollView>
     </View>
