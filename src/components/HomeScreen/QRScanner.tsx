@@ -17,27 +17,47 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [showPermissionError, setShowPermissionError] = useState(false);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      // Reset scanned state when modal opens
-      setScanned(false);
-      
-      // First load: request immediately
+    if (!visible) {
+      // Reset states when modal closes
+      setIsRequestingPermission(false);
+      setShowPermissionError(false);
+      return;
+    }
+
+    // Reset scanned state when modal opens
+    setScanned(false);
+    setShowPermissionError(false);
+    
+    // Request permission if not already granted
+    const handlePermission = async () => {
+      // If permission is still loading, wait
       if (!permission) {
-        requestPermission();
         return;
       }
-      // If not granted and we can still ask, request again to trigger prompt
-      if (!permission.granted && permission.canAskAgain) {
-        requestPermission();
+      
+      // If already granted, do nothing
+      if (permission.granted) {
+        setIsRequestingPermission(false);
+        return;
       }
-      // If not granted and cannot ask again, show guidance modal
-      if (!permission.granted && !permission.canAskAgain) {
+      
+      // Request permission
+      setIsRequestingPermission(true);
+      const result = await requestPermission();
+      setIsRequestingPermission(false);
+      
+      // If permission was denied and we can't ask again, show error
+      if (!result.granted && !result.canAskAgain) {
         setShowPermissionError(true);
       }
-    }
-  }, [visible, permission, requestPermission]);
+    };
+    
+    handlePermission();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, permission?.granted]);
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return;
@@ -57,7 +77,7 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
     <>
       <Modal transparent visible={visible} animationType="slide" onRequestClose={handleClose}>
         <View className="flex-1 bg-black">
-          {!permission ? (
+          {!permission || isRequestingPermission ? (
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator size="large" color="#ffffff" />
               <Text className="text-white mt-4 text-base">{t("parsingReceipt")}</Text>
@@ -75,7 +95,14 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
               {permission.canAskAgain ? (
                 <Pressable
                   className="mt-8 bg-white rounded-2xl px-8 py-4"
-                  onPress={requestPermission}
+                  onPress={async () => {
+                    setIsRequestingPermission(true);
+                    const result = await requestPermission();
+                    setIsRequestingPermission(false);
+                    if (!result.granted && !result.canAskAgain) {
+                      setShowPermissionError(true);
+                    }
+                  }}
                 >
                   <Text className="text-black font-bold text-base">{t("allowCamera")}</Text>
                 </Pressable>
