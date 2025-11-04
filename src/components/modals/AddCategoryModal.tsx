@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { View, Text, Modal, Pressable, TextInput, ScrollView, useColorScheme, KeyboardAvoidingView, Platform } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 
 import { useTranslation } from "../../hooks/useTranslation";
+import { useFinanceStore } from "../../store/finance";
+import { shouldTranslateCategoryName } from "../../constants/categories";
+import type { TranslationKey } from "../../i18n/translations";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -111,23 +114,77 @@ const AddCategoryModal = ({ visible, onClose, onSave }: AddCategoryModalProps) =
   const [categoryName, setCategoryName] = useState("");
   const [selectedIcon, setSelectedIcon] = useState<IconName>("help-circle");
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[0]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  const customCategories = useFinanceStore((state) => state.customCategories);
+  
+  // Get all existing category names (both custom and default)
+  const existingCategoryNames = useMemo(() => {
+    const names: string[] = [];
+    
+    // Add custom category names
+    customCategories.forEach((category) => {
+      if (shouldTranslateCategoryName(category.name)) {
+        // For default categories, use translated name
+        names.push(t(category.name as TranslationKey).toLowerCase().trim());
+      } else {
+        // For custom categories, use the name directly
+        names.push(category.name.toLowerCase().trim());
+      }
+    });
+    
+    return names;
+  }, [customCategories, t]);
 
   const handleSave = () => {
-    if (categoryName.trim()) {
-      onSave(categoryName.trim(), selectedIcon, selectedColor);
-      setCategoryName("");
-      setSelectedIcon("help-circle");
-      setSelectedColor(AVAILABLE_COLORS[0]);
-      onClose();
+    const trimmedName = categoryName.trim();
+    
+    if (!trimmedName) {
+      return;
     }
+    
+    // Check if category name already exists (case-insensitive)
+    const normalizedInputName = trimmedName.toLowerCase().trim();
+    const isDuplicate = existingCategoryNames.some(
+      (existingName) => existingName === normalizedInputName
+    );
+    
+    if (isDuplicate) {
+      setErrorMessage(t("categoryAlreadyExists"));
+      return;
+    }
+    
+    // Clear error and save
+    setErrorMessage(null);
+    onSave(trimmedName, selectedIcon, selectedColor);
+    setCategoryName("");
+    setSelectedIcon("help-circle");
+    setSelectedColor(AVAILABLE_COLORS[0]);
+    onClose();
   };
 
   const handleCancel = () => {
     setCategoryName("");
     setSelectedIcon("help-circle");
     setSelectedColor(AVAILABLE_COLORS[0]);
+    setErrorMessage(null);
     onClose();
   };
+  
+  const handleNameChange = (text: string) => {
+    setCategoryName(text);
+    // Clear error when user starts typing
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  };
+  
+  // Clear error when modal opens
+  useEffect(() => {
+    if (visible) {
+      setErrorMessage(null);
+    }
+  }, [visible]);
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -167,16 +224,25 @@ const AddCategoryModal = ({ visible, onClose, onSave }: AddCategoryModalProps) =
               <Text className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">
                 {t("categoryName")}
               </Text>
-              <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden">
+              <View className={`bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 overflow-hidden ${
+                errorMessage 
+                  ? "border-red-500 dark:border-red-500" 
+                  : "border-slate-200 dark:border-slate-700"
+              }`}>
                 <TextInput
                   className="px-5 py-4 text-lg font-semibold text-slate-900 dark:text-white"
                   placeholder={t("categoryNamePlaceholder")}
                   placeholderTextColor="#94a3b8"
                   value={categoryName}
-                  onChangeText={setCategoryName}
+                  onChangeText={handleNameChange}
                   autoFocus
                 />
               </View>
+              {errorMessage && (
+                <Text className="text-red-500 text-sm mt-2 font-medium">
+                  {errorMessage}
+                </Text>
+              )}
             </View>
           </View>
 
