@@ -201,9 +201,60 @@ export const useFinanceStore = create<FinanceState>()(
           ),
         })),
       deleteCustomCategory: (categoryId) =>
-        set((state) => ({
-          customCategories: state.customCategories.filter((cat) => cat.id !== categoryId),
-        })),
+        set((state) => {
+          // Find all transactions that reference this category
+          const transactionsToRevert = state.transactions.filter(
+            (t) => t.type === "expense" && t.category === categoryId
+          );
+
+          // Start with current state
+          let newState = { ...state };
+
+          // Revert each transaction to properly update balance and monthly data
+          transactionsToRevert.forEach((transaction) => {
+            const key = transaction.monthKey;
+            const monthData = newState.monthlyData[key] ?? createEmptyMonth();
+            const currentCategoryTotal = monthData.expenses[categoryId] ?? 0;
+
+            // Update balance
+            newState.totalBalance = add(newState.totalBalance, transaction.amount);
+
+            // Update monthly data
+            newState.monthlyData = {
+              ...newState.monthlyData,
+              [key]: {
+                ...monthData,
+                expenses: {
+                  ...monthData.expenses,
+                  [categoryId]: subtract(currentCategoryTotal, transaction.amount),
+                },
+              },
+            };
+          });
+
+          // Remove all transactions for this category
+          newState.transactions = newState.transactions.filter(
+            (t) => !(t.type === "expense" && t.category === categoryId)
+          );
+
+          // Clean up any remaining expense entries for this category in all months
+          const cleanedMonthlyData: Record<MonthKey, MonthlyFinance> = {};
+          Object.entries(newState.monthlyData).forEach(([monthKey, monthData]) => {
+            const { [categoryId]: _, ...remainingExpenses } = monthData.expenses;
+            cleanedMonthlyData[monthKey as MonthKey] = {
+              ...monthData,
+              expenses: remainingExpenses,
+            };
+          });
+          newState.monthlyData = cleanedMonthlyData;
+
+          // Remove the category itself
+          newState.customCategories = newState.customCategories.filter(
+            (cat) => cat.id !== categoryId
+          );
+
+          return newState;
+        }),
       revertTransaction: (transactionId) =>
         set((state) => {
           const transaction = state.transactions.find((t) => t.id === transactionId);
