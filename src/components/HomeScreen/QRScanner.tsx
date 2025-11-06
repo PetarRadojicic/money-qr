@@ -4,7 +4,6 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useTranslation } from "../../hooks/useTranslation";
-import { ErrorModal } from "../modals";
 
 type QRScannerProps = {
   visible: boolean;
@@ -16,20 +15,17 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const [showPermissionError, setShowPermissionError] = useState(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   useEffect(() => {
     if (!visible) {
       // Reset states when modal closes
       setIsRequestingPermission(false);
-      setShowPermissionError(false);
       return;
     }
 
     // Reset scanned state when modal opens
     setScanned(false);
-    setShowPermissionError(false);
     
     // Request permission if not already granted
     const handlePermission = async () => {
@@ -46,13 +42,8 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
       
       // Request permission
       setIsRequestingPermission(true);
-      const result = await requestPermission();
+      await requestPermission();
       setIsRequestingPermission(false);
-      
-      // If permission was denied and we can't ask again, show error
-      if (!result.granted && !result.canAskAgain) {
-        setShowPermissionError(true);
-      }
     };
     
     handlePermission();
@@ -74,8 +65,7 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
   if (!visible) return null;
 
   return (
-    <>
-      <Modal transparent visible={visible} animationType="slide" onRequestClose={handleClose}>
+    <Modal transparent visible={visible} animationType="slide" onRequestClose={handleClose}>
         <View className="flex-1 bg-black">
           {!permission || isRequestingPermission ? (
             <View className="flex-1 items-center justify-center">
@@ -97,11 +87,8 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
                   className="mt-8 bg-white rounded-2xl px-8 py-4"
                   onPress={async () => {
                     setIsRequestingPermission(true);
-                    const result = await requestPermission();
+                    await requestPermission();
                     setIsRequestingPermission(false);
-                    if (!result.granted && !result.canAskAgain) {
-                      setShowPermissionError(true);
-                    }
                   }}
                 >
                   <Text className="text-black font-bold text-base">{t("allowCamera")}</Text>
@@ -163,17 +150,6 @@ const QRScanner = ({ visible, onClose, onScan }: QRScannerProps) => {
           )}
         </View>
       </Modal>
-
-      <ErrorModal
-        visible={showPermissionError}
-        title={t("permissionDenied")}
-        message={t("permissionDeniedMessage")}
-        onClose={() => {
-          setShowPermissionError(false);
-          handleClose();
-        }}
-      />
-    </>
   );
 };
 
