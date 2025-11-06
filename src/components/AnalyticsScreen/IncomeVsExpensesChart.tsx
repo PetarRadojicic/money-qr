@@ -83,10 +83,20 @@ const IncomeVsExpensesChart = ({
   // Prepare data for chart
   const labels = sortedData.map((item) => formatMonthLabel(item.monthKey));
 
+  // Determine scale so large numbers fit nicely on the Y axis
+  const maxStackValue = Math.max(
+    ...sortedData.map((item) => item.income + item.expenses)
+  );
+  const scaleFactor = maxStackValue >= 1_000_000 ? 1_000_000 : maxStackValue >= 10_000 ? 1_000 : 1;
+  const yAxisSuffixDynamic = scaleFactor === 1_000_000 ? "M" : scaleFactor === 1_000 ? "k" : "";
+
   const chartData = {
     labels,
     legend: [t("income"), t("expenses")],
-    data: sortedData.map((item) => [item.income, item.expenses]),
+    data: sortedData.map((item) => [
+      item.income / scaleFactor,
+      item.expenses / scaleFactor,
+    ]),
     barColors: ["#22c55e", "#ef4444"], // green for income, red for expenses
   };
 
@@ -109,12 +119,11 @@ const IncomeVsExpensesChart = ({
       stroke: isDark ? "#334155" : "#e2e8f0",
       strokeWidth: 1,
     },
+    // We scale the data; keep labels as-is (library generates ticks), suffix shows unit
     formatYLabel: (value: string) => {
       const num = parseFloat(value);
-      if (num >= 1000) {
-        return `${(num / 1000).toFixed(1)}k`;
-      }
-      return value;
+      if (Number.isNaN(num)) return value;
+      return `${Math.round(num)}`;
     },
   };
 
@@ -173,7 +182,7 @@ const IncomeVsExpensesChart = ({
           hideLegend={true}
           segments={4}
           yAxisLabel=""
-          yAxisSuffix=""
+          yAxisSuffix={yAxisSuffixDynamic}
         />
       </ScrollView>
     </View>
