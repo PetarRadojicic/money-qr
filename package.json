@@ -17,6 +17,7 @@
     "babel-preset-expo": "^54.0.3",
     "dinero.js": "^2.0.0-alpha.14",
     "expo": "54.0.22",
+    "expo-build-properties": "~1.0.9",
     "expo-camera": "17.0.9",
     "expo-dev-client": "~6.0.16",
     "expo-font": "~14.0.9",

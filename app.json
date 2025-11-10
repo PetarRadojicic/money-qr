@@ -37,7 +37,9 @@
     },
     "plugins": [
       "expo-camera",
-      "expo-font"
+      "expo-font",
+      "expo-build-properties",
+      "./plugins/withProguardRules"
     ],
     "extra": {
       "eas": {
