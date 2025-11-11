@@ -41,9 +41,13 @@
       [
         "expo-build-properties",
         {
+          "ios": {
+            "enableHermes": true
+          },
           "android": {
             "enableProguardInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableHermes": true
           }
         }
       ]
