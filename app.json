@@ -38,8 +38,15 @@
     "plugins": [
       "expo-camera",
       "expo-font",
-      "expo-build-properties",
-      "./plugins/withProguardRules"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
